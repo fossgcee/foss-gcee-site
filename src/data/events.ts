@@ -29,6 +29,8 @@ export interface FossEvent {
   type: string;
   /** Full description shown on the event detail page */
   desc?: string;
+  /** Registration count display */
+  registrationsCount?: number;
   /**
    * POSTER  — Add before the event.
    * 1. Drop image into public/events/
@@ -54,6 +56,7 @@ export interface FossEvent {
 //   handledBy: "Name (Dept – Year)",
 //   type:      "workshop",
 //   desc:      "What this event is about.",
+//   registrationsCount: 0,
 //   poster:    "/events/your-poster.jpg",   // optional — add when ready
 //   photos:    [],                           // fill after event
 // },
@@ -70,6 +73,31 @@ export const EVENTS: FossEvent[] = [
     handledBy: "BHARATH (3rd Year IT)",
     type: "talk",
     desc: "A session on building AI-powered automation workflows and tools using open-source libraries. We'll explore LangChain, Ollama, and automation pipelines you can build entirely with free and open-source tools.",
-    // poster: "/events/ai-tools-poster.jpg",  // ← add your poster image here
+    registrationsCount: 45
   },
+  {
+    slug: "git-github-workshop-2025",
+    date: "15-12-2025",
+    dateISO: "2025-12-15",
+    title: "Introduction to Git & GitHub",
+    venue: "Lab 3",
+    time: "4:00 – 5:30 IST",
+    handledBy: "CLUB LEAD (4th Year CSE)",
+    type: "workshop",
+    desc: "Master the basics of version control with Git and collaboration via GitHub. Essential for every developer.",
+    photos: ["/events/git-1.jpg", "/events/git-2.jpg"],
+    registrationsCount: 82
+  },
+  {
+    slug: "open-source-summit-2026",
+    date: "10-08-2026",
+    dateISO: "2026-08-10",
+    title: "GCE Erode Open Source Summit",
+    venue: "Main Auditorium",
+    time: "9:00 – 4:00 IST",
+    handledBy: "FOSS GCE ERODE",
+    type: "hackathon",
+    desc: "Our flagship event featuring guest speakers, hands-on workshops, and a code sprint focused on community projects.",
+    registrationsCount: 12
+  }
 ];
