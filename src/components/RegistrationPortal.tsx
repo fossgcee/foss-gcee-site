@@ -1,21 +1,395 @@
 "use client";
 
-export default function RegistrationPortal() {
+import { useState, useRef } from "react";
+import {
+  User, Mail, Link2, Phone, GraduationCap, BookOpen,
+  ArrowRight, Loader2, CheckCircle2, RefreshCw, RotateCcw
+} from "lucide-react";
+
+const DEPARTMENTS = [
+  "Computer Science & Engineering",
+  "Information Technology",
+  "Electronics & Communication Engineering",
+  "Electrical & Electronics Engineering",
+  "Mechanical Engineering",
+  "Civil Engineering",
+  "Artificial Intelligence & Data Science",
+  "Other",
+];
+
+const YEARS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
+
+type Step = "form" | "otp" | "success";
+
+interface FormData {
+  name: string;
+  email: string;
+  linkedin: string;
+  phone: string;
+  year: string;
+  department: string;
+}
+
+// ————— Input field component —————
+function Field({
+  icon: Icon, label, name, type = "text", value, onChange, placeholder, disabled,
+  pattern, hint, title: inputTitle,
+}: {
+  icon: React.ElementType; label: string; name: string; type?: string;
+  value: string; onChange: (v: string) => void; placeholder: string; disabled?: boolean;
+  pattern?: string; hint?: string; title?: string;
+}) {
   return (
-    <section className="min-h-screen pt-32 pb-24 px-4 sm:px-6 lg:px-8 bg-black flex items-center justify-center">
-      <div className="max-w-2xl w-full backend-placeholder block rounded-2xl overflow-hidden glass-card relative h-full min-h-[420px] flex items-center justify-center p-8 border border-dashed border-white/20">
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "rgba(255,255,255,0.6)" }}>
-              <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-            </svg>
+    <div className="space-y-2">
+      <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest">{label}</label>
+      <div className="relative group">
+        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25 group-focus-within:text-white/70 transition-colors" />
+        <input
+          name={name}
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          required
+          disabled={disabled}
+          pattern={pattern}
+          title={inputTitle}
+          className="w-full bg-white/[0.03] border border-white/8 rounded-xl py-3.5 pl-12 pr-4 font-mono text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-1 ring-white/20 hover:bg-white/[0.05] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{ borderColor: "rgba(255,255,255,0.08)" }}
+        />
+      </div>
+      {hint && <p className="font-mono text-[9px] text-white/25 pl-1">{hint}</p>}
+    </div>
+  );
+}
+
+// ————— Select field component —————
+function SelectField({
+  icon: Icon, label, name, value, onChange, options, placeholder, disabled,
+}: {
+  icon: React.ElementType; label: string; name: string; value: string;
+  onChange: (v: string) => void; options: string[]; placeholder: string; disabled?: boolean;
+}) {
+  return (
+    <div className="space-y-2">
+      <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest">{label}</label>
+      <div className="relative group">
+        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25 group-focus-within:text-white/70 transition-colors z-10" />
+        <select
+          name={name}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          required
+          disabled={disabled}
+          className="w-full bg-[#0f0f0f] border border-white/8 rounded-xl py-3.5 pl-12 pr-4 font-mono text-sm text-white focus:outline-none focus:ring-1 ring-white/20 appearance-none cursor-pointer hover:bg-white/[0.05] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{ borderColor: "rgba(255,255,255,0.08)" }}
+        >
+          <option value="" disabled>{placeholder}</option>
+          {options.map((o) => (
+            <option key={o} value={o} className="bg-[#0f0f0f]">{o}</option>
+          ))}
+        </select>
+        <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/30">▾</div>
+      </div>
+    </div>
+  );
+}
+
+export default function RegistrationPortal() {
+  const [step, setStep] = useState<Step>("form");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [resendTimer, setResendTimer] = useState(0);
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const resendIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [form, setForm] = useState<FormData>({
+    name: "", email: "", linkedin: "", phone: "", year: "", department: "",
+  });
+
+  const startResendTimer = () => {
+    setResendTimer(60);
+    if (resendIntervalRef.current) clearInterval(resendIntervalRef.current);
+    resendIntervalRef.current = setInterval(() => {
+      setResendTimer((t) => {
+        if (t <= 1) { clearInterval(resendIntervalRef.current!); return 0; }
+        return t - 1;
+      });
+    }, 1000);
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      // Normalize LinkedIn: ensure https:// prefix so it's a valid clickable URL
+      const normalizedLinkedin = form.linkedin.startsWith("http")
+        ? form.linkedin
+        : `https://${form.linkedin}`;
+
+      const res = await fetch("/api/register/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, linkedin: normalizedLinkedin }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      setStep("otp");
+      startResendTimer();
+    } catch (err: any) {
+      setError(err.message || "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+    const next = [...otp];
+    next[index] = value.slice(-1);
+    setOtp(next);
+    if (value && index < 5) otpRefs.current[index + 1]?.focus();
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent) => {
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (pasted.length === 6) {
+      setOtp(pasted.split(""));
+      otpRefs.current[5]?.focus();
+    }
+    e.preventDefault();
+  };
+
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const code = otp.join("");
+    if (code.length < 6) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/register/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email, otp: code }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      setStep("success");
+    } catch (err: any) {
+      setError(err.message || "Verification failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (resendTimer > 0) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/register/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      setOtp(["", "", "", "", "", ""]);
+      otpRefs.current[0]?.focus();
+      startResendTimer();
+    } catch (err: any) {
+      setError(err.message || "Failed to resend OTP.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ——— SUCCESS SCREEN ———
+  if (step === "success") {
+    return (
+      <section className="min-h-screen pt-32 pb-24 px-4 flex items-center justify-center">
+        <div className="max-w-md w-full text-center space-y-8">
+          <div className="w-24 h-24 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto animate-bounce">
+            <CheckCircle2 className="w-12 h-12 text-emerald-400" />
           </div>
-          <h3 className="text-xl font-bold mb-3" style={{ color: "#ffffff" }}>
-            Backend Integration Space
-          </h3>
-          <p className="text-sm max-w-[280px] mx-auto leading-relaxed font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>
-            // TODO: Backend team to insert the recruitment registration form or OAuth components here.
+          <div>
+            <h2 className="text-3xl font-pixel text-white mb-3">ACCESS_GRANTED</h2>
+            <p className="font-mono text-sm text-white/50 leading-relaxed">
+              Welcome to the <span className="text-white">FOSS Club GCE Erode</span>, {form.name.split(" ")[0]}!<br />
+              Your email has been verified and your registration is complete.
+            </p>
+          </div>
+          <div className="p-6 rounded-2xl border border-emerald-500/10 bg-emerald-500/[0.04] space-y-3 text-left">
+            {[
+              ["Name", form.name],
+              ["Email", form.email],
+              ["Year", form.year],
+              ["Department", form.department],
+            ].map(([k, v]) => (
+              <div key={k} className="flex justify-between font-mono text-xs">
+                <span className="text-white/40">{k}</span>
+                <span className="text-white">{v}</span>
+              </div>
+            ))}
+          </div>
+          <p className="font-mono text-[10px] text-white/30">
+            Watch your inbox for further updates from the club.
           </p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="min-h-screen pt-32 pb-24 px-4 flex items-start justify-center">
+      <div className="w-full max-w-xl">
+        {/* Header */}
+        <div className="mb-10 space-y-2 text-center">
+          <p className="font-mono text-[10px] text-white/30 tracking-[0.3em] uppercase">
+            {step === "form" ? "Step 1 of 2 — Registration Details" : "Step 2 of 2 — Email Verification"}
+          </p>
+          <h1 className="text-3xl font-pixel text-white leading-tight">
+            {step === "form" ? "JOIN_FOSS_CLUB" : "VERIFY_EMAIL"}
+          </h1>
+          <p className="font-mono text-xs text-white/40 mt-1">
+            {step === "form"
+              ? "Fill in your details to request membership."
+              : <>OTP sent to <span className="text-white">{form.email}</span>. Check your inbox.</>
+            }
+          </p>
+        </div>
+
+        {/* Progress indicator */}
+        <div className="flex gap-2 mb-10">
+          {["form", "otp"].map((s, i) => (
+            <div
+              key={s}
+              className="h-1 flex-1 rounded-full transition-all duration-500"
+              style={{
+                background: (step === "otp" && i === 0) || (step === "form" && i === 0)
+                  ? step === "otp" && i === 0 ? "white" : step === "form" && i === 0 ? "white" : "rgba(255,255,255,0.1)"
+                  : step === "otp" && i === 1 ? "white" : "rgba(255,255,255,0.1)"
+              }}
+            />
+          ))}
+        </div>
+
+        <div
+          className="rounded-3xl p-8 border"
+          style={{
+            background: "rgba(255,255,255,0.02)",
+            borderColor: "rgba(255,255,255,0.07)",
+          }}
+        >
+          {/* ——— STEP 1: FORM ——— */}
+          {step === "form" && (
+            <form onSubmit={handleFormSubmit} className="space-y-5">
+              <Field icon={User} label="Full Name" name="name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} placeholder="e.g. Vishnu Kumar" />
+              <Field icon={Mail} label="Gmail Address" name="email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} placeholder="e.g. you@gmail.com" />
+              <Field
+                icon={Link2}
+                label="LinkedIn Profile URL"
+                name="linkedin"
+                type="text"
+                value={form.linkedin}
+                onChange={(v) => setForm({ ...form, linkedin: v })}
+                placeholder="www.linkedin.com/in/your-profile"
+                pattern="(https?://)?www\..*"
+                title="Must start with www. (e.g. www.linkedin.com/in/yourname)"
+                hint="https:// is optional — but www. is required"
+              />
+              <Field icon={Phone} label="Phone Number" name="phone" type="tel" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="+91 9876543210" />
+              <div className="grid grid-cols-2 gap-4">
+                <SelectField icon={GraduationCap} label="Year" name="year" value={form.year} onChange={(v) => setForm({ ...form, year: v })} options={YEARS} placeholder="Select year" />
+                <SelectField icon={BookOpen} label="Department" name="department" value={form.department} onChange={(v) => setForm({ ...form, department: v })} options={DEPARTMENTS} placeholder="Select dept." />
+              </div>
+
+              {error && (
+                <div className="flex gap-3 items-start p-4 rounded-xl border border-red-500/20 bg-red-500/10">
+                  <span className="text-red-400 font-mono text-[11px] leading-relaxed">{error}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full h-14 rounded-2xl bg-white text-black font-pixel text-[11px] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(255,255,255,0.08)] mt-2"
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>SEND_OTP <ArrowRight className="w-4 h-4" /></>}
+              </button>
+            </form>
+          )}
+
+          {/* ——— STEP 2: OTP ——— */}
+          {step === "otp" && (
+            <form onSubmit={handleOtpSubmit} className="space-y-8">
+              <div className="space-y-4 text-center">
+                <p className="font-mono text-xs text-white/40">Enter the 6-digit code we sent to your inbox</p>
+                <div className="flex gap-3 justify-center" onPaste={handleOtpPaste}>
+                  {otp.map((digit, i) => (
+                    <input
+                      key={i}
+                      ref={(el) => { otpRefs.current[i] = el; }}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleOtpChange(i, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                      className="w-12 h-14 text-center text-2xl font-pixel text-white bg-white/[0.04] border rounded-xl focus:outline-none focus:ring-2 ring-white/30 transition-all caret-transparent"
+                      style={{ borderColor: digit ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.08)" }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {error && (
+                <div className="flex gap-3 items-start p-4 rounded-xl border border-red-500/20 bg-red-500/10">
+                  <span className="text-red-400 font-mono text-[11px] leading-relaxed">{error}</span>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <button
+                  type="submit"
+                  disabled={loading || otp.join("").length < 6}
+                  className="w-full h-14 rounded-2xl bg-white text-black font-pixel text-[11px] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(255,255,255,0.08)]"
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>VERIFY_OTP <CheckCircle2 className="w-4 h-4" /></>}
+                </button>
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={loading || resendTimer > 0}
+                    className="flex-1 h-11 rounded-xl border font-mono text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-30 hover:bg-white/5"
+                    style={{ borderColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)" }}
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    {resendTimer > 0 ? `Resend in ${resendTimer}s` : "Resend OTP"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setStep("form"); setError(null); setOtp(["", "", "", "", "", ""]); }}
+                    className="flex-1 h-11 rounded-xl border font-mono text-xs flex items-center justify-center gap-2 transition-all hover:bg-white/5"
+                    style={{ borderColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)" }}
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    Edit Details
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     </section>

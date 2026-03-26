@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Press_Start_2P, Inter, JetBrains_Mono } from "next/font/google";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import "./globals.css";
 
 const inter = Inter({
@@ -45,9 +43,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${pressStart2P.variable} ${jetbrainsMono.variable} antialiased font-body noise`} style={{ background: "#080808", color: "#f0f0f0", minHeight: "100vh" }}>
-        <Navbar />
         {children}
-        <Footer />
       </body>
     </html>
   );
