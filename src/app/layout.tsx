@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Press_Start_2P, Inter, JetBrains_Mono } from "next/font/google";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import "./globals.css";
+import "@/lib/env";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -25,15 +24,46 @@ const jetbrainsMono = JetBrains_Mono({
 
 
 export const metadata: Metadata = {
-  title: "FOSSGCEE – FOSS Club GCE Erode",
+  title: {
+    default: "FOSSGCEE – FOSS Club GCE Erode",
+    template: "%s | FOSSGCEE",
+  },
   description:
     "Free and Open Source Software Club at Government College of Engineering, Erode. Promoting Linux, open-source culture, and real-world contributions.",
-  keywords: ["FOSS", "open source", "Linux", "GCE Erode", "student club", "FOSSGCEE"],
+  keywords: ["FOSS", "open source", "Linux", "GCE Erode", "student club", "FOSSGCEE", "developer community", "open source india"],
+  authors: [{ name: "FOSS Club GCE Erode" }],
+  creator: "FOSS Club GCE Erode",
+  publisher: "FOSS Club GCE Erode",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   openGraph: {
     title: "FOSSGCEE – FOSS Club GCE Erode",
-    description:
-      "Promoting Linux, open-source culture, and real-world contributions at Government College of Engineering, Erode.",
+    description: "Promoting Linux, open-source culture, and real-world contributions at Government College of Engineering, Erode.",
+    url: "https://fossgcee.in",
+    siteName: "FOSSGCEE",
+    images: [
+      {
+        url: "/icon.png",
+        width: 512,
+        height: 512,
+        alt: "FOSS Club GCE Erode Logo",
+      },
+    ],
+    locale: "en_IN",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FOSSGCEE – FOSS Club GCE Erode",
+    description: "Promoting Linux, open-source culture, and real-world contributions at Government College of Engineering, Erode.",
+    images: ["/icon.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
@@ -45,9 +75,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${pressStart2P.variable} ${jetbrainsMono.variable} antialiased font-body noise hex-grid text-[#f0f0f0] min-h-screen relative`}>
-        <Navbar />
         {children}
-        <Footer />
       </body>
     </html>
   );

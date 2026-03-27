@@ -84,14 +84,14 @@ export default function Hero() {
       />
 
       {/* ── Two-column layout ────────────────────────────── */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 w-full py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 w-full py-20 lg:py-24 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center">
 
         {/* ── LEFT: Text content ──────────────────────────── */}
-        <div ref={leftRef} className="flex flex-col items-start gap-6">
+        <div ref={leftRef} className="flex flex-col items-start gap-5 sm:gap-6 pt-10 lg:pt-0">
 
           {/* Terminal badge */}
           <div
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full font-mono text-[11px] glass"
+            className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full font-mono text-[9px] sm:text-[11px] glass"
             style={{ color: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.08)" }}
           >
             <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#ffffff" }} />
@@ -101,7 +101,7 @@ export default function Hero() {
           {/* Typewriter heading */}
           <h1
             className="font-pixel leading-relaxed"
-            style={{ color: "#ffffff", fontSize: "clamp(1.4rem, 3vw, 2.4rem)", minHeight: "2.4em" }}
+            style={{ color: "#ffffff", fontSize: "clamp(1.1rem, 4vw, 2.4rem)", minHeight: "3.2em" }}
           >
             {displayText}
             <span className="animate-blink" style={{ color: "#ffffff" }}>_</span>
@@ -109,8 +109,8 @@ export default function Hero() {
 
           {/* Description */}
           <p
-            className="text-base sm:text-lg leading-relaxed max-w-lg font-mono"
-            style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.95rem" }}
+            className="text-sm sm:text-base lg:text-lg leading-relaxed max-w-lg font-mono"
+            style={{ color: "rgba(255,255,255,0.5)" }}
           >
             We foster a culture of{" "}
             <span style={{ color: "#ffffff" }}>Linux</span>,{" "}
@@ -119,10 +119,10 @@ export default function Hero() {
           </p>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-3 mt-2">
+          <div className="flex flex-col sm:flex-row gap-3 mt-2 w-full sm:w-auto">
             <a
               href="#join"
-              className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl font-mono text-sm font-semibold transition-all duration-200 hover:scale-105 hover:shadow-xl"
+              className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl font-mono text-sm font-semibold transition-all duration-200 hover:scale-105"
               style={{
                 background: "#ffffff",
                 color: "#080808",
@@ -138,7 +138,7 @@ export default function Hero() {
               href="https://github.com/fossgcee"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl font-mono text-sm font-semibold transition-all duration-200 hover:scale-105 glass"
+              className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl font-mono text-sm font-semibold transition-all duration-200 hover:scale-105 glass"
               style={{ color: "rgba(255,255,255,0.75)", border: "1px solid rgba(255,255,255,0.12)" }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -151,25 +151,25 @@ export default function Hero() {
           {/* Club logo + college name */}
           <div className="flex items-center gap-3 mt-4 pt-6 border-t w-full" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
             <Image src="/foss_gcee_logo.png" alt="FOSSGCEE Logo" width={52} height={52} className="rounded-full object-contain" />
-            <div>
+            <div className="sm:block">
               <p className="font-pixel text-[8px] leading-relaxed" style={{ color: "#ffffff" }}>FOSSGCEE</p>
-              <p className="font-mono text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Govt. College of Engineering, Erode</p>
+              <p className="font-mono text-[9px] sm:text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Govt. College of Engineering, Erode</p>
             </div>
           </div>
         </div>
 
         {/* ── RIGHT: Tux illustration ─────────────────────── */}
-        <div ref={tuxRef} className="flex items-center justify-center relative">
+        <div ref={tuxRef} className="flex items-center justify-center relative order-first lg:order-last mb-8 lg:mb-0">
           {/* Glow circle behind Tux */}
           <div
             className="absolute rounded-full"
             style={{
-              width: "420px",
-              height: "420px",
+              width: "min(420px, 80vw)",
+              height: "min(420px, 80vw)",
               background: "radial-gradient(ellipse at center, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 45%, transparent 70%)",
             }}
           />
-          <div style={{ width: "340px", height: "420px", position: "relative", zIndex: 1, filter: "drop-shadow(0 0 48px rgba(255,255,255,0.08))" }}>
+          <div className="relative z-1 z-1 flex items-center justify-center" style={{ width: "min(340px, 60vw)", height: "min(420px, 75vw)", filter: "drop-shadow(0 0 48px rgba(255,255,255,0.08))" }}>
             <Image
               src="/Tux.svg"
               alt="Linux Tux"

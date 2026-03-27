@@ -77,11 +77,11 @@ export default function About() {
         </div>
 
         {/* Stats */}
-        <div ref={statsRef} className="mb-16 flex flex-wrap justify-center gap-10">
+        <div ref={statsRef} className="mb-16 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-10">
           {stats.map((s) => (
-            <div key={s.label} className="about-stat text-center glass-card px-8 py-6 cursor-default">
-              <div className="font-pixel text-2xl mb-1" style={{ color: "#ffffff" }}>{s.value}</div>
-              <div className="font-mono text-xs uppercase tracking-widest mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>{s.label}</div>
+            <div key={s.label} className="about-stat text-center glass-card px-4 sm:px-8 py-5 sm:py-6 cursor-default">
+              <div className="font-pixel text-xl sm:text-2xl mb-1" style={{ color: "#ffffff" }}>{s.value}</div>
+              <div className="font-mono text-[9px] sm:text-xs uppercase tracking-widest mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>{s.label}</div>
             </div>
           ))}
         </div>

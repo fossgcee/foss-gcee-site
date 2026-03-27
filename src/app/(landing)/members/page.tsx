@@ -3,8 +3,11 @@ import MembersGallery from "@/components/MembersGallery";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Board Members | FOSS-CIT",
-  description: "Meet the student board members and leaders of the FOSS Club of CIT.",
+  title: "Board & Members",
+  description: "Meet the core team and members of FOSS GCEE. Our student board leads the way in promoting open source at GCE Erode.",
+  alternates: {
+    canonical: "https://fossgcee.in/members",
+  },
 };
 
 export default function MembersPage() {
