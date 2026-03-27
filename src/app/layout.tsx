@@ -44,7 +44,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.variable} ${pressStart2P.variable} ${jetbrainsMono.variable} antialiased font-body noise`} style={{ background: "#080808", color: "#f0f0f0", minHeight: "100vh" }}>
+      <body className={`${inter.variable} ${pressStart2P.variable} ${jetbrainsMono.variable} antialiased font-body noise hex-grid text-[#f0f0f0] min-h-screen relative`}>
         <Navbar />
         {children}
         <Footer />

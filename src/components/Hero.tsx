@@ -68,8 +68,7 @@ export default function Hero() {
   return (
     <section
       ref={containerRef}
-      className="relative min-h-screen flex items-center overflow-hidden"
-      style={{ background: "#0a0a0a" }}
+      className="relative min-h-screen flex items-center overflow-hidden bg-transparent"
     >
       {/* Background radial glow — right side (behind Tux) */}
       <div
@@ -82,16 +81,6 @@ export default function Hero() {
       <div
         className="absolute left-0 top-0 w-96 h-96 rounded-full pointer-events-none"
         style={{ background: "radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%)" }}
-      />
-
-      {/* Grid overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)",
-          backgroundSize: "72px 72px",
-        }}
       />
 
       {/* ── Two-column layout ────────────────────────────── */}

@@ -54,8 +54,7 @@ export default function Community() {
     <section
       id="community"
       ref={sectionRef}
-      className="py-24 px-4 sm:px-6 lg:px-8 relative"
-      style={{ background: "#080808" }}
+      className="py-24 px-4 sm:px-6 lg:px-8 relative bg-transparent"
     >
       <div className="max-w-6xl mx-auto">
 
@@ -166,9 +165,11 @@ function TerminalCard({ event }: { event: FossEvent }) {
     <div
       className="terminal-card rounded-2xl overflow-hidden w-full max-w-4xl mx-auto"
       style={{
-        background: "#0f0f0f",
+        background: "rgba(10, 10, 10, 0.7)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
         border: "1px solid rgba(255,255,255,0.1)",
-        boxShadow: "0 0 60px rgba(255,255,255,0.04)",
+        boxShadow: "0 0 60px rgba(0,0,0,0.8)",
       }}
     >
       {/* Window chrome */}
