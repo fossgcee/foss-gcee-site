@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
@@ -105,10 +106,14 @@ export default function Community() {
                       {ev.photos && ev.photos.length > 0 && (
                         <div className="mt-3 grid grid-cols-3 gap-2">
                           {ev.photos.map((src, i) => (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img key={i} src={src} alt={`photo ${i+1}`}
-                              className="rounded-lg object-cover w-full aspect-video"
-                              style={{ border: "1px solid rgba(255,255,255,0.06)" }} />
+                            <div key={i} className="relative aspect-video rounded-lg overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
+                              <Image 
+                                src={src} 
+                                alt={`photo ${i+1}`}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
                           ))}
                         </div>
                       )}
@@ -193,13 +198,12 @@ function TerminalCard({ event }: { event: FossEvent }) {
         <div className="flex flex-col sm:flex-row gap-8 items-start">
           {/* Poster (optional) */}
           {event.poster && (
-            <div className="shrink-0">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+            <div className="shrink-0 relative w-[180px] h-[180px] rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
+              <Image
                 src={event.poster}
                 alt={`${event.title} poster`}
-                className="rounded-xl object-cover"
-                style={{ width: 180, height: 180, border: "1px solid rgba(255,255,255,0.08)" }}
+                fill
+                className="object-cover"
               />
             </div>
           )}

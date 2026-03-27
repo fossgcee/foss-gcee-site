@@ -313,7 +313,7 @@ export default function AdminEventsManager() {
       {/* Registration List Modal */}
       <AnimatePresence>
         {isRegModalOpen && (
-          <div className="fixed inset-0 z-[101] flex items-center justify-right">
+          <div className="fixed inset-0 z-[101] flex items-center justify-end">
              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsRegModalOpen(false)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
              <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="relative h-full w-full max-w-2xl bg-[#080808] border-l border-white/10 shadow-2xl flex flex-col">
                 <div className="p-8 border-b border-white/5 flex items-center justify-between">
@@ -336,26 +336,49 @@ export default function AdminEventsManager() {
                         <p className="font-pixel text-[10px] uppercase">No Registrations Yet</p>
                      </div>
                    ) : (
-                     <div className="space-y-4">
-                        {registrations.map((reg) => (
-                           <div key={reg._id} className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                              <div className="space-y-3">
-                                 <div>
-                                    <h5 className="font-pixel text-sm text-white uppercase">{reg.name}</h5>
-                                    <p className="font-mono text-[10px] text-white/30 uppercase">{reg.regNo} · YEAR {reg.year}</p>
+                     <div className="space-y-6">
+                        {/* Search in registrations */}
+                        <div className="relative group">
+                          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/20" />
+                          <input 
+                            type="text" 
+                            placeholder="Find participant by name or reg no..." 
+                            className="w-full pl-10 pr-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[10px] text-white focus:outline-none focus:border-white/20 transition-all"
+                            onChange={(e) => {
+                              const val = e.target.value.toLowerCase();
+                              const items = document.querySelectorAll('.reg-item');
+                              items.forEach((item: any) => {
+                                const text = item.innerText.toLowerCase();
+                                item.style.display = text.includes(val) ? 'flex' : 'none';
+                              });
+                            }}
+                          />
+                        </div>
+
+                        <div className="space-y-4">
+                           {registrations.map((reg, idx) => (
+                              <div key={reg._id || idx} className="reg-item p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                                 <div className="space-y-3">
+                                    <div>
+                                       <div className="flex items-center gap-2 mb-1">
+                                          <h5 className="font-pixel text-sm text-white uppercase">{reg.name}</h5>
+                                          <span className="px-1.5 py-0.5 rounded bg-white/5 text-[8px] font-mono text-white/30">{new Date(reg.registeredAt).toLocaleDateString()}</span>
+                                       </div>
+                                       <p className="font-mono text-[10px] text-white/30 uppercase">{reg.regNo} · YEAR {reg.year}</p>
+                                    </div>
+                                    <p className="font-mono text-[9px] text-white/40 italic uppercase">{reg.college}</p>
                                  </div>
-                                 <p className="font-mono text-[9px] text-white/40 italic uppercase">{reg.college}</p>
+                                 <div className="flex flex-col gap-2">
+                                    <a href={`mailto:${reg.email}`} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[9px] font-mono text-white/60 hover:text-white hover:bg-white/10 transition-all">
+                                       <Mail className="w-3 h-3" /> {reg.email}
+                                    </a>
+                                    <a href={`https://wa.me/${reg.mobile}`} target="_blank" className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10 text-[9px] font-mono text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 transition-all">
+                                       <Phone className="w-3 h-3" /> {reg.mobile}
+                                    </a>
+                                 </div>
                               </div>
-                              <div className="flex flex-col gap-2">
-                                 <a href={`mailto:${reg.email}`} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[9px] font-mono text-white/60 hover:text-white hover:bg-white/10 transition-all">
-                                    <Mail className="w-3 h-3" /> {reg.email}
-                                 </a>
-                                 <a href={`https://wa.me/${reg.mobile}`} target="_blank" className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10 text-[9px] font-mono text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 transition-all">
-                                    <Phone className="w-3 h-3" /> {reg.mobile}
-                                 </a>
-                              </div>
-                           </div>
-                        ))}
+                           ))}
+                        </div>
                      </div>
                    )}
                 </div>

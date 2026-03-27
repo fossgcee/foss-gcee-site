@@ -56,3 +56,35 @@ export async function sendOtpEmail(to: string, name: string, otp: string) {
     `,
   });
 }
+
+/**
+ * Sends a confirmation email for event registration.
+ */
+export async function sendEventRegistrationEmail(to: string, name: string, eventTitle: string) {
+  await transporter.sendMail({
+    from: `"FOSS Club GCE Erode" <${process.env.EMAIL_USER}>`,
+    to,
+    subject: `Registration Confirmed: ${eventTitle}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head><meta charset="UTF-8" /></head>
+      <body style="margin: 0; padding: 0; background-color: #080808; font-family: sans-serif;">
+        <div style="max-width: 560px; margin: 40px auto; background-color: #0f0f0f; border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; overflow: hidden;">
+          <div style="padding: 40px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Registration Confirmed!</h1>
+            <p style="color: rgba(255,255,255,0.5); margin: 12px 0 0;">Hello ${name}, you are all set for the event.</p>
+          </div>
+          <div style="padding: 40px; text-align: center;">
+            <div style="color: #ffffff; font-size: 18px; font-weight: bold; margin-bottom: 8px;">${eventTitle}</div>
+            <p style="color: rgba(255,255,255,0.4); font-size: 14px;">We have received your registration. Stay tuned for further updates on WhatsApp.</p>
+          </div>
+          <div style="padding: 24px; background: rgba(255,255,255,0.02); text-align: center; color: rgba(255,255,255,0.2); font-size: 10px; text-transform: uppercase;">
+            FOSS Club · GCE Erode
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  });
+}

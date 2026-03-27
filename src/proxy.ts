@@ -15,6 +15,18 @@ export function proxy(request: NextRequest) {
     }
   }
 
+  // Also protect admin API routes
+  if (pathname.startsWith("/api/admin")) {
+    const session = request.cookies.get("admin_session");
+
+    if (!session || session.value !== "authenticated") {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized access detected." },
+        { status: 401 }
+      );
+    }
+  }
+
   // If already authenticated and trying to access /admin/login, redirect to /admin
   if (pathname.startsWith("/admin/login")) {
     const session = request.cookies.get("admin_session");
@@ -29,7 +41,6 @@ export function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Config to limit middleware to admin routes
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/api/admin/:path*"],
 };

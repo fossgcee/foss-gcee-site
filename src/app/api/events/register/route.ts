@@ -6,10 +6,21 @@ export async function POST(request: Request) {
   try {
     await dbConnect();
     const body = await request.json();
-    const { name, regNo, college, year, mobile, email, eventSlug } = body;
+    const { name, regNo, college, year, mobile, email, eventSlug, eventTitle } = body;
 
     if (!name || !regNo || !college || !year || !mobile || !email || !eventSlug) {
       return NextResponse.json({ success: false, error: "Required fields are missing" }, { status: 400 });
+    }
+
+    const event = await Event.findOne({ slug: eventSlug.toLowerCase() });
+    if (!event) {
+      return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });
+    }
+
+    // Check for duplicate registration
+    const isDuplicate = event.registrations.some((r: any) => r.email === email || r.regNo === regNo);
+    if (isDuplicate) {
+      return NextResponse.json({ success: false, error: "You are already registered for this event" }, { status: 400 });
     }
 
     const regEntry = {
@@ -23,17 +34,20 @@ export async function POST(request: Request) {
     };
 
     // Use push within updateOne to ensure it goes into the correct document
-    const result = await Event.findOneAndUpdate(
-      { slug: eventSlug.toLowerCase() }, // Ensure slug is lowercase for matching
+    await Event.updateOne(
+      { slug: eventSlug.toLowerCase() },
       { 
         $push: { registrations: regEntry },
         $inc: { registrationsCount: 1 }
-      },
-      { new: true, runValidators: true }
+      }
     );
 
-    if (!result) {
-      return NextResponse.json({ success: false, error: "Event not found for this slug" }, { status: 404 });
+    // Send confirmation email asynchronously
+    try {
+      const { sendEventRegistrationEmail } = await import("@/lib/mailer");
+      await sendEventRegistrationEmail(email, name, eventTitle || event.title);
+    } catch (err) {
+      console.warn("Mail ignored but registration saved:", err);
     }
 
     return NextResponse.json({

@@ -307,7 +307,7 @@ export default function RegistrationPortal() {
                 hint="https:// is optional — but www. is required"
               />
               <Field icon={Phone} label="Phone Number" name="phone" type="tel" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="+91 9876543210" />
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <SelectField icon={GraduationCap} label="Year" name="year" value={form.year} onChange={(v) => setForm({ ...form, year: v })} options={YEARS} placeholder="Select year" />
                 <SelectField icon={BookOpen} label="Department" name="department" value={form.department} onChange={(v) => setForm({ ...form, department: v })} options={DEPARTMENTS} placeholder="Select dept." />
               </div>
@@ -332,8 +332,8 @@ export default function RegistrationPortal() {
           {step === "otp" && (
             <form onSubmit={handleOtpSubmit} className="space-y-8">
               <div className="space-y-4 text-center">
-                <p className="font-mono text-xs text-white/40">Enter the 6-digit code we sent to your inbox</p>
-                <div className="flex gap-3 justify-center" onPaste={handleOtpPaste}>
+                <p className="font-mono text-[10px] sm:text-xs text-white/40">Enter the 6-digit code we sent to your inbox</p>
+                <div className="flex gap-2 sm:gap-3 justify-center" onPaste={handleOtpPaste}>
                   {otp.map((digit, i) => (
                     <input
                       key={i}
@@ -344,7 +344,7 @@ export default function RegistrationPortal() {
                       value={digit}
                       onChange={(e) => handleOtpChange(i, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                      className="w-12 h-14 text-center text-2xl font-pixel text-white bg-white/[0.04] border rounded-xl focus:outline-none focus:ring-2 ring-white/30 transition-all caret-transparent"
+                      className="w-10 sm:w-12 h-12 sm:h-14 text-center text-xl sm:text-2xl font-pixel text-white bg-white/[0.04] border rounded-xl focus:outline-none focus:ring-2 ring-white/30 transition-all caret-transparent"
                       style={{ borderColor: digit ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.08)" }}
                     />
                   ))}
