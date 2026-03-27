@@ -66,7 +66,6 @@ export default function FloatingElements() {
               animation: {
                 enable: true,
                 speed: 1,
-                minimumValue: 0.1,
                 sync: false,
               },
             },
@@ -78,7 +77,6 @@ export default function FloatingElements() {
               animation: {
                 enable: true,
                 speed: 1,
-                minimumValue: 0.5,
                 sync: false,
               },
             },
