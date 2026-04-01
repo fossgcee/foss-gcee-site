@@ -8,7 +8,7 @@ import { gsap } from "gsap";
 const PHRASES = [
   "FOSSGCEE",
   "GCEE",
-  "Free and Open\nSource Software",
+  "Free and Open\nSource\u00a0Software",
   "FOSSGCEE",
 ];
 
