@@ -12,11 +12,10 @@ export function validateEnv() {
   const missing = requiredEnvVars.filter((name) => !process.env[name]);
 
   if (missing.length > 0) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error(`CRITICAL: Missing required environment variables: ${missing.join(", ")}`);
-    } else {
-      console.warn(`[WARNING] Missing environment variables: ${missing.join(", ")}`);
-    }
+    // Always warn — never throw, as this runs at build time and would
+    // crash static page collection (/_not-found, /, etc.) on Vercel
+    // if env vars are not yet set in the deployment environment.
+    console.warn(`[WARNING] Missing environment variables: ${missing.join(", ")}`);
   }
 }
 
