@@ -16,7 +16,6 @@ export default function BoardMembers() {
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
-    
     if (sectionRef.current) {
       const ctx = gsap.context(() => {
         gsap.from(".board-header", {
@@ -24,7 +23,6 @@ export default function BoardMembers() {
           scrollTrigger: { trigger: ".board-header", start: "top 85%" },
           y: 40, opacity: 0, duration: 0.8, ease: "power3.out",
         });
-        
         gsap.from(".year-select", {
           immediateRender: false,
           scrollTrigger: { trigger: ".year-select", start: "top 85%" },
@@ -34,10 +32,9 @@ export default function BoardMembers() {
       return () => ctx.revert();
     }
   }, []);
+
   useEffect(() => {
     if (!gridRef.current) return;
-    
-    // Animate cards on year change
     gsap.fromTo(
       gridRef.current.children,
       { y: 20, opacity: 0 },
@@ -46,30 +43,34 @@ export default function BoardMembers() {
   }, [selectedYear]);
 
   return (
-    <section ref={sectionRef} id="members" className="min-h-screen pt-32 pb-24 px-4 sm:px-6 lg:px-8 bg-black">
+    <section
+      ref={sectionRef}
+      id="members"
+      className="min-h-screen pt-32 pb-24 px-4 sm:px-6 lg:px-8 bg-bg"
+    >
       <div className="max-w-6xl mx-auto flex flex-col items-center">
-        
+
         {/* Title */}
-        <h1 className="board-header text-4xl md:text-5xl font-bold mb-8 text-center text-text">
+        <h1 className="board-header text-4xl md:text-5xl font-bold mb-8 text-center text-black dark:text-white">
           Board Members
         </h1>
 
-        {/* Year Dropdown Container */}
+        {/* Year Dropdown */}
         <div className="year-select mb-12 relative w-48">
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
-            className="w-full appearance-none bg-surface text-bg font-semibold py-2.5 px-4 pr-10 rounded shadow focus:outline-none focus:ring-2 focus:ring-[#FFDD00] transition-colors cursor-pointer"
-            style={{ backgroundImage: 'none' }}
+            className="w-full appearance-none bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-black dark:text-white font-semibold py-2.5 px-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 transition-colors cursor-pointer"
+            style={{ backgroundImage: "none" }}
           >
             {years.map((year) => (
-              <option key={year} value={year}>
+              <option key={year} value={year} className="bg-white dark:bg-[#111]">
                 {year}
               </option>
             ))}
           </select>
-          {/* Custom Dropdown Arrow */}
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-bg">
+          {/* Custom arrow */}
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-black/40 dark:text-white/40">
             <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
               <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
             </svg>
@@ -78,23 +79,18 @@ export default function BoardMembers() {
 
         {/* Members Grid */}
         {filteredMembers.length > 0 ? (
-          <div 
+          <div
             ref={gridRef}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 w-full"
           >
             {filteredMembers.map((member) => (
-              <div 
+              <div
                 key={member.id}
-                className="flex flex-col rounded-xl overflow-hidden relative group transition-transform duration-300 hover:-translate-y-2"
-                style={{ 
-                  background: "#080808",
-                  border: "1px solid rgba(255,255,255,0.05)",
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.5)"
-                }}
+                className="flex flex-col rounded-xl overflow-hidden relative group transition-transform duration-300 hover:-translate-y-2 bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/8 shadow-sm dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
               >
-                {/* Image Container - Aspect 4:5 */}
-                <div className="relative w-full aspect-[4/5] bg-bg-2 p-0 m-0 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-t from-bg via-transparent to-transparent z-10 opacity-60" />
+                {/* Image Container */}
+                <div className="relative w-full aspect-[4/5] bg-black/5 dark:bg-[#111] overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 dark:from-black/60 via-transparent to-transparent z-10 opacity-60" />
                   {member.imageUrl ? (
                     <Image
                       src={member.imageUrl}
@@ -104,7 +100,7 @@ export default function BoardMembers() {
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted-2">
+                    <div className="w-full h-full flex items-center justify-center text-black/20 dark:text-white/20">
                       <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                       </svg>
@@ -114,20 +110,20 @@ export default function BoardMembers() {
 
                 {/* Content */}
                 <div className="p-6 text-center relative z-20 flex-grow flex flex-col justify-end">
-                  <h3 className="text-lg font-bold tracking-wide uppercase mb-1 text-text">
+                  <h3 className="text-lg font-bold tracking-wide uppercase mb-1 text-black dark:text-white">
                     {member.name}
                   </h3>
-                  <p className="text-sm text-gray-300 font-medium">
+                  <p className="text-sm text-black/60 dark:text-white/60 font-medium">
                     {member.role}
                   </p>
 
-                  {/* LinkedIn Icon - Bottom Right absolute */}
+                  {/* LinkedIn */}
                   {member.linkedInUrl && (
-                    <a 
-                      href={member.linkedInUrl} 
-                      target="_blank" 
+                    <a
+                      href={member.linkedInUrl}
+                      target="_blank"
                       rel="noopener noreferrer"
-                      className="absolute bottom-4 right-4 text-muted-2 hover:text-[#0077b5] transition-colors"
+                      className="absolute bottom-4 right-4 text-black/30 dark:text-white/30 hover:text-[#0077b5] dark:hover:text-[#0077b5] transition-colors"
                       aria-label={`LinkedIn profile for ${member.name}`}
                     >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -140,8 +136,8 @@ export default function BoardMembers() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 text-muted-2">
-            <p>No members found for the selected year.</p>
+          <div className="text-center py-20 text-black/40 dark:text-white/40">
+            <p className="font-mono text-sm">No members found for the selected year.</p>
           </div>
         )}
       </div>

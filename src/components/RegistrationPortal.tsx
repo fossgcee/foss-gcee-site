@@ -41,9 +41,11 @@ function Field({
 }) {
   return (
     <div className="space-y-2">
-      <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest">{label}</label>
+      <label className="font-mono text-[10px] text-black/50 dark:text-white/40 uppercase tracking-widest">
+        {label}
+      </label>
       <div className="relative group">
-        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25 group-focus-within:text-white/70 transition-colors" />
+        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30 dark:text-white/25 group-focus-within:text-black/60 dark:group-focus-within:text-white/70 transition-colors" />
         <input
           name={name}
           type={type}
@@ -54,11 +56,10 @@ function Field({
           disabled={disabled}
           pattern={pattern}
           title={inputTitle}
-          className="w-full bg-white/[0.03] border border-white/8 rounded-xl py-3.5 pl-12 pr-4 font-mono text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-1 ring-white/20 hover:bg-white/[0.05] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{ borderColor: "rgba(255,255,255,0.08)" }}
+          className="w-full bg-black/[0.04] dark:bg-white/[0.03] border border-black/10 dark:border-white/8 rounded-xl py-3.5 pl-12 pr-4 font-mono text-sm text-black dark:text-white placeholder:text-black/30 dark:placeholder:text-white/20 focus:outline-none focus:ring-1 ring-black/20 dark:ring-white/20 hover:bg-black/[0.07] dark:hover:bg-white/[0.05] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         />
       </div>
-      {hint && <p className="font-mono text-[9px] text-white/25 pl-1">{hint}</p>}
+      {hint && <p className="font-mono text-[9px] text-black/40 dark:text-white/25 pl-1">{hint}</p>}
     </div>
   );
 }
@@ -72,24 +73,25 @@ function SelectField({
 }) {
   return (
     <div className="space-y-2">
-      <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest">{label}</label>
+      <label className="font-mono text-[10px] text-black/50 dark:text-white/40 uppercase tracking-widest">
+        {label}
+      </label>
       <div className="relative group">
-        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25 group-focus-within:text-white/70 transition-colors z-10" />
+        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30 dark:text-white/25 group-focus-within:text-black/60 dark:group-focus-within:text-white/70 transition-colors z-10" />
         <select
           name={name}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           required
           disabled={disabled}
-          className="w-full bg-[#0f0f0f] border border-white/8 rounded-xl py-3.5 pl-12 pr-4 font-mono text-sm text-white focus:outline-none focus:ring-1 ring-white/20 appearance-none cursor-pointer hover:bg-white/[0.05] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{ borderColor: "rgba(255,255,255,0.08)" }}
+          className="w-full bg-white dark:bg-[#0f0f0f] border border-black/10 dark:border-white/8 rounded-xl py-3.5 pl-12 pr-4 font-mono text-sm text-black dark:text-white focus:outline-none focus:ring-1 ring-black/20 dark:ring-white/20 appearance-none cursor-pointer hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          <option value="" disabled>{placeholder}</option>
+          <option value="" disabled className="bg-white dark:bg-[#0f0f0f]">{placeholder}</option>
           {options.map((o) => (
-            <option key={o} value={o} className="bg-[#0f0f0f]">{o}</option>
+            <option key={o} value={o} className="bg-white dark:bg-[#0f0f0f]">{o}</option>
           ))}
         </select>
-        <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/30">▾</div>
+        <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black/30 dark:text-white/30">▾</div>
       </div>
     </div>
   );
@@ -124,11 +126,9 @@ export default function RegistrationPortal() {
     setLoading(true);
     setError(null);
     try {
-      // Normalize LinkedIn: ensure https:// prefix so it's a valid clickable URL
       const normalizedLinkedin = form.linkedin.startsWith("http")
         ? form.linkedin
         : `https://${form.linkedin}`;
-
       const res = await fetch("/api/register/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -218,16 +218,16 @@ export default function RegistrationPortal() {
       <section className="min-h-screen pt-32 pb-24 px-4 flex items-center justify-center">
         <div className="max-w-md w-full text-center space-y-8">
           <div className="w-24 h-24 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto animate-bounce">
-            <CheckCircle2 className="w-12 h-12 text-emerald-400" />
+            <CheckCircle2 className="w-12 h-12 text-emerald-500 dark:text-emerald-400" />
           </div>
           <div>
-            <h2 className="text-3xl font-pixel text-white mb-3">ACCESS_GRANTED</h2>
-            <p className="font-mono text-sm text-white/50 leading-relaxed">
-              Welcome to the <span className="text-white">FOSS Club GCE Erode</span>, {form.name.split(" ")[0]}!<br />
+            <h2 className="text-3xl font-pixel text-black dark:text-white mb-3">ACCESS_GRANTED</h2>
+            <p className="font-mono text-sm text-black/60 dark:text-white/50 leading-relaxed">
+              Welcome to the <span className="text-black dark:text-white font-semibold">FOSS Club GCE Erode</span>, {form.name.split(" ")[0]}!<br />
               Your email has been verified and your registration is complete.
             </p>
           </div>
-          <div className="p-6 rounded-2xl border border-emerald-500/10 bg-emerald-500/[0.04] space-y-3 text-left">
+          <div className="p-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] space-y-3 text-left">
             {[
               ["Name", form.name],
               ["Email", form.email],
@@ -235,12 +235,12 @@ export default function RegistrationPortal() {
               ["Department", form.department],
             ].map(([k, v]) => (
               <div key={k} className="flex justify-between font-mono text-xs">
-                <span className="text-white/40">{k}</span>
-                <span className="text-white">{v}</span>
+                <span className="text-black/50 dark:text-white/40">{k}</span>
+                <span className="text-black dark:text-white">{v}</span>
               </div>
             ))}
           </div>
-          <p className="font-mono text-[10px] text-white/30">
+          <p className="font-mono text-[10px] text-black/40 dark:text-white/30">
             Watch your inbox for further updates from the club.
           </p>
         </div>
@@ -253,42 +253,37 @@ export default function RegistrationPortal() {
       <div className="w-full max-w-xl">
         {/* Header */}
         <div className="mb-10 space-y-2 text-center">
-          <p className="font-mono text-[10px] text-white/30 tracking-[0.3em] uppercase">
+          <p className="font-mono text-[10px] text-black/40 dark:text-white/30 tracking-[0.3em] uppercase">
             {step === "form" ? "Step 1 of 2 — Registration Details" : "Step 2 of 2 — Email Verification"}
           </p>
-          <h1 className="text-3xl font-pixel text-white leading-tight">
+          <h1 className="text-3xl font-pixel text-black dark:text-white leading-tight">
             {step === "form" ? "JOIN_FOSS_CLUB" : "VERIFY_EMAIL"}
           </h1>
-          <p className="font-mono text-xs text-white/40 mt-1">
+          <p className="font-mono text-xs text-black/50 dark:text-white/40 mt-1">
             {step === "form"
               ? "Fill in your details to request membership."
-              : <>OTP sent to <span className="text-white">{form.email}</span>. Check your inbox.</>
+              : <>OTP sent to <span className="text-black dark:text-white font-semibold">{form.email}</span>. Check your inbox.</>
             }
           </p>
         </div>
 
         {/* Progress indicator */}
         <div className="flex gap-2 mb-10">
-          {["form", "otp"].map((s, i) => (
-            <div
-              key={s}
-              className="h-1 flex-1 rounded-full transition-all duration-500"
-              style={{
-                background: (step === "otp" && i === 0) || (step === "form" && i === 0)
-                  ? step === "otp" && i === 0 ? "white" : step === "form" && i === 0 ? "white" : "rgba(255,255,255,0.1)"
-                  : step === "otp" && i === 1 ? "white" : "rgba(255,255,255,0.1)"
-              }}
-            />
-          ))}
+          {["form", "otp"].map((s, i) => {
+            const active = (step === "form" && i === 0) || (step === "otp");
+            const filled = (step === "otp" && i === 0) || (step === "otp" && i === 1) || (step === "form" && i === 0);
+            return (
+              <div
+                key={s}
+                className={`h-1 flex-1 rounded-full transition-all duration-500 ${filled ? "bg-black dark:bg-white" : "bg-black/10 dark:bg-white/10"}`}
+              />
+            );
+          })}
         </div>
 
-        <div
-          className="rounded-3xl p-8 border"
-          style={{
-            background: "rgba(255,255,255,0.02)",
-            borderColor: "rgba(255,255,255,0.07)",
-          }}
-        >
+        {/* Card */}
+        <div className="rounded-3xl p-8 border border-black/8 dark:border-white/7 bg-black/[0.02] dark:bg-white/[0.02]">
+
           {/* ——— STEP 1: FORM ——— */}
           {step === "form" && (
             <form onSubmit={handleFormSubmit} className="space-y-5">
@@ -314,14 +309,14 @@ export default function RegistrationPortal() {
 
               {error && (
                 <div className="flex gap-3 items-start p-4 rounded-xl border border-red-500/20 bg-red-500/10">
-                  <span className="text-red-400 font-mono text-[11px] leading-relaxed">{error}</span>
+                  <span className="text-red-600 dark:text-red-400 font-mono text-[11px] leading-relaxed">{error}</span>
                 </div>
               )}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-14 rounded-2xl bg-white text-black font-pixel text-[11px] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(255,255,255,0.08)] mt-2"
+                className="w-full h-14 rounded-2xl bg-black dark:bg-white text-white dark:text-black font-pixel text-[11px] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed mt-2"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>SEND_OTP <ArrowRight className="w-4 h-4" /></>}
               </button>
@@ -332,7 +327,7 @@ export default function RegistrationPortal() {
           {step === "otp" && (
             <form onSubmit={handleOtpSubmit} className="space-y-8">
               <div className="space-y-4 text-center">
-                <p className="font-mono text-[10px] sm:text-xs text-white/40">Enter the 6-digit code we sent to your inbox</p>
+                <p className="font-mono text-[10px] sm:text-xs text-black/50 dark:text-white/40">Enter the 6-digit code we sent to your inbox</p>
                 <div className="flex gap-2 sm:gap-3 justify-center" onPaste={handleOtpPaste}>
                   {otp.map((digit, i) => (
                     <input
@@ -344,8 +339,11 @@ export default function RegistrationPortal() {
                       value={digit}
                       onChange={(e) => handleOtpChange(i, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                      className="w-10 sm:w-12 h-12 sm:h-14 text-center text-xl sm:text-2xl font-pixel text-white bg-white/[0.04] border rounded-xl focus:outline-none focus:ring-2 ring-white/30 transition-all caret-transparent"
-                      style={{ borderColor: digit ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.08)" }}
+                      className={`w-10 sm:w-12 h-12 sm:h-14 text-center text-xl sm:text-2xl font-pixel text-black dark:text-white bg-black/[0.04] dark:bg-white/[0.04] border rounded-xl focus:outline-none focus:ring-2 ring-black/20 dark:ring-white/30 transition-all caret-transparent ${
+                        digit
+                          ? "border-black/40 dark:border-white/40"
+                          : "border-black/10 dark:border-white/10"
+                      }`}
                     />
                   ))}
                 </div>
@@ -353,7 +351,7 @@ export default function RegistrationPortal() {
 
               {error && (
                 <div className="flex gap-3 items-start p-4 rounded-xl border border-red-500/20 bg-red-500/10">
-                  <span className="text-red-400 font-mono text-[11px] leading-relaxed">{error}</span>
+                  <span className="text-red-600 dark:text-red-400 font-mono text-[11px] leading-relaxed">{error}</span>
                 </div>
               )}
 
@@ -361,7 +359,7 @@ export default function RegistrationPortal() {
                 <button
                   type="submit"
                   disabled={loading || otp.join("").length < 6}
-                  className="w-full h-14 rounded-2xl bg-white text-black font-pixel text-[11px] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(255,255,255,0.08)]"
+                  className="w-full h-14 rounded-2xl bg-black dark:bg-white text-white dark:text-black font-pixel text-[11px] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>VERIFY_OTP <CheckCircle2 className="w-4 h-4" /></>}
                 </button>
@@ -371,8 +369,7 @@ export default function RegistrationPortal() {
                     type="button"
                     onClick={handleResend}
                     disabled={loading || resendTimer > 0}
-                    className="flex-1 h-11 rounded-xl border font-mono text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-30 hover:bg-white/5"
-                    style={{ borderColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)" }}
+                    className="flex-1 h-11 rounded-xl border border-black/10 dark:border-white/10 text-black/60 dark:text-white/60 font-mono text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-30 hover:bg-black/5 dark:hover:bg-white/5"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
                     {resendTimer > 0 ? `Resend in ${resendTimer}s` : "Resend OTP"}
@@ -380,8 +377,7 @@ export default function RegistrationPortal() {
                   <button
                     type="button"
                     onClick={() => { setStep("form"); setError(null); setOtp(["", "", "", "", "", ""]); }}
-                    className="flex-1 h-11 rounded-xl border font-mono text-xs flex items-center justify-center gap-2 transition-all hover:bg-white/5"
-                    style={{ borderColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)" }}
+                    className="flex-1 h-11 rounded-xl border border-black/10 dark:border-white/10 text-black/60 dark:text-white/60 font-mono text-xs flex items-center justify-center gap-2 transition-all hover:bg-black/5 dark:hover:bg-white/5"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     Edit Details
