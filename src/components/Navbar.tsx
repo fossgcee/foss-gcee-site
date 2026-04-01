@@ -104,23 +104,17 @@ export default function Navbar() {
             className="md:hidden px-5 pb-4 border-t border-border-2 bg-bg-2/85 backdrop-blur-3xl"
           >
             <ul className="flex flex-col gap-2 pt-3">
-              {links.map(({ label, href }) => (
-                <li key={label}>
-                  <Link
-                    href={href}
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 font-mono text-xs py-1.5 transition-colors duration-200 text-muted-2 hover:text-text"
-                  >
-                    <span className="text-text">›</span> {label}
-                  </Link>
-                </li>
-              ))}
-              <li>
-                <div className="flex items-center justify-between mt-2 pt-2 border-t border-border">
-                  <span className="font-mono text-xs text-muted-2">Theme</span>
-                  <ThemeToggle />
-                </div>
+            {links.map(({ label, href }) => (
+              <li key={label}>
+                <Link
+                  href={href}
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 font-mono text-xs py-1.5 transition-colors duration-200 text-muted-2 hover:text-text"
+                >
+                  <span className="text-text">›</span> {label}
+                </Link>
               </li>
+            ))}
               <li>
                 <Link
                   href="/#join"

@@ -109,7 +109,7 @@ export default function Hero() {
 
           {/* Typewriter heading */}
           <h1
-            className="font-pixel leading-relaxed text-text whitespace-pre"
+            className="font-pixel leading-relaxed text-text whitespace-pre-wrap break-words"
             style={{ fontSize: "clamp(1.1rem, 4vw, 2.4rem)", minHeight: "3.2em" }}
           >
             {displayText}
