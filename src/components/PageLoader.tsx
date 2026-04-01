@@ -45,50 +45,42 @@ export default function PageLoader() {
   return (
     <div
       ref={loaderRef}
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-8"
-      style={{ backgroundColor: "var(--color-bg)", opacity: 0 }}
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-8 bg-bg transition-colors duration-300"
+      style={{ opacity: 0 }}
     >
       {/* Logo mark */}
       <div ref={logoRef} className="flex flex-col items-center gap-4">
         <div
-          className="p-5 rounded-3xl"
-          style={{
-            background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            boxShadow: "0 0 60px rgba(255,255,255,0.06)",
-          }}
+          className="p-5 rounded-3xl bg-black/5 border border-black/10 shadow-[0_0_60px_rgba(0,0,0,0.06)] dark:bg-white/5 dark:border-white/10 dark:shadow-[0_0_60px_rgba(255,255,255,0.06)] transition-colors"
         >
           <Image
             src="/foss_gcee_logo.png"
             alt="FOSSGCEE"
             width={96}
-              height={96}
-              className="rounded-full object-contain"
+            height={96}
+            className="rounded-full object-contain filter dark:invert-0 light:invert"
             priority
           />
         </div>
-        <p className="font-pixel text-[10px] tracking-widest" style={{ color: "#ffffff" }}>
+        <p className="font-pixel text-[10px] tracking-widest text-black dark:text-white transition-colors">
           FOSSGCEE
         </p>
       </div>
 
       {/* Loading bar */}
       <div
-        className="w-48 h-px relative overflow-hidden"
-        style={{ background: "rgba(255,255,255,0.08)" }}
+        className="w-48 h-px relative overflow-hidden bg-black/10 dark:bg-white/10 transition-colors"
       >
         <div
           ref={barRef}
-          className="absolute inset-0"
-          style={{ background: "linear-gradient(90deg, rgba(255,255,255,0.1), #ffffff, rgba(255,255,255,0.1))" }}
+          className="absolute inset-0 bg-gradient-to-r from-black/10 via-black to-black/10 dark:from-white/10 dark:via-white dark:to-white/10 transition-colors"
         />
       </div>
 
       {/* Tagline */}
       <p
         ref={textRef}
-        className="font-mono text-[10px] tracking-[0.25em] uppercase"
-        style={{ color: "rgba(255,255,255,0.3)" }}
+        className="font-mono text-[10px] tracking-[0.25em] uppercase text-black/40 dark:text-white/30 transition-colors"
       >
         Free &amp; Open Source
       </p>
