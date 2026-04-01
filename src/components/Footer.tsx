@@ -90,10 +90,11 @@ export default function Footer() {
         <div
           className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-border"
         >
-          <p className="font-mono text-xs text-muted">
-            &gt;_ Built by students, powered by <span className="text-text">open source</span>
+          <p className="font-mono text-xs text-muted text-center sm:text-left leading-relaxed">
+            &gt;_ Built by: <span className="text-text">Prem Kumar P</span>, <span className="text-text">Bharath Kumar P</span> &amp; <span className="text-text">Vikash V</span><br className="hidden sm:block" />
+            <span className="sm:inline-block sm:mt-1 opacity-75">powered by open source</span>
           </p>
-          <p className="font-mono text-xs text-muted-2">
+          <p className="font-mono text-xs text-muted-2 text-center sm:text-right">
             © {new Date().getFullYear()} FOSSGCEE · Made with ♥ in Erode
           </p>
         </div>
