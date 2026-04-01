@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
+import { useTheme } from "next-themes";
 
 /* ── Phrases that cycle in the typewriter ─────────────────── */
 const PHRASES = [
@@ -18,6 +19,8 @@ export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const leftRef = useRef<HTMLDivElement>(null);
   const tuxRef = useRef<HTMLDivElement>(null);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
   /* ── Typewriter state ─────────────────────────────────── */
   const [displayText, setDisplayText] = useState("");
@@ -162,16 +165,27 @@ export default function Hero() {
 
         {/* ── RIGHT: Tux illustration ─────────────────────── */}
         <div ref={tuxRef} className="flex items-center justify-center relative order-first lg:order-last mb-8 lg:mb-0">
-          {/* Glow circle behind Tux */}
+          {/* Glow / aura circle behind Tux — white in dark mode, black in light mode */}
           <div
             className="absolute rounded-full"
             style={{
               width: "min(420px, 80vw)",
               height: "min(420px, 80vw)",
-              background: "radial-gradient(ellipse at center, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 45%, transparent 70%)",
+              background: isDark
+                ? "radial-gradient(ellipse at center, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 45%, transparent 70%)"
+                : "radial-gradient(ellipse at center, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.05) 45%, transparent 70%)",
             }}
           />
-          <div className="relative z-1 z-1 flex items-center justify-center" style={{ width: "min(340px, 60vw)", height: "min(420px, 75vw)", filter: "drop-shadow(0 0 48px rgba(255,255,255,0.08))" }}>
+          <div
+            className="relative z-1 flex items-center justify-center"
+            style={{
+              width: "min(340px, 60vw)",
+              height: "min(420px, 75vw)",
+              filter: isDark
+                ? "drop-shadow(0 0 48px rgba(255,255,255,0.08))"
+                : "drop-shadow(0 0 32px rgba(0,0,0,0.35)) drop-shadow(0 0 12px rgba(0,0,0,0.20))",
+            }}
+          >
             <Image
               src="/Tux.svg"
               alt="Linux Tux"
