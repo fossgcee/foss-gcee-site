@@ -68,10 +68,10 @@ export default function About() {
         {/* Heading */}
         <div className="about-heading text-center mb-16">
           <span className="tag-badge mb-4 inline-block">// about</span>
-          <h2 className="text-3xl sm:text-4xl font-bold mt-3" style={{ color: "#f0f0f0" }}>
-            Who <span style={{ color: "#ffffff" }}>We Are</span>
+          <h2 className="text-3xl sm:text-4xl font-bold mt-3 text-text">
+            Who <span className="text-text">We Are</span>
           </h2>
-          <p className="mt-4 max-w-xl mx-auto text-sm sm:text-base leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+          <p className="mt-4 max-w-xl mx-auto text-sm sm:text-base leading-relaxed text-muted-2">
             A student‑led community at GCE Erode, united by our love for open‑source technology.
           </p>
         </div>
@@ -80,8 +80,8 @@ export default function About() {
         <div ref={statsRef} className="mb-16 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-10">
           {stats.map((s) => (
             <div key={s.label} className="about-stat text-center glass-card px-4 sm:px-8 py-5 sm:py-6 cursor-default">
-              <div className="font-pixel text-xl sm:text-2xl mb-1" style={{ color: "#ffffff" }}>{s.value}</div>
-              <div className="font-mono text-[9px] sm:text-xs uppercase tracking-widest mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>{s.label}</div>
+              <div className="font-pixel text-xl sm:text-2xl mb-1 text-text">{s.value}</div>
+              <div className="font-mono text-[9px] sm:text-xs uppercase tracking-widest mt-1 text-muted">{s.label}</div>
             </div>
           ))}
         </div>
@@ -91,8 +91,8 @@ export default function About() {
           {cards.map((c) => (
             <div key={c.title} className="about-card glass-card p-7">
               <div className="text-3xl mb-4">{c.icon}</div>
-              <h3 className="font-semibold text-base mb-3" style={{ color: "#f0f0f0" }}>{c.title}</h3>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>{c.text}</p>
+              <h3 className="font-semibold text-base mb-3 text-text">{c.title}</h3>
+              <p className="text-sm leading-relaxed text-muted-2">{c.text}</p>
             </div>
           ))}
         </div>

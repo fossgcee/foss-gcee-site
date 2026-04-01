@@ -2,32 +2,46 @@
 @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap");
 
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* ─── Tailwind v4 Design Tokens ────────────────────────────────── */
-@theme {
-  /* Monochromatic palette */
-  --color-bg:          #080808;
-  --color-bg-2:        #0f0f0f;
-  --color-surface:     rgba(255,255,255,0.04);
-  --color-surface-2:   rgba(255,255,255,0.08);
-  --color-border:      rgba(255,255,255,0.09);
-  --color-border-2:    rgba(255,255,255,0.16);
-  --color-text:        #f0f0f0;
-  --color-muted:       #888888;
-  --color-muted-2:     #555555;
+/* Removed @theme mapping as we use --color-* natively */
 
-  /* Accent — single green accent for terminal feel */
-  --color-accent:      #ffffff;
-  --color-accent-dim:  rgba(255,255,255,0.07);
-  --color-accent-glow: rgba(255,255,255,0.15);
+@layer theme {
+  :root {
+    --color-bg: #ffffff;
+    --color-bg-2: #f8f8f8;
+    --color-surface: rgba(0,0,0,0.03);
+    --color-surface-2: rgba(0,0,0,0.06);
+    --color-border: rgba(0,0,0,0.08);
+    --color-border-2: rgba(0,0,0,0.15);
+    --color-text: #080808;
+    --color-muted: #666666;
+    --color-muted-2: #888888;
+    --color-accent: #000000;
+    --color-accent-dim: rgba(0,0,0,0.05);
+    --color-accent-glow: rgba(0,0,0,0.12);
 
-  /* Font families */
-  --font-pixel: "Press Start 2P", monospace;
-  --font-body:  "Inter", system-ui, sans-serif;
-  --font-mono:  "JetBrains Mono", monospace;
+    --font-pixel: "Press Start 2P", monospace;
+    --font-body:  "Inter", system-ui, sans-serif;
+    --font-mono:  "JetBrains Mono", monospace;
+    --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  }
 
-  /* Animation timing */
-  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  .dark {
+    --color-bg: #080808;
+    --color-bg-2: #0f0f0f;
+    --color-surface: rgba(255,255,255,0.04);
+    --color-surface-2: rgba(255,255,255,0.08);
+    --color-border: rgba(255,255,255,0.09);
+    --color-border-2: rgba(255,255,255,0.16);
+    --color-text: #f0f0f0;
+    --color-muted: #888888;
+    --color-muted-2: #555555;
+    --color-accent: #ffffff;
+    --color-accent-dim: rgba(255,255,255,0.07);
+    --color-accent-glow: rgba(255,255,255,0.15);
+  }
 }
 
 /* ─── Base Reset ───────────────────────────────────────────────── */
@@ -45,44 +59,44 @@ body {
 
 /* ─── Glassmorphism utilities ──────────────────────────────────── */
 .glass {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface);
   backdrop-filter: blur(20px) saturate(1.2);
   -webkit-backdrop-filter: blur(20px) saturate(1.2);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid var(--border);
 }
 
 .glass-strong {
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--surface-2);
   backdrop-filter: blur(32px) saturate(1.4);
   -webkit-backdrop-filter: blur(32px) saturate(1.4);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--border-2);
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid var(--border);
   border-radius: 16px;
   transition: all 0.3s var(--ease-smooth);
 }
 
 .glass-card:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--surface-2);
+  border-color: var(--border-2);
   transform: translateY(-4px);
-  box-shadow: 0 24px 48px rgba(0,0,0,0.4), 0 0 0 1px rgba(200,255,0,0.08);
+  box-shadow: 0 24px 48px var(--accent-glow), 0 0 0 1px var(--border-2);
 }
 
 /* ─── Accent glow ──────────────────────────────────────────────── */
 .accent-glow {
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5),
-               0 0 60px rgba(255, 255, 255, 0.2);
+  text-shadow: 0 0 20px var(--accent-glow),
+               0 0 60px var(--accent-dim);
 }
 
 .accent-glow-box {
-  box-shadow: 0 0 30px rgba(255, 255, 255, 0.15),
-              inset 0 0 30px rgba(255, 255, 255, 0.02);
+  box-shadow: 0 0 30px var(--accent-glow),
+              inset 0 0 30px var(--accent-dim);
 }
 
 /* ─── Typography helpers ───────────────────────────────────────── */
@@ -142,7 +156,7 @@ body {
 .section-divider {
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
 }
 
 /* ─── Accent tag badge ─────────────────────────────────────────── */
@@ -154,8 +168,8 @@ body {
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #c8ff00;
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  color: var(--text);
   letter-spacing: 0.05em;
 }

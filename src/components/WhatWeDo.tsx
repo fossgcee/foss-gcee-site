@@ -33,16 +33,16 @@ export default function WhatWeDo() {
   }, []);
 
   return (
-    <section id="whatwedo" ref={sectionRef} className="py-28 relative" style={{ background: "rgba(255,255,255,0.01)" }}>
+    <section id="whatwedo" ref={sectionRef} className="py-28 relative bg-bg-2">
       <div className="section-divider" />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <div className="wwd-heading text-center mb-16">
           <span className="tag-badge mb-4 inline-block">// what we do</span>
-          <h2 className="text-3xl sm:text-4xl font-bold mt-3" style={{ color: "#f0f0f0" }}>
-            What We <span style={{ color: "#ffffff" }}>Do</span>
+          <h2 className="text-3xl sm:text-4xl font-bold mt-3 text-text">
+            What We <span className="text-text">Do</span>
           </h2>
-          <p className="mt-4 max-w-xl mx-auto text-sm sm:text-base" style={{ color: "rgba(255,255,255,0.45)" }}>
+          <p className="mt-4 max-w-xl mx-auto text-sm sm:text-base text-muted-2">
             From workshops to hackathons — everything we do serves open‑source learning and community building.
           </p>
         </div>
@@ -51,19 +51,17 @@ export default function WhatWeDo() {
           {activities.map((a) => (
             <div key={a.title} className="wwd-card glass-card p-7 cursor-default group">
               <div
-                className="font-mono text-xl font-bold mb-4 transition-colors duration-200"
-                style={{ color: "rgba(255,255,255,0.2)" }}
+                className="font-mono text-xl font-bold mb-4 transition-colors duration-200 text-muted"
               >
-                <span className="group-hover:text-[#ffffff] transition-colors duration-300">{a.icon}</span>
+                <span className="group-hover:text-text transition-colors duration-300">{a.icon}</span>
               </div>
               <span
-                className="inline-block font-mono text-[10px] px-2 py-0.5 rounded-full mb-3"
-                style={{ background: "rgba(255,255,255,0.05)", color: "#ffffff", border: "1px solid rgba(255,255,255,0.14)" }}
+                className="inline-block font-mono text-[10px] px-2 py-0.5 rounded-full mb-3 bg-surface text-text border border-border-2"
               >
                 {a.tag}
               </span>
-              <h3 className="font-semibold text-sm mb-2" style={{ color: "#f0f0f0" }}>{a.title}</h3>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>{a.desc}</p>
+              <h3 className="font-semibold text-sm mb-2 text-text">{a.title}</h3>
+              <p className="text-sm leading-relaxed text-muted-2">{a.desc}</p>
             </div>
           ))}
         </div>

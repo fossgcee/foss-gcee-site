@@ -68,13 +68,13 @@ export default function MembersGallery() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-24 px-4 sm:px-6 lg:px-8 bg-[#050505] border-t border-white/5">
+    <section ref={sectionRef} className="py-24 px-4 sm:px-6 lg:px-8 bg-bg-2 border-t border-border">
       <div className="max-w-6xl mx-auto">
 
 
         {/* Gallery Section */}
         <div className="flex justify-between items-end mb-8">
-          <h3 className="gallery-header text-3xl font-bold" style={{ color: "#ffffff" }}>
+          <h3 className="gallery-header text-3xl font-bold text-text">
             Members Gallery
           </h3>
           
@@ -82,14 +82,14 @@ export default function MembersGallery() {
             <div className="flex gap-2">
               <button 
                 onClick={scrollLeft}
-                className="p-2 border border-white/20 rounded-full hover:bg-white/10 transition-colors text-white"
+                className="p-2 border border-border-2 rounded-full hover:bg-surface-2 transition-colors text-text"
                 aria-label="Scroll left"
               >
                 <ChevronLeftIcon className="w-5 h-5" />
               </button>
               <button 
                 onClick={scrollRight}
-                className="p-2 border border-white/20 rounded-full hover:bg-white/10 transition-colors text-white"
+                className="p-2 border border-border-2 rounded-full hover:bg-surface-2 transition-colors text-text"
                 aria-label="Scroll right"
               >
                 <ChevronRightIcon className="w-5 h-5" />
@@ -107,7 +107,7 @@ export default function MembersGallery() {
             {images.map((image) => (
               <div 
                 key={image._id} 
-                className="gallery-card group flex-none w-[85vw] sm:w-[45vw] md:w-[30vw] relative rounded-xl overflow-hidden bg-[#0a0a0a] border border-white/5 snap-center"
+                className="gallery-card group flex-none w-[85vw] sm:w-[45vw] md:w-[30vw] relative rounded-xl overflow-hidden bg-bg-2 border border-border snap-center"
               >
                 <div className="relative w-full aspect-[16/9]">
                   <Image
@@ -121,7 +121,7 @@ export default function MembersGallery() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 text-white/40 border border-dashed border-white/10 rounded-2xl">
+          <div className="text-center py-12 text-muted-2 border border-dashed border-border-2 rounded-2xl">
             <p className="font-mono text-sm">No images in gallery.</p>
           </div>
         )}

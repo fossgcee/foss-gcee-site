@@ -43,16 +43,16 @@ export default function JoinUs() {
   }, []);
 
   return (
-    <section id="join" ref={sectionRef} className="py-28 relative" style={{ background: "rgba(255,255,255,0.01)" }}>
+    <section id="join" ref={sectionRef} className="py-28 relative bg-bg-2">
       <div className="section-divider" />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <div className="join-heading text-center mb-16">
           <span className="tag-badge mb-4 inline-block">// join us</span>
-          <h2 className="text-3xl sm:text-4xl font-bold mt-3" style={{ color: "#f0f0f0" }}>
-            Become Part of the <span style={{ color: "#ffffff" }}>Community</span>
+          <h2 className="text-3xl sm:text-4xl font-bold mt-3 text-text">
+            Become Part of the <span className="text-text">Community</span>
           </h2>
-          <p className="mt-4 max-w-xl mx-auto text-sm sm:text-base" style={{ color: "rgba(255,255,255,0.45)" }}>
+          <p className="mt-4 max-w-xl mx-auto text-sm sm:text-base text-muted-2">
             No experience required — just curiosity, enthusiasm, and a love for learning.
           </p>
         </div>
@@ -62,21 +62,20 @@ export default function JoinUs() {
           {/* Steps + Socials Centered */}
           <div className="space-y-12">
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-widest mb-6 text-center" style={{ color: "rgba(255,255,255,0.3)" }}>
+              <p className="font-mono text-[10px] uppercase tracking-widest mb-6 text-center text-muted">
                 ─ How to Join
               </p>
               <div className="join-steps max-w-xl mx-auto space-y-4">
                 {steps.map((s) => (
                   <div key={s.n} className="join-step flex gap-4 items-start p-5 glass-card group">
                     <div
-                      className="shrink-0 w-11 h-11 rounded-xl flex items-center justify-center font-pixel text-[9px]"
-                      style={{ background: "rgba(255,255,255,0.05)", color: "#ffffff", border: "1px solid rgba(255,255,255,0.14)" }}
+                      className="shrink-0 w-11 h-11 rounded-xl flex items-center justify-center font-pixel text-[9px] bg-surface text-text border border-border-2"
                     >
                       {s.n}
                     </div>
                     <div>
-                      <h4 className="font-semibold text-sm mb-1" style={{ color: "#f0f0f0" }}>{s.title}</h4>
-                      <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>{s.desc}</p>
+                      <h4 className="font-semibold text-sm mb-1 text-text">{s.title}</h4>
+                      <p className="text-xs leading-relaxed text-muted-2">{s.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -84,7 +83,7 @@ export default function JoinUs() {
             </div>
 
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-widest mb-6 text-center" style={{ color: "rgba(255,255,255,0.3)" }}>
+              <p className="font-mono text-[10px] uppercase tracking-widest mb-6 text-center text-muted">
                 ─ Find Us Online
               </p>
               <div className="join-socials grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -98,16 +97,15 @@ export default function JoinUs() {
                     style={{ textDecoration: "none" }}
                   >
                     <div
-                      className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-110"
-                      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.8)" }}
+                      className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-110 bg-surface border border-border text-text/80"
                     >
                       <s.Icon />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold text-xs" style={{ color: "#f0f0f0" }}>
-                        {s.label}{!s.active && <span className="ml-1 font-mono text-[8px]" style={{ color: "rgba(255,255,255,0.3)" }}>soon</span>}
+                      <p className="font-semibold text-xs text-text">
+                        {s.label}{!s.active && <span className="ml-1 font-mono text-[8px] text-muted">soon</span>}
                       </p>
-                      <p className="font-mono text-[10px] truncate" style={{ color: "rgba(255,255,255,0.3)" }}>{s.sub}</p>
+                      <p className="font-mono text-[10px] truncate text-muted">{s.sub}</p>
                     </div>
                   </a>
                 ))}
