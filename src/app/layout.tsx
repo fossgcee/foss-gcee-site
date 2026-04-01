@@ -26,6 +26,7 @@ const jetbrainsMono = JetBrains_Mono({
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://fossgcee.vercel.app"),
   title: {
     default: "FOSSGCEE – FOSS Club GCE Erode",
     template: "%s | FOSSGCEE",

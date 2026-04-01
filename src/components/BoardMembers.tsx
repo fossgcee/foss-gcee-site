@@ -50,10 +50,7 @@ export default function BoardMembers() {
       <div className="max-w-6xl mx-auto flex flex-col items-center">
         
         {/* Title */}
-        <h1 
-          className="board-header text-4xl md:text-5xl font-bold mb-8 text-center" 
-          className="text-text"
-        >
+        <h1 className="board-header text-4xl md:text-5xl font-bold mb-8 text-center text-text">
           Board Members
         </h1>
 
@@ -117,10 +114,7 @@ export default function BoardMembers() {
 
                 {/* Content */}
                 <div className="p-6 text-center relative z-20 flex-grow flex flex-col justify-end">
-                  <h3 
-                    className="text-lg font-bold tracking-wide uppercase mb-1"
-                    className="text-text"
-                  >
+                  <h3 className="text-lg font-bold tracking-wide uppercase mb-1 text-text">
                     {member.name}
                   </h3>
                   <p className="text-sm text-gray-300 font-medium">

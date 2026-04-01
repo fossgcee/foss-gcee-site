@@ -85,7 +85,6 @@ export const EVENTS: FossEvent[] = [
     handledBy: "CLUB LEAD (4th Year CSE)",
     type: "workshop",
     desc: "Master the basics of version control with Git and collaboration via GitHub. Essential for every developer.",
-    photos: ["/events/git-1.jpg", "/events/git-2.jpg"],
     registrationsCount: 82
   },
   {
