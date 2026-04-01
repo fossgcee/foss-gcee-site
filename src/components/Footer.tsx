@@ -22,12 +22,11 @@ const socials = [
 export default function Footer() {
   return (
     <footer
-      className="relative border-t"
-      style={{ borderColor: "rgba(255,255,255,0.06)", background: "#060606" }}
+      className="relative border-t bg-bg border-border-2"
     >
       <style>{`
-        .footer-link:hover { color: #ffffff !important; }
-        .footer-icon:hover  { color: #ffffff !important; transform: scale(1.15); }
+        .footer-link:hover { color: var(--text) !important; }
+        .footer-icon:hover  { color: var(--text) !important; transform: scale(1.15); }
       `}</style>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 mb-10">
@@ -35,17 +34,17 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2.5 mb-4">
-              <Image src="/foss_gcee_logo.png" alt="FOSSGCEE" width={44} height={44} className="rounded-full object-contain" />
-              <span className="font-pixel text-[9px]" style={{ color: "#ffffff" }}>FOSSGCEE</span>
+              <Image src="/foss_gcee_logo.png" alt="FOSSGCEE" width={44} height={44} className="rounded-full object-contain filter dark:invert-0 light:invert" />
+              <span className="font-pixel text-[9px] text-text">FOSSGCEE</span>
             </div>
-            <p className="text-sm leading-relaxed max-w-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+            <p className="text-sm leading-relaxed max-w-xs text-muted-2">
               Free and Open Source Software Club at Government College of Engineering, Erode.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-mono text-[10px] uppercase tracking-widest mb-5" style={{ color: "rgba(255,255,255,0.3)" }}>
+            <h4 className="font-mono text-[10px] uppercase tracking-widest mb-5 text-muted">
               Quick Links
             </h4>
             <ul className="space-y-2.5">
@@ -53,10 +52,10 @@ export default function Footer() {
                 <li key={label}>
                   <a
                     href={href}
-                    className="footer-link font-mono text-xs flex items-center gap-1.5 transition-colors duration-200"
-                    style={{ color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
+                    className="footer-link font-mono text-xs flex items-center gap-1.5 transition-colors duration-200 text-muted-2"
+                    style={{ textDecoration: "none" }}
                   >
-                    <span style={{ color: "rgba(255,255,255,0.3)" }}>›</span> {label}
+                    <span className="text-muted">›</span> {label}
                   </a>
                 </li>
               ))}
@@ -65,7 +64,7 @@ export default function Footer() {
 
           {/* Connect */}
           <div>
-            <h4 className="font-mono text-[10px] uppercase tracking-widest mb-5" style={{ color: "rgba(255,255,255,0.3)" }}>
+            <h4 className="font-mono text-[10px] uppercase tracking-widest mb-5 text-muted">
               Connect
             </h4>
             <div className="flex flex-wrap gap-2 mb-4">
@@ -77,30 +76,24 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   aria-label={active ? label : `${label} (coming soon)`}
                   title={active ? label : `${label} — coming soon`}
-                  className={`footer-icon w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200${!active ? " opacity-30 pointer-events-none" : ""}`}
-                  style={{
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    color: "rgba(255,255,255,0.5)",
-                  }}
+                  className={`footer-icon w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200 bg-surface border border-border text-muted-2${!active ? " opacity-30 pointer-events-none" : ""}`}
                 >
                   <Icon />
                 </a>
               ))}
             </div>
-            <p className="font-mono text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>fossgcee@gmail.com</p>
+            <p className="font-mono text-xs text-muted">fossgcee@gmail.com</p>
           </div>
         </div>
 
         {/* Bottom bar */}
         <div
-          className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 border-t"
-          style={{ borderColor: "rgba(255,255,255,0.05)" }}
+          className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-border"
         >
-          <p className="font-mono text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
-            &gt;_ Built by students, powered by <span style={{ color: "#ffffff" }}>open source</span>
+          <p className="font-mono text-xs text-muted">
+            &gt;_ Built by students, powered by <span className="text-text">open source</span>
           </p>
-          <p className="font-mono text-xs" style={{ color: "rgba(255,255,255,0.2)" }}>
+          <p className="font-mono text-xs text-muted-2">
             © {new Date().getFullYear()} FOSSGCEE · Made with ♥ in Erode
           </p>
         </div>

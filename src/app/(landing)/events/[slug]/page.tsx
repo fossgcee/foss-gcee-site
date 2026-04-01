@@ -28,14 +28,14 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
   const isPast = new Date(event.dateISO) < today;
 
   return (
-    <div className="min-h-screen" style={{ background: "#080808", color: "#f0f0f0" }}>
+    <div className="min-h-screen bg-bg text-text">
 
       {/* Back button */}
       <div className="max-w-4xl mx-auto px-6 pt-8">
         <Link
           href="/#community"
-          className="inline-flex items-center gap-2 font-mono text-xs transition-colors duration-200 hover:text-white"
-          style={{ color: "rgba(255,255,255,0.4)" }}
+          className="inline-flex items-center gap-2 font-mono text-xs transition-colors duration-200 hover:text-text"
+          className="text-muted"
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M12 7H2M6 3L2 7l4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
@@ -48,17 +48,17 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
       <div className="max-w-4xl mx-auto px-6 pt-10 pb-6">
         <div
           className="rounded-2xl overflow-hidden"
-          style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.08)" }}
+          className="bg-bg-2 border border-border-2"
         >
           {/* Terminal header */}
           <div
             className="flex items-center gap-2 px-5 py-3 border-b"
-            style={{ borderColor: "rgba(255,255,255,0.06)", background: "#151515" }}
+            className="border-border bg-surface"
           >
-            <span className="w-3 h-3 rounded-full" style={{ background: "rgba(255,255,255,0.15)" }} />
-            <span className="w-3 h-3 rounded-full" style={{ background: "rgba(255,255,255,0.1)" }} />
-            <span className="w-3 h-3 rounded-full" style={{ background: "rgba(255,255,255,0.07)" }} />
-            <span className="ml-3 font-mono text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>
+            <span className="w-3 h-3 rounded-full" className="bg-muted" />
+            <span className="w-3 h-3 rounded-full" className="bg-muted-2" />
+            <span className="w-3 h-3 rounded-full" className="bg-surface-2" />
+            <span className="ml-3 font-mono text-[11px]" className="text-muted">
               /events/{event.slug}
             </span>
           </div>
@@ -71,19 +71,19 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
                 src={event.poster}
                 alt={`${event.title} poster`}
                 className="rounded-xl object-cover shrink-0"
-                style={{ width: 200, height: 200, border: "1px solid rgba(255,255,255,0.08)" }}
+                className="border border-border w-[200px] h-[200px]"
               />
             )}
             <div className="flex-1">
               {/* Type badge */}
               <span
                 className="inline-block font-mono text-[10px] px-2.5 py-1 rounded-full mb-3"
-                style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
+                className="bg-surface text-muted-2 border border-border-2"
               >
                 {event.type} · {isPast ? "past" : "upcoming"}
               </span>
 
-              <h1 className="text-2xl sm:text-3xl font-bold mb-6 leading-snug" style={{ color: "#ffffff" }}>
+              <h1 className="text-2xl sm:text-3xl font-bold mb-6 leading-snug" className="text-text">
                 {event.title}
               </h1>
 
@@ -102,10 +102,10 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
       {/* Description */}
       {event.desc && (
         <section className="max-w-4xl mx-auto px-6 py-6">
-          <h2 className="font-mono text-[11px] uppercase tracking-widest mb-4" style={{ color: "rgba(255,255,255,0.3)" }}>
+          <h2 className="font-mono text-[11px] uppercase tracking-widest mb-4" className="text-muted">
             — About this event
           </h2>
-          <p className="text-base leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
+          <p className="text-base leading-relaxed" className="text-muted-2">
             {event.desc}
           </p>
         </section>
@@ -114,7 +114,7 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
       {/* Photo gallery */}
       {event.photos && event.photos.length > 0 && (
         <section className="max-w-4xl mx-auto px-6 py-8">
-          <h2 className="font-mono text-[11px] uppercase tracking-widest mb-6" style={{ color: "rgba(255,255,255,0.3)" }}>
+          <h2 className="font-mono text-[11px] uppercase tracking-widest mb-6" className="text-muted">
             — Event Photos
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -125,7 +125,7 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
                 src={src}
                 alt={`${event.title} photo ${i + 1}`}
                 className="rounded-xl object-cover w-full aspect-video"
-                style={{ border: "1px solid rgba(255,255,255,0.07)" }}
+                className="border border-border"
               />
             ))}
           </div>
@@ -137,7 +137,7 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
         <Link
           href="/#community"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-mono text-sm font-semibold transition-all duration-200 hover:scale-105"
-          style={{ background: "#ffffff", color: "#080808" }}
+          className="bg-text text-bg"
         >
           ← All Events
         </Link>
@@ -149,8 +149,8 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
 function Detail({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="font-mono text-[10px] uppercase tracking-widest mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>{label}</dt>
-      <dd className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.8)" }}>{value}</dd>
+      <dt className="font-mono text-[10px] uppercase tracking-widest mb-1" className="text-muted">{label}</dt>
+      <dd className="text-sm font-medium" className="text-text/80">{value}</dd>
     </div>
   );
 }

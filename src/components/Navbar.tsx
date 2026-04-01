@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const links = [
   { label: "About", href: "/#about" },
@@ -37,15 +38,7 @@ export default function Navbar() {
       {/* Floating pill container */}
       <div
         ref={navRef}
-        className="w-full max-w-5xl transition-all duration-500"
-        style={{
-          background: scrolled ? "rgba(10,10,10,0.85)" : "rgba(255,255,255,0.04)",
-          backdropFilter: "blur(24px)",
-          WebkitBackdropFilter: "blur(24px)",
-          border: "1px solid rgba(255,255,255,0.09)",
-          borderRadius: "9999px",
-          boxShadow: scrolled ? "0 8px 32px rgba(0,0,0,0.5)" : "none",
-        }}
+        className={`w-full max-w-5xl transition-all duration-500 rounded-full border ${scrolled ? "bg-bg-2/85 backdrop-blur-3xl shadow-2xl border-border-2" : "glass border-border/50"}`}
       >
         <nav className="px-5 h-[52px] flex items-center justify-between gap-4">
 
@@ -59,8 +52,7 @@ export default function Navbar() {
               className="rounded-full object-contain group-hover:scale-110 transition-transform duration-200"
             />
             <span
-              className="font-pixel text-[8px] hidden sm:block tracking-wider"
-              style={{ color: "#ffffff" }}
+              className="font-pixel text-[8px] hidden sm:block tracking-wider text-text"
             >
               FOSSGCEE
             </span>
@@ -72,8 +64,7 @@ export default function Navbar() {
               <li key={label}>
                 <Link
                   href={href}
-                  className="font-mono text-xs tracking-wide transition-colors duration-200 hover:text-white"
-                  style={{ color: "rgba(255,255,255,0.5)" }}
+                  className="font-mono text-xs tracking-wide transition-colors duration-200 text-muted-2 hover:text-text"
                 >
                   {label}
                 </Link>
@@ -82,19 +73,20 @@ export default function Navbar() {
           </ul>
 
           {/* CTA */}
-          <Link
-            href="/join"
-            className="hidden md:inline-flex shrink-0 items-center gap-1.5 px-4 py-1.5 rounded-full font-mono text-[11px] font-semibold transition-all duration-200 hover:scale-105"
-            style={{ background: "#ffffff", color: "#080808", boxShadow: "0 0 16px rgba(255,255,255,0.15)" }}
-          >
-            $ Register
-          </Link>
+          <div className="hidden md:flex items-center gap-4 shrink-0">
+            <ThemeToggle />
+            <Link
+              href="/join"
+              className="inline-flex shrink-0 items-center gap-1.5 px-4 py-1.5 rounded-full font-mono text-[11px] font-semibold transition-transform hover:scale-105 bg-text text-bg"
+            >
+              $ Register
+            </Link>
+          </div>
 
           {/* Hamburger */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden p-1.5 rounded-full transition-colors duration-200"
-            style={{ color: "rgba(255,255,255,0.6)", background: "rgba(255,255,255,0.05)" }}
+            className="md:hidden flex items-center justify-center p-1.5 rounded-full transition-colors duration-200 bg-surface text-muted-2 hover:text-text hover:bg-surface-2"
             aria-label="Toggle menu"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -109,8 +101,7 @@ export default function Navbar() {
         {/* Mobile dropdown — inside the pill */}
         {menuOpen && (
           <div
-            className="md:hidden px-5 pb-4 border-t"
-            style={{ borderColor: "rgba(255,255,255,0.06)" }}
+            className="md:hidden px-5 pb-4 border-t border-border-2 bg-bg-2/85 backdrop-blur-3xl"
           >
             <ul className="flex flex-col gap-2 pt-3">
               {links.map(({ label, href }) => (
@@ -118,19 +109,23 @@ export default function Navbar() {
                   <Link
                     href={href}
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 font-mono text-xs py-1.5 transition-colors duration-200 hover:text-white"
-                    style={{ color: "rgba(255,255,255,0.5)" }}
+                    className="flex items-center gap-2 font-mono text-xs py-1.5 transition-colors duration-200 text-muted-2 hover:text-text"
                   >
-                    <span style={{ color: "#ffffff" }}>›</span> {label}
+                    <span className="text-text">›</span> {label}
                   </Link>
                 </li>
               ))}
               <li>
+                <div className="flex items-center justify-between mt-2 pt-2 border-t border-border">
+                  <span className="font-mono text-xs text-muted-2">Theme</span>
+                  <ThemeToggle />
+                </div>
+              </li>
+              <li>
                 <Link
                   href="/#join"
                   onClick={() => setMenuOpen(false)}
-                  className="inline-flex items-center px-4 py-1.5 rounded-full font-mono text-xs font-semibold mt-1"
-                  style={{ background: "#ffffff", color: "#080808" }}
+                  className="inline-flex items-center px-4 py-1.5 rounded-full font-mono text-xs font-semibold mt-2 bg-text text-bg hover:scale-105 transition-transform"
                 >
                   $ join_community
                 </Link>

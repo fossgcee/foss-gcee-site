@@ -23,6 +23,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 
+import { ThemeProvider } from "@/components/ThemeProvider";
+
 export const metadata: Metadata = {
   title: {
     default: "FOSSGCEE – FOSS Club GCE Erode",
@@ -73,10 +75,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.variable} ${pressStart2P.variable} ${jetbrainsMono.variable} antialiased font-body noise`} style={{ background: "#080808", color: "#f0f0f0", minHeight: "100vh" }}>
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} ${pressStart2P.variable} ${jetbrainsMono.variable} antialiased font-body noise min-h-screen bg-bg text-text transition-colors duration-300`}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
 }
+

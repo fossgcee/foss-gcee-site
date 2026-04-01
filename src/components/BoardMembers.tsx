@@ -52,7 +52,7 @@ export default function BoardMembers() {
         {/* Title */}
         <h1 
           className="board-header text-4xl md:text-5xl font-bold mb-8 text-center" 
-          style={{ color: "#ffffff" }}
+          className="text-text"
         >
           Board Members
         </h1>
@@ -62,7 +62,7 @@ export default function BoardMembers() {
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
-            className="w-full appearance-none bg-[#A9A9A9] text-black font-semibold py-2.5 px-4 pr-10 rounded shadow focus:outline-none focus:ring-2 focus:ring-[#FFDD00] transition-colors cursor-pointer"
+            className="w-full appearance-none bg-surface text-bg font-semibold py-2.5 px-4 pr-10 rounded shadow focus:outline-none focus:ring-2 focus:ring-[#FFDD00] transition-colors cursor-pointer"
             style={{ backgroundImage: 'none' }}
           >
             {years.map((year) => (
@@ -72,7 +72,7 @@ export default function BoardMembers() {
             ))}
           </select>
           {/* Custom Dropdown Arrow */}
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-black">
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-bg">
             <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
               <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
             </svg>
@@ -96,8 +96,8 @@ export default function BoardMembers() {
                 }}
               >
                 {/* Image Container - Aspect 4:5 */}
-                <div className="relative w-full aspect-[4/5] bg-[#111111] p-0 m-0 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-transparent to-transparent z-10 opacity-60" />
+                <div className="relative w-full aspect-[4/5] bg-bg-2 p-0 m-0 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-t from-bg via-transparent to-transparent z-10 opacity-60" />
                   {member.imageUrl ? (
                     <Image
                       src={member.imageUrl}
@@ -107,7 +107,7 @@ export default function BoardMembers() {
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white/20">
+                    <div className="w-full h-full flex items-center justify-center text-muted-2">
                       <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                       </svg>
@@ -119,7 +119,7 @@ export default function BoardMembers() {
                 <div className="p-6 text-center relative z-20 flex-grow flex flex-col justify-end">
                   <h3 
                     className="text-lg font-bold tracking-wide uppercase mb-1"
-                    style={{ color: "#ffffff" }}
+                    className="text-text"
                   >
                     {member.name}
                   </h3>
@@ -133,7 +133,7 @@ export default function BoardMembers() {
                       href={member.linkedInUrl} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="absolute bottom-4 right-4 text-white/40 hover:text-[#0077b5] transition-colors"
+                      className="absolute bottom-4 right-4 text-muted-2 hover:text-[#0077b5] transition-colors"
                       aria-label={`LinkedIn profile for ${member.name}`}
                     >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -146,7 +146,7 @@ export default function BoardMembers() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 text-white/40">
+          <div className="text-center py-20 text-muted-2">
             <p>No members found for the selected year.</p>
           </div>
         )}

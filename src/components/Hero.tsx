@@ -8,7 +8,7 @@ import { gsap } from "gsap";
 const PHRASES = [
   "FOSSGCEE",
   "GCEE",
-  "Free and Open Source Software",
+  "Free and Open\nSource Software",
   "FOSSGCEE",
 ];
 
@@ -68,8 +68,7 @@ export default function Hero() {
   return (
     <section
       ref={containerRef}
-      className="relative min-h-screen flex items-center overflow-hidden"
-      style={{ background: "#0a0a0a" }}
+      className="relative min-h-screen flex items-center overflow-hidden bg-bg"
     >
       {/* Background radial glow — right side (behind Tux) */}
       <div
@@ -102,30 +101,28 @@ export default function Hero() {
 
           {/* Terminal badge */}
           <div
-            className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full font-mono text-[9px] sm:text-[11px] glass"
-            style={{ color: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.08)" }}
+            className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full font-mono text-[9px] sm:text-[11px] glass text-text/50 border-border"
           >
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#ffffff" }} />
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse bg-text" />
             Free &amp; Open Source Software Club — GCE Erode
           </div>
 
           {/* Typewriter heading */}
           <h1
-            className="font-pixel leading-relaxed"
-            style={{ color: "#ffffff", fontSize: "clamp(1.1rem, 4vw, 2.4rem)", minHeight: "3.2em" }}
+            className="font-pixel leading-relaxed text-text whitespace-pre"
+            style={{ fontSize: "clamp(1.1rem, 4vw, 2.4rem)", minHeight: "3.2em" }}
           >
             {displayText}
-            <span className="animate-blink" style={{ color: "#ffffff" }}>_</span>
+            <span className="animate-blink text-text">_</span>
           </h1>
 
           {/* Description */}
           <p
-            className="text-sm sm:text-base lg:text-lg leading-relaxed max-w-lg font-mono"
-            style={{ color: "rgba(255,255,255,0.5)" }}
+            className="text-sm sm:text-base lg:text-lg leading-relaxed max-w-lg font-mono text-muted-2"
           >
             We foster a culture of{" "}
-            <span style={{ color: "#ffffff" }}>Linux</span>,{" "}
-            <span style={{ color: "rgba(255,255,255,0.85)" }}>open‑source contribution</span>, and
+            <span className="text-text">Linux</span>,{" "}
+            <span className="text-text/85">open‑source contribution</span>, and
             real‑world collaboration among students at Government College of Engineering, Erode.
           </p>
 
@@ -133,12 +130,7 @@ export default function Hero() {
           <div className="flex flex-col sm:flex-row gap-3 mt-2 w-full sm:w-auto">
             <a
               href="#join"
-              className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl font-mono text-sm font-semibold transition-all duration-200 hover:scale-105"
-              style={{
-                background: "#ffffff",
-                color: "#080808",
-                boxShadow: "0 0 24px rgba(255,255,255,0.15)",
-              }}
+              className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl font-mono text-sm font-semibold transition-all duration-200 hover:scale-105 bg-text text-bg shadow-[0_0_24px_var(--accent-glow)]"
             >
               $ join_community
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -149,8 +141,7 @@ export default function Hero() {
               href="https://github.com/fossgcee"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl font-mono text-sm font-semibold transition-all duration-200 hover:scale-105 glass"
-              style={{ color: "rgba(255,255,255,0.75)", border: "1px solid rgba(255,255,255,0.12)" }}
+              className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl font-mono text-sm font-semibold transition-all duration-200 hover:scale-105 glass border-border text-text/75"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.14 3 .4 2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.49 5.92.43.37.82 1.1.82 2.22v3.29c0 .32.21.7.83.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z" />
@@ -160,11 +151,11 @@ export default function Hero() {
           </div>
 
           {/* Club logo + college name */}
-          <div className="flex items-center gap-3 mt-4 pt-6 border-t w-full" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-            <Image src="/foss_gcee_logo.png" alt="FOSSGCEE Logo" width={52} height={52} className="rounded-full object-contain" />
+          <div className="flex items-center gap-3 mt-4 pt-6 border-t border-border w-full">
+            <Image src="/foss_gcee_logo.png" alt="FOSSGCEE Logo" width={52} height={52} className="rounded-full object-contain filter dark:invert-0 light:invert" />
             <div className="sm:block">
-              <p className="font-pixel text-[8px] leading-relaxed" style={{ color: "#ffffff" }}>FOSSGCEE</p>
-              <p className="font-mono text-[9px] sm:text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Govt. College of Engineering, Erode</p>
+              <p className="font-pixel text-[8px] leading-relaxed text-text">FOSSGCEE</p>
+              <p className="font-mono text-[9px] sm:text-[10px] text-muted-2">Govt. College of Engineering, Erode</p>
             </div>
           </div>
         </div>
@@ -195,7 +186,7 @@ export default function Hero() {
       {/* Bottom fade */}
       <div
         className="absolute bottom-0 inset-x-0 h-24 pointer-events-none"
-        style={{ background: "linear-gradient(to top, #0a0a0a, transparent)" }}
+        style={{ backgroundImage: "linear-gradient(to top, var(--color-bg), transparent)" }}
       />
     </section>
   );

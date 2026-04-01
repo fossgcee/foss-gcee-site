@@ -7,7 +7,7 @@ import PageLoader from "@/components/PageLoader";
 
 export default function Home() {
   return (
-    <div className="min-h-screen overflow-x-hidden" style={{ background: "#080808", color: "#f0f0f0" }}>
+    <div className="min-h-screen overflow-x-hidden relative bg-white dark:bg-[#080808] text-black dark:text-[#f0f0f0]">
       <PageLoader />
       <main>
         <Hero />

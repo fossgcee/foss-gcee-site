@@ -46,7 +46,7 @@ export default function PageLoader() {
     <div
       ref={loaderRef}
       className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-8"
-      style={{ background: "#080808", opacity: 0 }}
+      style={{ backgroundColor: "var(--color-bg)", opacity: 0 }}
     >
       {/* Logo mark */}
       <div ref={logoRef} className="flex flex-col items-center gap-4">
