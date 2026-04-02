@@ -63,8 +63,20 @@ export default function EventsPage() {
   }, []);
 
   // ── Status processing ──────────────────────────────────────────────
-  const upcomingEvents = events.filter(e => e.status === "upcoming").reverse();
-  const pastEvents = events.filter(e => e.status === "completed");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const isPastEvent = (e: PublicEvent) => {
+    if (e.status === "completed") return true;
+    if (e.endDate) {
+      const endDate = new Date(e.endDate);
+      return endDate < today;
+    }
+    return false;
+  };
+
+  const upcomingEvents = events.filter(e => e.status !== "draft" && !isPastEvent(e)).reverse();
+  const pastEvents = events.filter(e => e.status !== "draft" && isPastEvent(e));
   const featuredEvent = upcomingEvents[0] || (pastEvents[0] || null);
 
   useEffect(() => {
