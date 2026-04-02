@@ -46,7 +46,7 @@ export default function Navbar() {
         <nav className="px-5 h-[52px] flex items-center justify-between gap-4">
 
           {/* Logo + name */}
-          <Link href="/" className="flex items-center gap-2 shrink-0 group">
+          <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 shrink-0 group">
             <Image
               src="/foss_gcee_logo.png"
               alt="FOSSGCEE"

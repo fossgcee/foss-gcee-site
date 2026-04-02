@@ -132,7 +132,7 @@ export default function Hero() {
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-3 mt-2 w-full sm:w-auto">
             <a
-              href="#join"
+              href="/#join"
               className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl font-mono text-sm font-semibold transition-all duration-200 hover:scale-105 bg-text text-bg shadow-[0_0_24px_var(--accent-glow)]"
             >
               $ join_community

@@ -4,10 +4,10 @@ import Image from "next/image";
 import { GitHubIcon, YouTubeIcon, InstagramIcon, DiscordIcon, LinkedInIcon, EmailIcon } from "@/components/icons/SocialIcons";
 
 const quickLinks = [
-  { label: "About",      href: "#about" },
-  { label: "What We Do", href: "#whatwedo" },
-  { label: "Events",     href: "#community" },
-  { label: "Join Us",    href: "#join" },
+  { label: "About",      href: "/#about" },
+  { label: "What We Do", href: "/#whatwedo" },
+  { label: "Events",     href: "/#community" },
+  { label: "Join Us",    href: "/#join" },
 ];
 
 const socials = [
