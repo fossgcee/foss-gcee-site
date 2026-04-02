@@ -84,7 +84,7 @@ export default function JoinUs() {
                 <div className="join-step pt-4 flex justify-center sm:justify-start">
                   <a
                     href="/join"
-                    className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl font-mono text-[13px] font-semibold transition-all duration-200 hover:scale-105 bg-text text-bg shadow-[0_0_15px_rgba(0,0,0,0.15)] dark:shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+                    className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl font-mono text-[13px] font-semibold transition-all duration-200 hover:scale-105 bg-text text-bg shadow-[0_0_20px_rgba(0,0,0,0.4)] dark:shadow-[0_0_24px_rgba(255,255,255,0.5)]"
                   >
                     $ Register Now
                     <svg width="12" height="12" viewBox="0 0 14 14" fill="none">

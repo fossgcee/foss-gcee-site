@@ -81,7 +81,7 @@ export default function Navbar() {
             <ThemeToggle />
             <Link
               href="/join"
-              className="inline-flex shrink-0 items-center gap-1.5 px-4 py-1.5 rounded-full font-mono text-[11px] font-semibold transition-all duration-200 hover:scale-105 bg-text text-bg shadow-[0_0_10px_rgba(0,0,0,0.15)] dark:shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+              className="inline-flex shrink-0 items-center gap-1.5 px-4 py-1.5 rounded-full font-mono text-[11px] font-semibold transition-all duration-200 hover:scale-105 bg-text text-bg shadow-[0_0_20px_rgba(0,0,0,0.4)] dark:shadow-[0_0_24px_rgba(255,255,255,0.5)]"
             >
               $ Register
             </Link>
@@ -130,7 +130,7 @@ export default function Navbar() {
                 <Link
                   href="/join"
                   onClick={() => setMenuOpen(false)}
-                  className="inline-flex items-center px-4 py-1.5 rounded-full font-mono text-xs font-semibold mt-2 bg-text text-bg hover:scale-105 transition-transform shadow-[0_0_10px_rgba(0,0,0,0.15)] dark:shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+                  className="inline-flex items-center px-4 py-1.5 rounded-full font-mono text-xs font-semibold mt-2 bg-text text-bg hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,0,0,0.4)] dark:shadow-[0_0_24px_rgba(255,255,255,0.5)]"
                 >
                   $ Register
                 </Link>
