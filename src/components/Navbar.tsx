@@ -30,7 +30,10 @@ export default function Navbar() {
   // GSAP entrance
   useEffect(() => {
     if (!navRef.current) return;
-    gsap.from(navRef.current, { y: -80, opacity: 0, duration: 0.9, ease: "power3.out", delay: 0.1 });
+    gsap.fromTo(navRef.current, 
+      { y: -80, opacity: 0 }, 
+      { y: 0, opacity: 1, duration: 0.9, ease: "power3.out", delay: 0.1 }
+    );
   }, []);
 
   return (
@@ -38,7 +41,7 @@ export default function Navbar() {
       {/* Floating pill container */}
       <div
         ref={navRef}
-        className={`w-full max-w-5xl transition-all duration-500 rounded-full border ${scrolled ? "bg-bg-2/85 backdrop-blur-3xl shadow-2xl border-border-2" : "glass border-border/50"}`}
+        className={`w-full max-w-5xl transition-all duration-500 border ${menuOpen ? "rounded-2xl" : "rounded-full"} ${scrolled ? "bg-bg-2/85 backdrop-blur-3xl shadow-2xl border-border-2" : "glass border-border/50"}`}
       >
         <nav className="px-5 h-[52px] flex items-center justify-between gap-4">
 
@@ -115,13 +118,20 @@ export default function Navbar() {
                 </Link>
               </li>
             ))}
-              <li>
+              <li className="flex gap-3">
                 <Link
                   href="/#join"
                   onClick={() => setMenuOpen(false)}
+                  className="inline-flex items-center px-4 py-1.5 rounded-full font-mono text-xs font-semibold mt-2 bg-surface border border-border text-text hover:bg-surface-2 transition-colors"
+                >
+                  $ Community
+                </Link>
+                <Link
+                  href="/join"
+                  onClick={() => setMenuOpen(false)}
                   className="inline-flex items-center px-4 py-1.5 rounded-full font-mono text-xs font-semibold mt-2 bg-text text-bg hover:scale-105 transition-transform"
                 >
-                  $ join_community
+                  $ Register
                 </Link>
               </li>
             </ul>
