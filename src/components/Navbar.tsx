@@ -41,6 +41,7 @@ export default function Navbar() {
       {/* Floating pill container */}
       <div
         ref={navRef}
+        style={{ opacity: 0, transform: "translateY(-80px)" }}
         className={`w-full max-w-5xl transition-all duration-500 border ${menuOpen ? "rounded-2xl" : "rounded-full"} ${scrolled ? "bg-bg-2/85 backdrop-blur-3xl shadow-2xl border-border-2" : "glass border-border/50"}`}
       >
         <nav className="px-5 h-[52px] flex items-center justify-between gap-4">
