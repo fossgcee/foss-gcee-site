@@ -123,7 +123,7 @@ export default function Navbar() {
                 <Link
                   href="/#join"
                   onClick={() => setMenuOpen(false)}
-                  className="inline-flex items-center px-4 py-1.5 rounded-full font-mono text-xs font-semibold mt-2 bg-surface border border-border text-text hover:bg-surface-2 transition-colors"
+                  className="inline-flex items-center px-4 py-1.5 rounded-full font-mono text-xs font-semibold mt-2 bg-text text-bg hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,0,0,0.4)] dark:shadow-[0_0_24px_rgba(255,255,255,0.5)]"
                 >
                   $ Community
                 </Link>
