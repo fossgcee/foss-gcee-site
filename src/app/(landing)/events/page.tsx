@@ -64,19 +64,29 @@ export default function EventsPage() {
   }, []);
 
   // ── Status processing ──────────────────────────────────────────────
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // The API auto-archives expired events (flips status to "completed") before
+  // returning data, so we can trust the status field directly.
+  // Fallback: also treat any event whose endDate is in the past as completed,
+  // in case the client has stale data before the next API call.
+  const todayStr = (() => {
+    const now = new Date();
+    const ist = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
+    return ist.toISOString().slice(0, 10); // "YYYY-MM-DD"
+  })();
 
   const isPastEvent = (e: PublicEvent) => {
     if (e.status === "completed") return true;
-    if (e.endDate) {
-      const endDate = new Date(e.endDate);
-      return endDate < today;
-    }
+    // endDate string comparison works correctly since format is YYYY-MM-DD
+    if (e.endDate && e.endDate < todayStr) return true;
     return false;
   };
 
-  const upcomingEvents = events.filter(e => e.status !== "draft" && !isPastEvent(e)).reverse();
+  // API already sorts by startDate descending (newest first).
+  // Upcoming: we want soonest event first → reverse to ascending.
+  // Past: newest/most-recent past event first → keep descending.
+  const upcomingEvents = events
+    .filter(e => e.status !== "draft" && !isPastEvent(e))
+    .reverse(); // flip to ascending so the next upcoming event is first
   const pastEvents = events.filter(e => e.status !== "draft" && isPastEvent(e));
   
   const manualFeaturedEvent = events.find(e => e.isFeatured && e.status !== "draft");
