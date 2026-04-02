@@ -10,6 +10,11 @@ export interface IRegistrationEntry {
   registeredAt: Date;
 }
 
+export interface IAgendaItem {
+  time: string;  // e.g. "09:00"
+  topic: string; // e.g. "Introduction to Git"
+}
+
 export interface IEvent extends mongoose.Document {
   title: string;
   slug: string; // unique identifier
@@ -24,6 +29,8 @@ export interface IEvent extends mongoose.Document {
   organizers: string[]; // Array of organizer names
   poster?: string; // URL from Vercel Blob
   photos?: string[]; // Array of URLs for completed events
+  agenda?: IAgendaItem[]; // Scheduled agenda items (for upcoming events)
+  outcomes?: string; // Summary of results/takeaways (for completed events)
   status: "upcoming" | "completed" | "draft";
   isFeatured?: boolean;
   registrationsCount: number;
@@ -88,6 +95,16 @@ const EventSchema = new mongoose.Schema<IEvent>(
     photos: [{
       type: String,
     }],
+    agenda: [
+      {
+        time:  { type: String, required: true },
+        topic: { type: String, required: true },
+      }
+    ],
+    outcomes: {
+      type: String,
+      default: "",
+    },
     status: {
       type: String,
       enum: ["upcoming", "completed", "draft"],

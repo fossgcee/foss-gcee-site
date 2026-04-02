@@ -28,21 +28,28 @@ import {
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 
+interface AgendaItem {
+  time: string;
+  topic: string;
+}
+
 interface EventData {
   _id?: string;
   title: string;
   slug: string;
   description: string;
-  startDate: string; // YYYY-MM-DD
-  endDate: string; // YYYY-MM-DD
-  startTime: string; // HH:mm
-  endTime: string; // HH:mm
+  startDate: string;
+  endDate: string;
+  startTime: string;
+  endTime: string;
   venue: string;
   category: "workshop" | "talk" | "hackathon" | "meetup" | "other";
   handledBy: string;
   organizers: string[];
   poster?: string;
   photos?: string[];
+  agenda?: AgendaItem[];
+  outcomes?: string;
   status: "upcoming" | "completed" | "draft";
   isFeatured?: boolean;
   registrationsCount: number;
@@ -89,6 +96,9 @@ export default function AdminEventsManager() {
     category: "workshop",
     handledBy: "",
     organizers: [],
+    photos: [],
+    agenda: [],
+    outcomes: "",
     status: "upcoming",
     isFeatured: false,
     registrationsCount: 0
@@ -123,9 +133,10 @@ export default function AdminEventsManager() {
   const handleCreateNew = () => {
     setEditingEvent(null);
     setFormData({
-      title: "", slug: "", description: "", startDate: "", endDate: "", 
-      startTime: "09:00", endTime: "17:00", venue: "", category: "workshop", 
-      handledBy: "", organizers: [], status: "upcoming", isFeatured: false, registrationsCount: 0
+      title: "", slug: "", description: "", startDate: "", endDate: "",
+      startTime: "09:00", endTime: "17:00", venue: "", category: "workshop",
+      handledBy: "", organizers: [], photos: [], agenda: [], outcomes: "",
+      status: "upcoming", isFeatured: false, registrationsCount: 0
     });
     setIsModalOpen(true);
   };
@@ -483,8 +494,119 @@ export default function AdminEventsManager() {
 
                     <div className="space-y-2">
                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Description</label>
-                       <textarea required rows={6} className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all resize-none placeholder:text-white/10" placeholder="Describe the mission scope..." value={formData.description} onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))} />
+                       <textarea required rows={5} className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all resize-none placeholder:text-white/10" placeholder="Describe the mission scope..." value={formData.description} onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))} />
                     </div>
+
+                    {/* Agenda builder */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Event Agenda</label>
+                        <button
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, agenda: [...(prev.agenda || []), { time: "", topic: "" }] }))}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[9px] font-mono text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                        >
+                          <Plus className="w-3 h-3" /> Add Item
+                        </button>
+                      </div>
+                      {(formData.agenda || []).length === 0 ? (
+                        <p className="font-mono text-[9px] text-white/20 italic pl-1">No agenda items yet. Click "Add Item" to define the schedule.</p>
+                      ) : (
+                        <div className="space-y-3">
+                          {(formData.agenda || []).map((item, i) => (
+                            <div key={i} className="flex items-center gap-3">
+                              <input
+                                type="time"
+                                value={item.time}
+                                onChange={e => {
+                                  const updated = [...(formData.agenda || [])];
+                                  updated[i] = { ...updated[i], time: e.target.value };
+                                  setFormData(prev => ({ ...prev, agenda: updated }));
+                                }}
+                                className="w-28 px-3 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 [color-scheme:dark] shrink-0"
+                              />
+                              <input
+                                type="text"
+                                value={item.topic}
+                                placeholder="Session topic or activity..."
+                                onChange={e => {
+                                  const updated = [...(formData.agenda || [])];
+                                  updated[i] = { ...updated[i], topic: e.target.value };
+                                  setFormData(prev => ({ ...prev, agenda: updated }));
+                                }}
+                                className="flex-1 px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 placeholder:text-white/10"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = (formData.agenda || []).filter((_, j) => j !== i);
+                                  setFormData(prev => ({ ...prev, agenda: updated }));
+                                }}
+                                className="p-2.5 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-all shrink-0"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Outcomes — shown when status is completed */}
+                    {formData.status === "completed" && (
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Event Outcomes / Takeaways</label>
+                        <textarea rows={4} className="w-full px-5 py-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-emerald-500/40 transition-all resize-none placeholder:text-white/10" placeholder="Summarise what was achieved, key learnings, attendance numbers, highlights..." value={formData.outcomes || ""} onChange={e => setFormData(prev => ({ ...prev, outcomes: e.target.value }))} />
+                      </div>
+                    )}
+
+                    {/* Photos — shown when status is completed */}
+                    {formData.status === "completed" && (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Event Photos (URLs)</label>
+                          <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, photos: [...(prev.photos || []), ""] }))}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[9px] font-mono text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                          >
+                            <Plus className="w-3 h-3" /> Add Photo URL
+                          </button>
+                        </div>
+                        <p className="font-mono text-[9px] text-white/20 italic pl-1">Upload photos to Vercel Blob via the poster uploader and paste the URLs here.</p>
+                        {(formData.photos || []).length === 0 ? (
+                          <p className="font-mono text-[9px] text-white/20 italic pl-1">No photos added yet.</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {(formData.photos || []).map((url, i) => (
+                              <div key={i} className="flex items-center gap-3">
+                                <input
+                                  type="url"
+                                  value={url}
+                                  placeholder="https://..."
+                                  onChange={e => {
+                                    const updated = [...(formData.photos || [])];
+                                    updated[i] = e.target.value;
+                                    setFormData(prev => ({ ...prev, photos: updated }));
+                                  }}
+                                  className="flex-1 px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 placeholder:text-white/10"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = (formData.photos || []).filter((_, j) => j !== i);
+                                    setFormData(prev => ({ ...prev, photos: updated }));
+                                  }}
+                                  className="p-2.5 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-all shrink-0"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Scheduling & Logic */}
