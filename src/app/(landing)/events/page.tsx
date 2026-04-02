@@ -38,6 +38,7 @@ interface PublicEvent {
   poster?: string;
   photos?: string[];
   status: "upcoming" | "completed" | "draft";
+  isFeatured?: boolean;
   registrationsCount: number;
 }
 
@@ -77,7 +78,9 @@ export default function EventsPage() {
 
   const upcomingEvents = events.filter(e => e.status !== "draft" && !isPastEvent(e)).reverse();
   const pastEvents = events.filter(e => e.status !== "draft" && isPastEvent(e));
-  const featuredEvent = upcomingEvents[0] || (pastEvents[0] || null);
+  
+  const manualFeaturedEvent = events.find(e => e.isFeatured && e.status !== "draft");
+  const featuredEvent = manualFeaturedEvent || upcomingEvents[0] || (pastEvents[0] || null);
 
   useEffect(() => {
     if (loading || events.length === 0) return;
@@ -287,7 +290,9 @@ export default function EventsPage() {
           </div>
 
           <div className="events-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {(activeTab === "upcoming" ? upcomingEvents.slice(1) : pastEvents).map((event) => (
+            {(activeTab === "upcoming" ? upcomingEvents : pastEvents)
+              .filter(event => event._id !== featuredEvent?._id)
+              .map((event) => (
               <div key={event._id} className="event-card group relative">
                  <div className="h-full p-px rounded-[32px] bg-gradient-to-b from-white/10 to-transparent group-hover:from-white/20 transition-all duration-700">
                     <div className="h-full bg-bg-2 rounded-[31px] overflow-hidden p-6 space-y-6 flex flex-col relative">

@@ -44,6 +44,7 @@ interface EventData {
   poster?: string;
   photos?: string[];
   status: "upcoming" | "completed" | "draft";
+  isFeatured?: boolean;
   registrationsCount: number;
 }
 
@@ -89,6 +90,7 @@ export default function AdminEventsManager() {
     handledBy: "",
     organizers: [],
     status: "upcoming",
+    isFeatured: false,
     registrationsCount: 0
   });
 
@@ -123,7 +125,7 @@ export default function AdminEventsManager() {
     setFormData({
       title: "", slug: "", description: "", startDate: "", endDate: "", 
       startTime: "09:00", endTime: "17:00", venue: "", category: "workshop", 
-      handledBy: "", organizers: [], status: "upcoming", registrationsCount: 0
+      handledBy: "", organizers: [], status: "upcoming", isFeatured: false, registrationsCount: 0
     });
     setIsModalOpen(true);
   };
@@ -469,6 +471,16 @@ export default function AdminEventsManager() {
                       </div>
                     </div>
                     
+                    <div className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+                      <div className="space-y-0.5">
+                        <label className="text-[10px] font-mono text-white/80 uppercase tracking-widest font-bold">Featured Event Override</label>
+                        <p className="text-[9px] font-mono text-white/40 leading-snug">Manually pin this event to the top of the events page, bypassing the default date-based chronological sorting.</p>
+                      </div>
+                      <button type="button" onClick={() => setFormData(p => ({ ...p, isFeatured: !p.isFeatured }))} className={`relative flex items-center shrink-0 w-12 h-6 rounded-full transition-colors ${formData.isFeatured ? 'bg-emerald-500' : 'bg-white/10 border border-white/10'}`}>
+                        <span className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform mx-1 ${formData.isFeatured ? 'translate-x-6' : 'translate-x-0'}`} />
+                      </button>
+                    </div>
+
                     <div className="space-y-2">
                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Description</label>
                        <textarea required rows={6} className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all resize-none placeholder:text-white/10" placeholder="Describe the mission scope..." value={formData.description} onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))} />

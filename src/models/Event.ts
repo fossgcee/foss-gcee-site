@@ -25,6 +25,7 @@ export interface IEvent extends mongoose.Document {
   poster?: string; // URL from Vercel Blob
   photos?: string[]; // Array of URLs for completed events
   status: "upcoming" | "completed" | "draft";
+  isFeatured?: boolean;
   registrationsCount: number;
   registrations: IRegistrationEntry[]; // Added internal registrations array
   createdAt: Date;
@@ -91,6 +92,10 @@ const EventSchema = new mongoose.Schema<IEvent>(
       type: String,
       enum: ["upcoming", "completed", "draft"],
       default: "upcoming",
+    },
+    isFeatured: {
+      type: Boolean,
+      default: false,
     },
     registrationsCount: {
       type: Number,
