@@ -8,7 +8,7 @@ import Link from "next/link";
 interface EventContent {
   _id: string;
   title: string;
-  agenda?: string;
+  agenda?: { time: string; topic: string }[];
   outcomes?: string;
   photos?: string[];
   slug: string;
@@ -121,21 +121,65 @@ export default function AdminEventContentPage() {
       </div>
 
       <div className="space-y-12">
-        {/* Editor: Agenda */}
+        {/* Editor: Agenda / Timeline */}
         <div className="space-y-4">
-           <div className="flex items-center gap-3 border-b border-white/5 pb-2">
-             <FileText className="w-4 h-4 text-white/40" />
-             <h2 className="font-mono text-xs uppercase tracking-widest text-white/80">Event Agenda Timeline</h2>
+           <div className="flex justify-between items-center border-b border-white/5 pb-2">
+             <div className="flex items-center gap-3">
+               <FileText className="w-4 h-4 text-white/40" />
+               <h2 className="font-mono text-xs uppercase tracking-widest text-white/80">Event Agenda Timeline</h2>
+             </div>
+             <button 
+               onClick={() => setEvent(prev => prev ? { ...prev, agenda: [...(prev.agenda || []), { time: "09:00", topic: "New Agenda Item" }] } : prev)}
+               className="font-pixel text-[10px] text-emerald-400 uppercase bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors"
+             >
+               + ADD_ENTRY
+             </button>
            </div>
-           <p className="text-[10px] font-mono text-white/30 leading-relaxed uppercase">Markdown is supported. Outline the speakers, timings, and activities.</p>
            
-           <textarea 
-             value={event.agenda || ""}
-             onChange={e => setEvent({ ...event, agenda: e.target.value })}
-             rows={8}
-             placeholder="- 09:00 AM: Inauguration\n- 10:00 AM: Core Concepts"
-             className="w-full px-5 py-4 bg-white/[0.02] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all resize-y placeholder:text-white/10"
-           />
+           <div className="space-y-3">
+             {!(event.agenda && event.agenda.length > 0) && (
+               <p className="font-mono text-[10px] text-white/20 italic p-4 text-center border border-dashed border-white/10 rounded-2xl">No timeline entries. Add one above.</p>
+             )}
+             {(event.agenda || []).map((item, idx) => (
+                <div key={idx} className="flex flex-col sm:flex-row gap-3 p-4 bg-white/[0.02] border border-white/10 rounded-2xl items-start sm:items-center">
+                  <div className="space-y-1 w-full sm:w-32 shrink-0">
+                    <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest pl-1">TIME (e.g. 09:00 AM)</label>
+                    <input 
+                      type="text" 
+                      value={item.time} 
+                      onChange={e => {
+                        const newAgenda = [...(event.agenda || [])];
+                        newAgenda[idx].time = e.target.value;
+                        setEvent({ ...event, agenda: newAgenda });
+                      }}
+                      className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-white/30"
+                    />
+                  </div>
+                  <div className="space-y-1 flex-1 w-full">
+                    <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest pl-1">TOPIC / TITLE</label>
+                    <input 
+                      type="text" 
+                      value={item.topic} 
+                      onChange={e => {
+                        const newAgenda = [...(event.agenda || [])];
+                        newAgenda[idx].topic = e.target.value;
+                        setEvent({ ...event, agenda: newAgenda });
+                      }}
+                      className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-white/30"
+                    />
+                  </div>
+                  <button 
+                    onClick={() => {
+                      const newAgenda = (event.agenda || []).filter((_, i) => i !== idx);
+                      setEvent({ ...event, agenda: newAgenda });
+                    }}
+                    className="p-3 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500/20 transition-colors mt-auto"
+                  >
+                    <Trash className="w-4 h-4" />
+                  </button>
+                </div>
+             ))}
+           </div>
         </div>
 
         {/* Editor: Outcomes */}

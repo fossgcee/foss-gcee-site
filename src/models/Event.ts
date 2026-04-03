@@ -19,7 +19,7 @@ export interface IEvent extends mongoose.Document {
   title: string;
   slug: string; // unique identifier
   description: string;
-  agenda?: string; // Markdown supported
+  agenda?: { time: string; topic: string }[];
   outcomes?: string; // Markdown supported
   startDate: string; // "YYYY-MM-DD"
   endDate: string; // "YYYY-MM-DD"
@@ -59,9 +59,12 @@ const EventSchema = new mongoose.Schema<IEvent>(
       type: String,
       required: [true, "Description is required"],
     },
-    agenda: {
-      type: String,
-    },
+    agenda: [
+      {
+        time: { type: String, required: true },
+        topic: { type: String, required: true },
+      }
+    ],
     outcomes: {
       type: String,
     },
