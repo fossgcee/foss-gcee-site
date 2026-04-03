@@ -19,8 +19,9 @@ export interface IEvent extends mongoose.Document {
   title: string;
   slug: string; // unique identifier
   description: string;
-  agenda?: { time: string; topic: string }[];
-  outcomes?: string; // Markdown supported
+  agenda?: IAgendaItem[]; // Scheduled agenda items (for upcoming events)
+  outcomes?: string; // Summary of results/takeaways (for completed events)
+  academicYear: string; // e.g. "2025 - 26"
   startDate: string; // "YYYY-MM-DD"
   endDate: string; // "YYYY-MM-DD"
   startTime: string; // "HH:mm" (24h)
@@ -31,8 +32,7 @@ export interface IEvent extends mongoose.Document {
   organizers: string[]; // Array of organizer names
   poster?: string; // URL from Vercel Blob
   photos?: string[]; // Array of URLs for completed events
-  agenda?: IAgendaItem[]; // Scheduled agenda items (for upcoming events)
-  outcomes?: string; // Summary of results/takeaways (for completed events)
+
   status: "upcoming" | "completed" | "draft";
   isFeatured?: boolean;
   registrationsCount: number;
@@ -67,6 +67,11 @@ const EventSchema = new mongoose.Schema<IEvent>(
     ],
     outcomes: {
       type: String,
+      default: "",
+    },
+    academicYear: {
+      type: String,
+      required: [true, "Academic Year is required"],
     },
     startDate: {
       type: String,
@@ -106,16 +111,7 @@ const EventSchema = new mongoose.Schema<IEvent>(
     photos: [{
       type: String,
     }],
-    agenda: [
-      {
-        time:  { type: String, required: true },
-        topic: { type: String, required: true },
-      }
-    ],
-    outcomes: {
-      type: String,
-      default: "",
-    },
+
     status: {
       type: String,
       enum: ["upcoming", "completed", "draft"],

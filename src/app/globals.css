@@ -11,43 +11,49 @@
   :root {
     --color-bg: #ffffff;
     --color-bg-2: #f8f8f8;
-    --color-surface: rgba(0,0,0,0.03);
-    --color-surface-2: rgba(0,0,0,0.06);
-    --color-border: rgba(0,0,0,0.08);
-    --color-border-2: rgba(0,0,0,0.15);
+    --color-surface: rgba(0, 0, 0, 0.03);
+    --color-surface-2: rgba(0, 0, 0, 0.06);
+    --color-border: rgba(0, 0, 0, 0.08);
+    --color-border-2: rgba(0, 0, 0, 0.15);
     --color-text: #080808;
     --color-muted: #666666;
     --color-muted-2: #888888;
     --color-accent: #000000;
-    --color-accent-dim: rgba(0,0,0,0.05);
-    --color-accent-glow: rgba(0,0,0,0.12);
+    --color-accent-dim: rgba(0, 0, 0, 0.05);
+    --color-accent-glow: rgba(0, 0, 0, 0.12);
 
     --font-pixel: "Press Start 2P", monospace;
-    --font-body:  "Inter", system-ui, sans-serif;
-    --font-mono:  "JetBrains Mono", monospace;
+    --font-body: "Inter", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", monospace;
     --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .dark {
     --color-bg: #080808;
     --color-bg-2: #0f0f0f;
-    --color-surface: rgba(255,255,255,0.04);
-    --color-surface-2: rgba(255,255,255,0.08);
-    --color-border: rgba(255,255,255,0.09);
-    --color-border-2: rgba(255,255,255,0.16);
+    --color-surface: rgba(255, 255, 255, 0.04);
+    --color-surface-2: rgba(255, 255, 255, 0.08);
+    --color-border: rgba(255, 255, 255, 0.09);
+    --color-border-2: rgba(255, 255, 255, 0.16);
     --color-text: #f0f0f0;
     --color-muted: #888888;
     --color-muted-2: #555555;
     --color-accent: #ffffff;
-    --color-accent-dim: rgba(255,255,255,0.07);
-    --color-accent-glow: rgba(255,255,255,0.15);
+    --color-accent-dim: rgba(255, 255, 255, 0.07);
+    --color-accent-glow: rgba(255, 255, 255, 0.15);
   }
 }
 
 /* ─── Base Reset ───────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+}
 
 body {
   font-family: var(--font-body);
@@ -91,39 +97,78 @@ body {
 /* ─── Accent glow ──────────────────────────────────────────────── */
 .accent-glow {
   text-shadow: 0 0 20px var(--accent-glow),
-               0 0 60px var(--accent-dim);
+    0 0 60px var(--accent-dim);
 }
 
 .accent-glow-box {
   box-shadow: 0 0 30px var(--accent-glow),
-              inset 0 0 30px var(--accent-dim);
+    inset 0 0 30px var(--accent-dim);
 }
 
 /* ─── Typography helpers ───────────────────────────────────────── */
-.font-pixel { font-family: var(--font-pixel) !important; }
-.font-mono  { font-family: var(--font-mono) !important; }
+.font-pixel {
+  font-family: var(--font-pixel) !important;
+}
+
+.font-mono {
+  font-family: var(--font-mono) !important;
+}
 
 /* ─── Scrollbar ────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: var(--color-bg); }
-::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.25); border-radius: 99px; }
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 99px;
+}
 
 /* ─── Custom Animations ────────────────────────────────────────── */
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
 }
-.animate-blink { animation: blink 1s step-end infinite; }
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
-.animate-float { animation: float 4s ease-in-out infinite; }
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
 
 @keyframes scanline {
-  0%   { transform: translateY(-100%); }
-  100% { transform: translateY(100vh); }
+  0% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(100vh);
+  }
 }
 
 /* ─── Tux watermark (global) ───────────────────────────────────── */

@@ -39,6 +39,7 @@ interface EventData {
   title: string;
   slug: string;
   description: string;
+  academicYear: string;
   startDate: string;
   endDate: string;
   startTime: string;
@@ -89,6 +90,7 @@ export default function AdminEventsManager() {
     title: "",
     slug: "",
     description: "",
+    academicYear: "",
     startDate: "",
     endDate: "",
     startTime: "09:00",
@@ -134,7 +136,7 @@ export default function AdminEventsManager() {
   const handleCreateNew = () => {
     setEditingEvent(null);
     setFormData({
-      title: "", slug: "", description: "", startDate: "", endDate: "",
+      title: "", slug: "", description: "", academicYear: "", startDate: "", endDate: "",
       startTime: "09:00", endTime: "17:00", venue: "", category: "workshop",
       handledBy: "", organizers: [], photos: [], agenda: [], outcomes: "",
       status: "upcoming", isFeatured: false, registrationsCount: 0
@@ -180,12 +182,10 @@ export default function AdminEventsManager() {
     e.preventDefault();
     setLoading(true);
     try {
-      const url = editingEvent ? `/api/admin/events?id=${editingEvent._id}` : "/api/admin/events";
-      const method = editingEvent ? "PUT" : "POST";
-      
-      const res = await fetch(url, {
-        method, headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+      const res = await fetch("/api/admin/events", {
+        method: editingEvent ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editingEvent ? { id: editingEvent._id, ...formData } : formData)
       });
       const d = await res.json();
       if (d.success) {
@@ -465,21 +465,25 @@ export default function AdminEventsManager() {
                     
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
+                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Academic Year</label>
+                        <input required type="text" placeholder="e.g. 2025 - 26" className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all font-bold placeholder:text-white/10 uppercase" value={formData.academicYear} onChange={e => setFormData(prev => ({ ...prev, academicYear: e.target.value }))} />
+                      </div>
+                      <div className="space-y-2">
                         <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Category</label>
-                        <select className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-black focus:outline-none focus:border-white/30 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center]" value={formData.category} onChange={e => setFormData(prev => ({ ...prev, category: e.target.value as any }))}>
-                          <option value="workshop">Workshop</option>
-                          <option value="talk">Talk</option>
-                          <option value="hackathon">Hackathon</option>
-                          <option value="meetup">Meetup</option>
-                          <option value="other">Other</option>
+                        <select className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center]" value={formData.category} onChange={e => setFormData(prev => ({ ...prev, category: e.target.value as any }))}>
+                          <option value="workshop" className="text-black">Workshop</option>
+                          <option value="talk" className="text-black">Talk</option>
+                          <option value="hackathon" className="text-black">Hackathon</option>
+                          <option value="meetup" className="text-black">Meetup</option>
+                          <option value="other" className="text-black">Other</option>
                         </select>
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Status</label>
-                        <select className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-black focus:outline-none focus:border-white/30 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center]" value={formData.status} onChange={e => setFormData(prev => ({ ...prev, status: e.target.value as any }))}>
-                          <option value="upcoming">Upcoming</option>
-                          <option value="completed">Completed</option>
-                          <option value="draft">Draft</option>
+                        <select className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center]" value={formData.status} onChange={e => setFormData(prev => ({ ...prev, status: e.target.value as any }))}>
+                          <option value="upcoming" className="text-black">Upcoming</option>
+                          <option value="completed" className="text-black">Completed</option>
+                          <option value="draft" className="text-black">Draft</option>
                         </select>
                       </div>
                     </div>

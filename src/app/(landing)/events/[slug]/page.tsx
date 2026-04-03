@@ -6,9 +6,14 @@ import { ArrowLeft, Calendar, Clock, MapPin, Users, CheckCircle2, ListChecks, Im
 
 /* ── Static params ─────────────────────────────────────────── */
 export async function generateStaticParams() {
-  await dbConnect();
-  const events = await Event.find({ status: { $ne: "draft" } }, "slug").lean();
-  return events.map((e: any) => ({ slug: e.slug }));
+  try {
+    await dbConnect();
+    const events = await Event.find({ status: { $ne: "draft" } }, "slug").lean();
+    return events.map((e: any) => ({ slug: e.slug }));
+  } catch (error) {
+    console.warn("Could not connect to MongoDB during build. Skipping static generation for events.");
+    return [];
+  }
 }
 
 /* ── Metadata ──────────────────────────────────────────────── */
@@ -26,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 const fmt = (d: string) => {
   if (!d) return "N/A";
   const [y, m, day] = d.split("-");
-  return new Date(+y, +m - 1, +day).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  return `${day}/${m}/${y}`;
 };
 
 function todayIST() {
@@ -60,62 +65,52 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
         </Link>
       </div>
 
-      {/* Hero terminal card */}
-      <div className="max-w-4xl mx-auto px-6">
-        <div className="rounded-[32px] overflow-hidden bg-bg-2 border border-border-2 p-1">
-          <div className="bg-surface rounded-[31px] flex flex-col">
+      {/* FOSS CIT Style Hero Layout */}
+      <div className="max-w-4xl mx-auto px-6 mb-16 flex flex-col items-center">
+         
+         <h1 className="text-3xl sm:text-5xl md:text-6xl font-pixel text-center mb-10 px-4 text-text uppercase">
+            {event.title}
+         </h1>
 
-            <div className="flex flex-wrap items-center gap-2 px-5 py-4 border-b border-border bg-black/10">
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="w-3 h-3 rounded-full bg-red-400" />
-                <span className="w-3 h-3 rounded-full bg-amber-400" />
-                <span className="w-3 h-3 rounded-full bg-emerald-400" />
-              </div>
-              <span className="ml-3 font-mono text-[10px] text-muted-2 uppercase tracking-widest truncate">/events/{event.slug}</span>
-              <span className={`ml-auto font-mono text-[10px] px-3 py-1 rounded-lg border ${isPast ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-blue-500/10 border-blue-500/20 text-blue-400"}`}>
-                {isPast ? "Completed" : "Upcoming"}
-              </span>
+         {event.poster && (
+            <div className="w-full max-w-3xl aspect-video bg-surface rounded-lg overflow-hidden border border-border mb-12 shadow-2xl relative">
+              <div className="absolute inset-0 shadow-[inset_0_0_50px_rgba(255,255,255,0.02)] pointer-events-none" />
+              <img src={event.poster} alt={event.title} className="w-full h-full object-contain" />
+            </div>
+         )}
+
+         {/* 2-Column Specs Grid */}
+         <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-y-12 gap-x-10 text-left font-mono mt-4">
+            
+            <div className="space-y-2">
+               <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Date:</h3>
+               <p className="text-muted-2 text-sm sm:text-base">
+                  {fmt(event.startDate)} {event.endDate && event.endDate !== event.startDate ? ` - ${fmt(event.endDate)}` : ''}
+               </p>
+            </div>
+            
+            <div className="space-y-2">
+               <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Venue:</h3>
+               <p className="text-muted-2 text-sm sm:text-base">
+                  {event.venue}
+               </p>
+            </div>
+            
+            <div className="space-y-2">
+               <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Time:</h3>
+               <p className="text-muted-2 text-sm sm:text-base">
+                  {event.startTime} - {event.endTime}
+               </p>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-8 p-7 md:p-10 items-start">
-              {event.poster && (
-                <img src={event.poster} alt={`${event.title} poster`} className="rounded-2xl object-cover shrink-0 border border-border w-full md:w-[260px] aspect-[4/5] shadow-2xl" />
-              )}
-              <div className="flex-1 space-y-6">
-                <div>
-                  <div className="flex flex-wrap items-center gap-3 mb-4">
-                    <span className="font-mono text-[10px] px-3 py-1.5 rounded-lg border border-border-2 uppercase tracking-widest text-text bg-surface-2">{event.category}</span>
-                    {event.registrationsCount > 0 && (
-                      <span className="font-mono text-[10px] px-3 py-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 flex items-center gap-1.5">
-                        <Users className="w-3 h-3" /> {event.registrationsCount} Registered
-                      </span>
-                    )}
-                  </div>
-                  <h1 className="text-3xl sm:text-5xl font-pixel uppercase mb-6 leading-tight text-text">{event.title}</h1>
-                </div>
-
-                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-6 p-6 rounded-2xl bg-bg-2 border border-border">
-                  <div>
-                    <dt className="font-mono text-[9px] text-muted-2 uppercase tracking-[0.2em] mb-1 flex items-center gap-1.5"><Calendar className="w-3 h-3" /> Date</dt>
-                    <dd className="text-sm font-bold font-mono text-text uppercase">{fmt(event.startDate)} — {fmt(event.endDate)}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-mono text-[9px] text-muted-2 uppercase tracking-[0.2em] mb-1 flex items-center gap-1.5"><Clock className="w-3 h-3" /> Time (IST)</dt>
-                    <dd className="text-sm font-bold font-mono text-text uppercase">{event.startTime} – {event.endTime}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-mono text-[9px] text-muted-2 uppercase tracking-[0.2em] mb-1 flex items-center gap-1.5"><MapPin className="w-3 h-3" /> Venue</dt>
-                    <dd className="text-sm font-bold font-mono text-text uppercase">{event.venue}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-mono text-[9px] text-muted-2 uppercase tracking-[0.2em] mb-1">Handled By</dt>
-                    <dd className="text-sm font-bold font-mono text-text uppercase">{event.handledBy}</dd>
-                  </div>
-                </dl>
-              </div>
+            <div className="space-y-2">
+               <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Speaker:</h3>
+               <p className="text-muted-2 text-sm sm:text-base">
+                  {event.handledBy}
+               </p>
             </div>
-          </div>
-        </div>
+
+         </div>
       </div>
 
       {/* Description */}
