@@ -23,7 +23,8 @@ import {
   Users,
   Download,
   Mail,
-  Phone
+  Phone,
+  Image as ImageIcon
 } from "lucide-react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
@@ -307,6 +308,7 @@ export default function AdminEventsManager() {
                   </button>
                   <div className="flex items-center gap-2">
                     <Link href={`/events/${event.slug}`} target="_blank" className="p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all"><ExternalLink className="w-4 h-4" /></Link>
+                    <Link href={`/admin/events/${event._id}`} className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white hover:bg-white/10 transition-all text-[10px] font-pixel"><ImageIcon className="w-4 h-4" /> CONTENT</Link>
                     <button onClick={() => handleEdit(event)} className="p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all"><Edit3 className="w-4 h-4" /></button>
                     <button 
                       onClick={() => handleDelete(event._id!)} 

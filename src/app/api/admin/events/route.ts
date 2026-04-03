@@ -2,9 +2,18 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Event from "@/models/Event";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     await dbConnect();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (id) {
+       const event = await Event.findById(id);
+       if (!event) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+       return NextResponse.json({ success: true, data: event });
+    }
+
     // Return all events including drafts for admin
     const events = await Event.find({}).sort({ startDate: -1 });
 
