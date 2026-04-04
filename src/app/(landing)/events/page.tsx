@@ -1,21 +1,14 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { 
-  Calendar, 
-  MapPin, 
-  Clock, 
-  Terminal, 
+  Calendar,
+  Clock,
   ArrowRight, 
   Image as ImageIcon,
-  History,
-  Sparkles,
-  Users,
-  ExternalLink,
-  Plus,
-  Loader2,
-  ArrowRightCircle
+  Loader2
 } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -123,11 +116,6 @@ export default function EventsPage() {
     }, containerRef);
     return () => ctx.revert();
   }, [loading, events, selectedYear]);
-
-  const handleRegister = (event: PublicEvent) => {
-    setSelectedEvent(event);
-    setIsModalOpen(true);
-  };
 
   // Date formatter: DD/MM/YYYY
   const formatDDMMYYYY = (dateStr: string) => {

@@ -1,31 +1,29 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState, useEffect } from "react";
-import { 
+import {
   Calendar as CalendarIcon, 
   Plus, 
   Search, 
-  Filter, 
   Edit3, 
   Trash2, 
-  Eye, 
   Clock, 
   CheckCircle2, 
   AlertCircle,
   ExternalLink,
   MapPin,
-  Clock3,
   X,
   Upload,
   Loader2,
   Trash,
-  ChevronRight,
   Users,
   Download,
   Mail,
   Phone,
   Image as ImageIcon
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -50,6 +48,7 @@ interface EventData {
   organizers: string[];
   poster?: string;
   photos?: string[];
+  galleryLink?: string;
   agenda?: AgendaItem[];
   outcomes?: string;
   status: "upcoming" | "completed" | "draft";
@@ -80,9 +79,14 @@ export default function AdminEventsManager() {
   const [regLoading, setRegLoading] = useState(false);
   const [registrations, setRegistrations] = useState<MemberRegistration[]>([]);
   const [selectedEventReg, setSelectedEventReg] = useState<EventData | null>(null);
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailMessage, setEmailMessage] = useState("");
+  const [emailStatus, setEmailStatus] = useState<string | null>(null);
+  const [isEmailing, setIsEmailing] = useState(false);
   
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [posterUploadError, setPosterUploadError] = useState<string | null>(null);
   
   // Form state
   const [editingEvent, setEditingEvent] = useState<EventData | null>(null);
@@ -100,6 +104,7 @@ export default function AdminEventsManager() {
     handledBy: "",
     organizers: [],
     photos: [],
+    galleryLink: "",
     agenda: [],
     outcomes: "",
     status: "upcoming",
@@ -122,6 +127,9 @@ export default function AdminEventsManager() {
 
   const fetchRegistrations = async (event: EventData) => {
     setSelectedEventReg(event);
+    setEmailSubject(`Upcoming Event: ${event.title}`);
+    setEmailMessage("");
+    setEmailStatus(null);
     setIsRegModalOpen(true);
     setRegLoading(true);
     try {
@@ -133,13 +141,47 @@ export default function AdminEventsManager() {
     }
   };
 
+  const handleSendEmail = async () => {
+    if (!selectedEventReg) return;
+    const subject = emailSubject.trim();
+    const message = emailMessage.trim();
+    if (!subject || !message) {
+      setEmailStatus("Subject and message are required.");
+      return;
+    }
+    setIsEmailing(true);
+    setEmailStatus(null);
+    try {
+      const res = await fetch("/api/admin/events/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventSlug: selectedEventReg.slug,
+          subject,
+          message,
+        }),
+      });
+      const d = await res.json();
+      if (!d.success) {
+        setEmailStatus(d.error || "Failed to send email.");
+        return;
+      }
+      setEmailStatus(`Sent to ${d.data.recipients} registrants in ${d.data.batches} batches.`);
+    } catch {
+      setEmailStatus("Failed to send email.");
+    } finally {
+      setIsEmailing(false);
+    }
+  };
+
   const handleCreateNew = () => {
     setEditingEvent(null);
     setFormData({
       title: "", slug: "", description: "", academicYear: "", startDate: "", endDate: "",
       startTime: "09:00", endTime: "17:00", venue: "", category: "workshop",
       handledBy: "", organizers: [], photos: [], agenda: [], outcomes: "",
-      status: "upcoming", isFeatured: false, registrationsCount: 0
+      status: "upcoming", isFeatured: false, registrationsCount: 0,
+      galleryLink: ""
     });
     setIsModalOpen(true);
   };
@@ -162,19 +204,35 @@ export default function AdminEventsManager() {
     }
   };
 
+  const buildBlobPath = (file: File, kind: "poster") => {
+    const slugRaw = (formData.slug || "draft").toLowerCase();
+    const safeSlug = slugRaw.replace(/[^a-z0-9-]+/g, "-").replace(/(^-|-$)/g, "") || "draft";
+    const name = file.name || "image";
+    const ext = name.includes(".") ? name.split(".").pop()!.toLowerCase() : "";
+    const base = name.replace(/\.[^/.]+$/, "").toLowerCase();
+    const safeBase = base.replace(/[^a-z0-9-]+/g, "-").replace(/(^-|-$)/g, "") || "image";
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const filename = `${stamp}-${safeBase}${ext ? `.${ext}` : ""}`;
+    return `events/${safeSlug}/${kind}/${filename}`;
+  };
+
   const handleUploadPoster = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setIsUploading(true);
+    setPosterUploadError(null);
     try {
-      const res = await fetch(`/api/admin/events/upload?filename=${encodeURIComponent(file.name)}`, {
+      const path = buildBlobPath(file, "poster");
+      const res = await fetch(`/api/admin/events/upload?filename=${encodeURIComponent(path)}`, {
         method: "POST", body: file,
       });
       const d = await res.json();
       if (d.url) setFormData(prev => ({ ...prev, poster: d.url }));
+      else setPosterUploadError("Poster upload failed. Please try again.");
     } finally {
       setIsUploading(false);
+      e.target.value = "";
     }
   };
 
@@ -203,7 +261,7 @@ export default function AdminEventsManager() {
     draft: "border-amber-500/20 bg-amber-500/10 text-amber-400",
   };
 
-  const statusIcons: Record<string, any> = {
+  const statusIcons: Record<string, LucideIcon> = {
     upcoming: Clock, completed: CheckCircle2, draft: AlertCircle,
   };
 
@@ -213,6 +271,37 @@ export default function AdminEventsManager() {
     const matchesFilter = filter === "all" || e.status === filter;
     return matchesSearch && matchesFilter;
   });
+
+  const formatAcademicYear = (startYear: number) =>
+    `${startYear} - ${String(startYear + 1).slice(-2)}`;
+
+  const parseAcademicYearStart = (value: string) => {
+    const match = value.match(/\d{4}/);
+    return match ? Number.parseInt(match[0], 10) : 0;
+  };
+
+  const academicYearOptions = (() => {
+    const clubStartYear = 2026;
+    const now = new Date();
+    const currentStartYear = now.getMonth() >= 5 ? now.getFullYear() : now.getFullYear() - 1;
+    const startYear = Math.max(currentStartYear, clubStartYear);
+    const baseYears: string[] = [];
+    for (let year = startYear; year >= clubStartYear; year -= 1) {
+      baseYears.push(formatAcademicYear(year));
+    }
+    const dynamicYears = events.map(e => e.academicYear).filter(Boolean);
+    const currentYear = formData.academicYear ? [formData.academicYear] : [];
+    const unique = Array.from(new Set([...baseYears, ...dynamicYears, ...currentYear].map(y => y.trim()).filter(Boolean)));
+    const filtered = unique.filter((value) => {
+      const year = parseAcademicYearStart(value);
+      return year >= clubStartYear && year <= startYear;
+    });
+    filtered.sort((a, b) => {
+      const diff = parseAcademicYearStart(b) - parseAcademicYearStart(a);
+      return diff !== 0 ? diff : a.localeCompare(b);
+    });
+    return filtered;
+  })();
 
   return (
     <div className="space-y-8 py-10">
@@ -361,10 +450,10 @@ export default function AdminEventsManager() {
                             className="w-full pl-10 pr-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[10px] text-white focus:outline-none focus:border-white/20 transition-all"
                             onChange={(e) => {
                               const val = e.target.value.toLowerCase();
-                              const items = document.querySelectorAll('.reg-item');
-                              items.forEach((item: any) => {
+                              const items = document.querySelectorAll<HTMLElement>(".reg-item");
+                              items.forEach((item) => {
                                 const text = item.innerText.toLowerCase();
-                                item.style.display = text.includes(val) ? 'flex' : 'none';
+                                item.style.display = text.includes(val) ? "flex" : "none";
                               });
                             }}
                           />
@@ -398,7 +487,38 @@ export default function AdminEventsManager() {
                    )}
                 </div>
                 
-                <div className="p-8 border-t border-white/5 bg-white/[0.01]">
+                <div className="p-8 border-t border-white/5 bg-white/[0.01] space-y-4">
+                   <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                         <p className="font-pixel text-[10px] text-white uppercase">EMAIL_REGISTRANTS</p>
+                         <p className="font-mono text-[9px] text-white/30 uppercase tracking-widest">{registrations.length} recipients</p>
+                      </div>
+                      <input
+                        value={emailSubject}
+                        onChange={(e) => setEmailSubject(e.target.value)}
+                        placeholder="Subject"
+                        className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[10px] text-white focus:outline-none focus:border-white/20 transition-all placeholder:text-white/20"
+                      />
+                      <textarea
+                        value={emailMessage}
+                        onChange={(e) => setEmailMessage(e.target.value)}
+                        placeholder="Message for registered members..."
+                        rows={4}
+                        className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[10px] text-white focus:outline-none focus:border-white/20 transition-all placeholder:text-white/20 resize-none"
+                      />
+                      {emailStatus && (
+                        <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest">{emailStatus}</p>
+                      )}
+                      <button
+                        onClick={handleSendEmail}
+                        disabled={isEmailing || registrations.length === 0 || regLoading}
+                        className="w-full py-3 rounded-2xl bg-white/5 border border-white/10 text-white font-pixel text-[10px] hover:bg-white/10 transition-all flex items-center justify-center gap-3 uppercase disabled:opacity-50"
+                      >
+                        <Mail className="w-4 h-4" />
+                        {isEmailing ? "SENDING..." : "SEND_EMAIL.SYS"}
+                      </button>
+                   </div>
+
                    <button 
                      onClick={() => alert("Feature coming soon: Excel Export")}
                      hidden={registrations.length === 0}
@@ -433,7 +553,7 @@ export default function AdminEventsManager() {
                    <div className="relative group aspect-video md:aspect-[21/9] rounded-[24px] bg-white/[0.02] border border-dashed border-white/10 overflow-hidden flex items-center justify-center">
                       {formData.poster ? (
                         <>
-                           <img src={formData.poster} className="w-full h-full object-cover opacity-60" />
+                           <img src={formData.poster} alt={formData.title ? `${formData.title} poster` : "Event poster"} className="w-full h-full object-cover opacity-60" />
                            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
                            <button type="button" onClick={() => setFormData(prev => ({ ...prev, poster: "" }))} className="absolute top-4 right-4 p-3 rounded-full bg-red-500/80 text-white backdrop-blur shadow-lg hover:scale-110 transition-transform"><Trash className="w-4 h-4" /></button>
                         </>
@@ -444,12 +564,15 @@ export default function AdminEventsManager() {
                            </div>
                            <div className="space-y-1">
                               <span className="font-pixel text-[10px] text-white/40 uppercase tracking-widest block">CHOOSE_POSTER_FILE</span>
-                              <span className="font-mono text-[9px] text-white/20 uppercase">Vercel Blob Storage Integration</span>
+                              <span className="font-mono text-[9px] text-white/20 uppercase">Uploads to Vercel Blob</span>
                            </div>
                            <input type="file" className="hidden" accept="image/*" onChange={handleUploadPoster} disabled={isUploading} />
                         </label>
                       )}
                    </div>
+                   {posterUploadError && (
+                     <p className="font-mono text-[9px] text-red-400/80 pl-1">{posterUploadError}</p>
+                   )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
@@ -466,11 +589,21 @@ export default function AdminEventsManager() {
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Academic Year</label>
-                        <input required type="text" placeholder="e.g. 2025 - 26" className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all font-bold placeholder:text-white/10 uppercase" value={formData.academicYear} onChange={e => setFormData(prev => ({ ...prev, academicYear: e.target.value }))} />
+                        <select
+                          required
+                          className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center]"
+                          value={formData.academicYear}
+                          onChange={e => setFormData(prev => ({ ...prev, academicYear: e.target.value }))}
+                        >
+                          <option value="" disabled className="text-black">Select Academic Year</option>
+                          {academicYearOptions.map((year) => (
+                            <option key={year} value={year} className="text-black">{year}</option>
+                          ))}
+                        </select>
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Category</label>
-                        <select className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center]" value={formData.category} onChange={e => setFormData(prev => ({ ...prev, category: e.target.value as any }))}>
+                        <select className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center]" value={formData.category} onChange={e => setFormData(prev => ({ ...prev, category: e.target.value as EventData["category"] }))}>
                           <option value="workshop" className="text-black">Workshop</option>
                           <option value="talk" className="text-black">Talk</option>
                           <option value="hackathon" className="text-black">Hackathon</option>
@@ -480,7 +613,7 @@ export default function AdminEventsManager() {
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Status</label>
-                        <select className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center]" value={formData.status} onChange={e => setFormData(prev => ({ ...prev, status: e.target.value as any }))}>
+                        <select className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center]" value={formData.status} onChange={e => setFormData(prev => ({ ...prev, status: e.target.value as EventData["status"] }))}>
                           <option value="upcoming" className="text-black">Upcoming</option>
                           <option value="completed" className="text-black">Completed</option>
                           <option value="draft" className="text-black">Draft</option>
@@ -516,7 +649,7 @@ export default function AdminEventsManager() {
                         </button>
                       </div>
                       {(formData.agenda || []).length === 0 ? (
-                        <p className="font-mono text-[9px] text-white/20 italic pl-1">No agenda items yet. Click "Add Item" to define the schedule.</p>
+                        <p className="font-mono text-[9px] text-white/20 italic pl-1">No agenda items yet. Click &quot;Add Item&quot; to define the schedule.</p>
                       ) : (
                         <div className="space-y-3">
                           {(formData.agenda || []).map((item, i) => (
@@ -566,51 +699,20 @@ export default function AdminEventsManager() {
                       </div>
                     )}
 
-                    {/* Photos — shown when status is completed */}
+                    {/* Gallery Link — shown when status is completed */}
                     {formData.status === "completed" && (
                       <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Event Photos (URLs)</label>
-                          <button
-                            type="button"
-                            onClick={() => setFormData(prev => ({ ...prev, photos: [...(prev.photos || []), ""] }))}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[9px] font-mono text-white/60 hover:text-white hover:bg-white/10 transition-all"
-                          >
-                            <Plus className="w-3 h-3" /> Add Photo URL
-                          </button>
-                        </div>
-                        <p className="font-mono text-[9px] text-white/20 italic pl-1">Upload photos to Vercel Blob via the poster uploader and paste the URLs here.</p>
-                        {(formData.photos || []).length === 0 ? (
-                          <p className="font-mono text-[9px] text-white/20 italic pl-1">No photos added yet.</p>
-                        ) : (
-                          <div className="space-y-2">
-                            {(formData.photos || []).map((url, i) => (
-                              <div key={i} className="flex items-center gap-3">
-                                <input
-                                  type="url"
-                                  value={url}
-                                  placeholder="https://..."
-                                  onChange={e => {
-                                    const updated = [...(formData.photos || [])];
-                                    updated[i] = e.target.value;
-                                    setFormData(prev => ({ ...prev, photos: updated }));
-                                  }}
-                                  className="flex-1 px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 placeholder:text-white/10"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const updated = (formData.photos || []).filter((_, j) => j !== i);
-                                    setFormData(prev => ({ ...prev, photos: updated }));
-                                  }}
-                                  className="p-2.5 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-all shrink-0"
-                                >
-                                  <X className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Event Photos (Google Drive Link)</label>
+                        <p className="font-mono text-[9px] text-white/20 italic pl-1">
+                          Upload event photos to Google Drive and paste the share link below. The public page will show a button to open the gallery.
+                        </p>
+                        <input
+                          type="url"
+                          value={formData.galleryLink || ""}
+                          placeholder="https://drive.google.com/..."
+                          onChange={e => setFormData(prev => ({ ...prev, galleryLink: e.target.value }))}
+                          className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 placeholder:text-white/10"
+                        />
                       </div>
                     )}
                   </div>

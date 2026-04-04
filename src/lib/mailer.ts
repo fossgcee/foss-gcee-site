@@ -8,6 +8,13 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
+const getSiteUrl = () => {
+  const raw = process.env.PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  return raw.replace(/\/$/, "");
+};
+
+const getLogoUrl = () => `${getSiteUrl()}/foss_gcee_logo.png`;
+
 export function generateOtp(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
@@ -20,6 +27,7 @@ export async function sendOtpEmail(to: string, name: string, otp: string) {
     from: `"FOSS Club GCE Erode" <${process.env.EMAIL_USER}>`,
     to,
     subject: "Your FOSSGCEE Verification Code",
+    text: `Hi ${name},\n\nYour FOSSGCEE verification code is: ${otp}\n\nThis code expires in 10 minutes. If you did not initiate this, please ignore this email.\n\nFOSS Club · GCE Erode`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -30,7 +38,8 @@ export async function sendOtpEmail(to: string, name: string, otp: string) {
         <div style="max-width: 560px; margin: 40px auto; background-color: #0f0f0f; border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
           <div style="padding: 40px 40px 32px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center;">
             <div style="margin-bottom: 24px;">
-              <div style="display: inline-block; background: #ffffff; color: #000000; padding: 12px 20px; border-radius: 12px; font-family: 'Courier New', monospace; font-size: 18px; font-weight: 800; letter-spacing: 2px;">
+              <img src="${getLogoUrl()}" alt="FOSS Club GCE Erode" width="72" height="72" style="display:block; margin: 0 auto 14px; width:72px; height:72px; border-radius:14px;" />
+              <div style="display: inline-block; background: #ffffff; color: #000000; padding: 10px 16px; border-radius: 10px; font-family: 'Courier New', monospace; font-size: 14px; font-weight: 800; letter-spacing: 2px;">
                 FOSS CLUB
               </div>
             </div>
@@ -65,6 +74,7 @@ export async function sendEventRegistrationEmail(to: string, name: string, event
     from: `"FOSS Club GCE Erode" <${process.env.EMAIL_USER}>`,
     to,
     subject: `Registration Confirmed: ${eventTitle}`,
+    text: `Hi ${name},\n\nYour registration is confirmed for: ${eventTitle}.\nWe have received your registration. Stay tuned for further updates on WhatsApp.\n\nFOSS Club · GCE Erode`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -72,6 +82,7 @@ export async function sendEventRegistrationEmail(to: string, name: string, event
       <body style="margin: 0; padding: 0; background-color: #080808; font-family: sans-serif;">
         <div style="max-width: 560px; margin: 40px auto; background-color: #0f0f0f; border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; overflow: hidden;">
           <div style="padding: 40px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <img src="${getLogoUrl()}" alt="FOSS Club GCE Erode" width="64" height="64" style="display:block; margin: 0 auto 16px; width:64px; height:64px; border-radius:12px;" />
             <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Registration Confirmed!</h1>
             <p style="color: rgba(255,255,255,0.5); margin: 12px 0 0;">Hello ${name}, you are all set for the event.</p>
           </div>
@@ -87,4 +98,47 @@ export async function sendEventRegistrationEmail(to: string, name: string, event
       </html>
     `,
   });
+}
+
+type BulkEmailOptions = {
+  subject: string;
+  text: string;
+  html: string;
+  bcc: string[];
+  batchSize?: number;
+};
+
+const chunkList = <T,>(items: T[], size: number) => {
+  const chunks: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size));
+  }
+  return chunks;
+};
+
+/**
+ * Sends a single announcement email to many recipients using BCC batching.
+ */
+export async function sendBulkEmail({ subject, text, html, bcc, batchSize = 80 }: BulkEmailOptions) {
+  const fromAddress = process.env.EMAIL_USER;
+  if (!fromAddress) {
+    throw new Error("EMAIL_USER is not configured.");
+  }
+  if (!bcc.length) {
+    throw new Error("No recipients provided for bulk email.");
+  }
+
+  const batches = chunkList(bcc, Math.max(1, Math.min(batchSize, 90)));
+  for (const batch of batches) {
+    await transporter.sendMail({
+      from: `"FOSS Club GCE Erode" <${fromAddress}>`,
+      to: `"FOSS Club GCE Erode" <${fromAddress}>`,
+      bcc: batch,
+      subject,
+      text,
+      html,
+    });
+  }
+
+  return { batches: batches.length, recipients: bcc.length };
 }

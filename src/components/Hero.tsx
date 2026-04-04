@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { useTheme } from "next-themes";
@@ -20,7 +21,7 @@ export default function Hero() {
   const leftRef = useRef<HTMLDivElement>(null);
   const tuxRef = useRef<HTMLDivElement>(null);
   const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
+  const isDark = resolvedTheme !== "light";
 
   /* ── Typewriter state ─────────────────────────────────── */
   const [displayText, setDisplayText] = useState("");
@@ -29,7 +30,7 @@ export default function Hero() {
 
   useEffect(() => {
     const currentPhrase = PHRASES[phraseIdx];
-    let timer: ReturnType<typeof setTimeout>;
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
     if (typing) {
       if (displayText.length < currentPhrase.length) {
@@ -41,11 +42,15 @@ export default function Hero() {
       if (displayText.length > 0) {
         timer = setTimeout(() => setDisplayText(displayText.slice(0, -1)), 55);
       } else {
-        setPhraseIdx((i) => (i + 1) % PHRASES.length);
-        setTyping(true);
+        timer = setTimeout(() => {
+          setPhraseIdx((i) => (i + 1) % PHRASES.length);
+          setTyping(true);
+        }, 0);
       }
     }
-    return () => clearTimeout(timer);
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [displayText, typing, phraseIdx]);
 
   /* ── GSAP entrance animations ─────────────────────────── */
@@ -131,7 +136,7 @@ export default function Hero() {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-3 mt-2 w-full sm:w-auto">
-            <a
+            <Link
               href="/#join"
               className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl font-mono text-sm font-semibold transition-all duration-200 hover:scale-105 bg-text text-bg shadow-[0_0_24px_var(--accent-glow)]"
             >
@@ -139,7 +144,7 @@ export default function Hero() {
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-            </a>
+            </Link>
             <a
               href="https://github.com/fossgcee"
               target="_blank"

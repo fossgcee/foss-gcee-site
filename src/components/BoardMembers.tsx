@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Member, membersData, getUniqueYears } from "@/data/members";
+import { membersData, getUniqueYears } from "@/data/members";
 
 export default function BoardMembers() {
   const years = getUniqueYears();

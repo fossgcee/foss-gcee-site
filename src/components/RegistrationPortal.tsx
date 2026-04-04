@@ -30,6 +30,12 @@ interface FormData {
   department: string;
 }
 
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  return "Something went wrong.";
+};
+
 // ————— Input field component —————
 function Field({
   icon: Icon, label, name, type = "text", value, onChange, placeholder, disabled,
@@ -138,8 +144,8 @@ export default function RegistrationPortal() {
       if (!data.success) throw new Error(data.error);
       setStep("otp");
       startResendTimer();
-    } catch (err: any) {
-      setError(err.message || "Something went wrong.");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -183,8 +189,8 @@ export default function RegistrationPortal() {
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
       setStep("success");
-    } catch (err: any) {
-      setError(err.message || "Verification failed.");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err) || "Verification failed.");
     } finally {
       setLoading(false);
     }
@@ -205,8 +211,8 @@ export default function RegistrationPortal() {
       setOtp(["", "", "", "", "", ""]);
       otpRefs.current[0]?.focus();
       startResendTimer();
-    } catch (err: any) {
-      setError(err.message || "Failed to resend OTP.");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err) || "Failed to resend OTP.");
     } finally {
       setLoading(false);
     }
@@ -270,7 +276,6 @@ export default function RegistrationPortal() {
         {/* Progress indicator */}
         <div className="flex gap-2 mb-10">
           {["form", "otp"].map((s, i) => {
-            const active = (step === "form" && i === 0) || (step === "otp");
             const filled = (step === "otp" && i === 0) || (step === "otp" && i === 1) || (step === "form" && i === 0);
             return (
               <div

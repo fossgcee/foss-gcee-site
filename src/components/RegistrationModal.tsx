@@ -102,7 +102,7 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
                   <div className="space-y-2">
                     <h4 className="text-2xl font-pixel text-white">SUCCESS!</h4>
                     <p className="font-mono text-xs text-white/40 max-w-xs mx-auto">
-                      Your registration for "{eventTitle}" has been recorded. Check your mail for confirmation.
+                      Your registration for &quot;{eventTitle}&quot; has been recorded. Check your mail for confirmation.
                     </p>
                   </div>
                   <button 

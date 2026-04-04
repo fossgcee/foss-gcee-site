@@ -3,6 +3,12 @@ import dbConnect from "@/lib/db";
 import Registration from "@/models/Registration";
 import { generateOtp, sendOtpEmail } from "@/lib/mailer";
 
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  return "Unknown error";
+};
+
 export async function POST(request: Request) {
   try {
     await dbConnect();
@@ -31,8 +37,8 @@ export async function POST(request: Request) {
     await sendOtpEmail(email, name, otp);
 
     return NextResponse.json({ success: true, message: "OTP sent to your email." });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Send OTP error:", error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }

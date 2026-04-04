@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Registration from "@/models/Registration";
 
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  return "Unknown error";
+};
+
 export async function POST(request: Request) {
   try {
     await dbConnect();
@@ -37,8 +43,8 @@ export async function POST(request: Request) {
     await registration.save();
 
     return NextResponse.json({ success: true, message: "Email verified! Registration complete." });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Verify OTP error:", error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }

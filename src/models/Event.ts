@@ -31,7 +31,8 @@ export interface IEvent extends mongoose.Document {
   handledBy: string; // Speaker name
   organizers: string[]; // Array of organizer names
   poster?: string; // URL from Vercel Blob
-  photos?: string[]; // Array of URLs for completed events
+  photos?: string[]; // Legacy photo URLs (kept for backward compatibility)
+  galleryLink?: string; // External gallery link (e.g. Google Drive)
 
   status: "upcoming" | "completed" | "draft";
   isFeatured?: boolean;
@@ -111,6 +112,11 @@ const EventSchema = new mongoose.Schema<IEvent>(
     photos: [{
       type: String,
     }],
+    galleryLink: {
+      type: String,
+      default: "",
+      trim: true,
+    },
 
     status: {
       type: String,

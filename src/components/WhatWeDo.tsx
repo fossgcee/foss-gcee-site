@@ -38,7 +38,7 @@ export default function WhatWeDo() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <div className="wwd-heading text-center mb-16">
-          <span className="tag-badge mb-4 inline-block">// what we do</span>
+          <span className="tag-badge mb-4 inline-block">{"// what we do"}</span>
           <h2 className="text-3xl sm:text-4xl font-bold mt-3 text-text">
             What We <span className="text-text">Do</span>
           </h2>

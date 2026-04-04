@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Event from "@/models/Event";
 
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  return "Unknown error";
+};
+
 export async function GET(request: Request) {
   try {
     await dbConnect();
@@ -22,11 +28,11 @@ export async function GET(request: Request) {
       count: events.length,
       data: events,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Fetch Admin Events Error:", error);
     return NextResponse.json({
       success: false,
-      error: error.message,
+      error: getErrorMessage(error),
     }, { status: 500 });
   }
 }
@@ -43,11 +49,11 @@ export async function POST(request: Request) {
       message: "Event created successfully",
       data: event,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Create Event Error:", error);
     return NextResponse.json({
       success: false,
-      error: error.message,
+      error: getErrorMessage(error),
     }, { status: 500 });
   }
 }
@@ -74,11 +80,11 @@ export async function PUT(request: Request) {
       message: "Event updated successfully",
       data: event,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Update Event Error:", error);
     return NextResponse.json({
       success: false,
-      error: error.message,
+      error: getErrorMessage(error),
     }, { status: 500 });
   }
 }
@@ -103,11 +109,11 @@ export async function DELETE(request: Request) {
       success: true,
       message: "Event deleted successfully",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Delete Event Error:", error);
     return NextResponse.json({
       success: false,
-      error: error.message,
+      error: getErrorMessage(error),
     }, { status: 500 });
   }
 }

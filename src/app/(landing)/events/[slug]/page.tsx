@@ -1,16 +1,43 @@
+/* eslint-disable @next/next/no-img-element */
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import dbConnect from "@/lib/db";
 import Event from "@/models/Event";
-import { ArrowLeft, Calendar, Clock, MapPin, Users, CheckCircle2, ListChecks, ImageIcon, Award } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ListChecks, Award, ExternalLink } from "lucide-react";
+
+type AgendaItem = { time: string; topic: string };
+
+type EventSlug = { slug: string };
+
+type EventMetadata = {
+  title: string;
+  description?: string;
+};
+
+type EventDetails = {
+  title: string;
+  slug: string;
+  description?: string;
+  startDate: string;
+  endDate?: string;
+  startTime: string;
+  endTime: string;
+  venue: string;
+  handledBy: string;
+  poster?: string;
+  status: "upcoming" | "completed" | "draft";
+  agenda?: AgendaItem[];
+  outcomes?: string;
+  galleryLink?: string;
+};
 
 /* ── Static params ─────────────────────────────────────────── */
 export async function generateStaticParams() {
   try {
     await dbConnect();
-    const events = await Event.find({ status: { $ne: "draft" } }, "slug").lean();
-    return events.map((e: any) => ({ slug: e.slug }));
-  } catch (error) {
+    const events = await Event.find({ status: { $ne: "draft" } }, "slug").lean<EventSlug[]>();
+    return events.map((e) => ({ slug: e.slug }));
+  } catch {
     console.warn("Could not connect to MongoDB during build. Skipping static generation for events.");
     return [];
   }
@@ -20,7 +47,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   await dbConnect();
-  const event = await Event.findOne({ slug }).lean();
+  const event = await Event.findOne({ slug }).lean<EventMetadata>();
   if (!event) return { title: "Event Not Found – FOSSGCEE" };
   return {
     title: `${event.title} – FOSSGCEE`,
@@ -42,17 +69,15 @@ function todayIST() {
 export default async function EventPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   await dbConnect();
-  const eventData = await Event.findOne({ slug }).lean();
-  if (!eventData) notFound();
-
-  const event: any = eventData;
+  const event = await Event.findOne({ slug }).lean<EventDetails>();
+  if (!event) notFound();
   const today = todayIST();
   const isPast = event.status === "completed" || (event.endDate && event.endDate < today);
 
-  const agenda: { time: string; topic: string }[] = event.agenda ?? [];
-  const photos: string[] = event.photos ?? [];
+  const agenda: AgendaItem[] = event.agenda ?? [];
+  const galleryLink: string = event.galleryLink ?? "";
   const hasOutcomes = isPast && event.outcomes && event.outcomes.trim().length > 0;
-  const hasPhotos   = isPast && photos.length > 0;
+  const hasGalleryLink = isPast && galleryLink.trim().length > 0;
   const hasAgenda   = !isPast && agenda.length > 0;
 
   return (
@@ -159,34 +184,30 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
         </section>
       )}
 
-      {/* Photos — past events only */}
-      {hasPhotos && (
+      {/* Gallery Link — past events only */}
+      {hasGalleryLink && (
         <section className="max-w-4xl mx-auto px-6 py-10">
           <h2 className="font-pixel text-sm text-text uppercase tracking-tight mb-6 flex items-center gap-2">
-            <ImageIcon className="w-4 h-4" /> :: MEDIA_ARCHIVE
+            <ExternalLink className="w-4 h-4" /> :: MEDIA_ARCHIVE
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {photos.map((src: string, i: number) => (
-              <a key={i} href={src} target="_blank" rel="noopener noreferrer" className="group overflow-hidden rounded-[24px] border border-border-2 bg-surface p-2 block">
-                <div className="relative aspect-square rounded-2xl overflow-hidden">
-                  <img src={src} alt={`${event.title} photo ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                    <span className="font-mono text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest bg-black/60 px-3 py-1.5 rounded-lg">View Full</span>
-                  </div>
-                </div>
-              </a>
-            ))}
-          </div>
+          <a
+            href={galleryLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-surface-2 border border-border-2 font-pixel text-xs uppercase tracking-tight text-text hover:scale-[1.02] transition-all"
+          >
+            OPEN_GOOGLE_DRIVE_GALLERY <ExternalLink className="w-4 h-4" />
+          </a>
         </section>
       )}
 
       {/* Empty state for completed events with no content yet */}
-      {isPast && !hasOutcomes && !hasPhotos && (
+      {isPast && !hasOutcomes && !hasGalleryLink && (
         <section className="max-w-4xl mx-auto px-6 py-10">
           <div className="p-8 rounded-2xl border border-dashed border-border-2 text-center">
             <CheckCircle2 className="w-8 h-8 mx-auto mb-3 text-muted-2" />
             <p className="font-pixel text-[10px] text-muted uppercase tracking-widest">Event Completed</p>
-            <p className="font-mono text-xs text-muted-2 mt-1">Outcomes and photos will be posted soon.</p>
+            <p className="font-mono text-xs text-muted-2 mt-1">Outcomes and gallery link will be posted soon.</p>
           </div>
         </section>
       )}

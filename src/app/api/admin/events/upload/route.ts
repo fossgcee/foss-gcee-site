@@ -1,6 +1,12 @@
 import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  return "Unknown error";
+};
+
 export async function POST(request: Request): Promise<NextResponse> {
   const { searchParams } = new URL(request.url);
   const filename = searchParams.get('filename');
@@ -25,8 +31,8 @@ export async function POST(request: Request): Promise<NextResponse> {
     });
 
     return NextResponse.json(blob);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Vercel Blob Upload error Details:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }

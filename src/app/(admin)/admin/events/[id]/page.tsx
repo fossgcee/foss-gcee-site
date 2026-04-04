@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Loader2, ArrowLeft, Save, Upload, Trash, Image as ImageIcon, FileText } from "lucide-react";
+import { useParams } from "next/navigation";
+import { Loader2, ArrowLeft, Save, FileText, Link as LinkIcon, Trash } from "lucide-react";
 import Link from "next/link";
 
 interface EventContent {
@@ -11,18 +11,17 @@ interface EventContent {
   agenda?: { time: string; topic: string }[];
   outcomes?: string;
   photos?: string[];
+  galleryLink?: string;
   slug: string;
 }
 
 export default function AdminEventContentPage() {
   const params = useParams();
-  const router = useRouter();
   const id = params.id as string;
 
   const [event, setEvent] = useState<EventContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   useEffect(() => {
     fetch(`/api/admin/events?id=${id}`)
@@ -43,44 +42,15 @@ export default function AdminEventContentPage() {
         body: JSON.stringify({
           agenda: event.agenda,
           outcomes: event.outcomes,
-          photos: event.photos,
+          galleryLink: event.galleryLink,
         }),
       });
       alert("Content saved successfully");
-    } catch (err) {
+    } catch {
       alert("Failed to save content");
     } finally {
       setSaving(false);
     }
-  };
-
-  const handleUploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !event) return;
-
-    setUploadingPhoto(true);
-    try {
-      const res = await fetch(`/api/admin/events/upload?filename=${encodeURIComponent(file.name)}`, {
-        method: "POST", body: file,
-      });
-      const d = await res.json();
-      if (d.url) {
-        setEvent(prev => prev ? ({
-          ...prev,
-          photos: [...(prev.photos || []), d.url]
-        }) : prev);
-      }
-    } finally {
-      setUploadingPhoto(false);
-    }
-  };
-
-  const removePhoto = (indexToRemove: number) => {
-    if (!event) return;
-    setEvent(prev => prev ? ({
-      ...prev,
-      photos: (prev.photos || []).filter((_, i) => i !== indexToRemove)
-    }) : prev);
   };
 
   if (loading) {
@@ -112,7 +82,7 @@ export default function AdminEventContentPage() {
 
         <button 
           onClick={handleSave}
-          disabled={saving || uploadingPhoto}
+          disabled={saving}
           className="flex items-center justify-center gap-2 px-8 py-3 bg-white text-black rounded-xl font-pixel text-[11px] hover:bg-white/90 disabled:opacity-50 transition-all active:scale-95 shadow-[0_4px_20px_rgba(255,255,255,0.1)]"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -199,42 +169,20 @@ export default function AdminEventContentPage() {
            />
         </div>
 
-        {/* Photo Gallery Manager */}
+        {/* Google Drive Gallery Link */}
         <div className="space-y-6">
            <div className="flex items-center gap-3 border-b border-white/5 pb-2">
-             <ImageIcon className="w-4 h-4 text-white/40" />
-             <h2 className="font-mono text-xs uppercase tracking-widest text-white/80">Media Archive / Photo Gallery</h2>
+             <LinkIcon className="w-4 h-4 text-white/40" />
+             <h2 className="font-mono text-xs uppercase tracking-widest text-white/80">Event Photos (Google Drive)</h2>
            </div>
-           <p className="text-[10px] font-mono text-white/30 leading-relaxed uppercase">Upload photos from the event. These will automatically appear in the public specs page gallery.</p>
-           
-           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {/* Existing Photos */}
-              {(event.photos || []).map((photoUrl, idx) => (
-                <div key={idx} className="relative group aspect-square rounded-[24px] bg-white/[0.02] border border-white/10 overflow-hidden">
-                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                   <img src={photoUrl} alt="Event upload" className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all" />
-                   <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-end">
-                      <button 
-                        onClick={() => removePhoto(idx)}
-                        className="p-2 rounded-xl bg-red-500/80 text-white backdrop-blur shadow-lg hover:scale-110 transition-transform"
-                      >
-                         <Trash className="w-3.5 h-3.5" />
-                      </button>
-                   </div>
-                </div>
-              ))}
-
-              {/* Uploader Box */}
-              <label className="aspect-square flex flex-col items-center justify-center gap-3 cursor-pointer p-6 text-center hover:bg-white/[0.04] transition-colors rounded-[24px] bg-white/[0.01] border border-dashed border-white/10 group">
-                 {uploadingPhoto ? (
-                    <Loader2 className="w-6 h-6 animate-spin text-white/30" />
-                 ) : (
-                    <Upload className="w-6 h-6 text-white/20 group-hover:scale-110 transition-transform group-hover:text-white/60" />
-                 )}
-                 <span className="font-mono text-[9px] text-white/30 uppercase tracking-widest block">UPLOAD_IMAGE</span>
-                 <input type="file" className="hidden" accept="image/*" onChange={handleUploadPhoto} disabled={uploadingPhoto} />
-              </label>
-           </div>
+           <p className="text-[10px] font-mono text-white/30 leading-relaxed uppercase">Upload event photos to Google Drive and paste the share link below. The public page will show a button to open the gallery.</p>
+           <input
+             type="url"
+             value={event.galleryLink || ""}
+             onChange={e => setEvent({ ...event, galleryLink: e.target.value })}
+             placeholder="https://drive.google.com/..."
+             className="w-full px-5 py-4 bg-white/[0.02] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all placeholder:text-white/10"
+           />
         </div>
 
       </div>

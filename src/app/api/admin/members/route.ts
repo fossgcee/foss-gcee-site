@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Registration from "@/models/Registration";
 
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  return "Unknown error";
+};
+
 export async function GET(request: Request) {
   try {
     await dbConnect();
@@ -11,8 +17,7 @@ export async function GET(request: Request) {
     const verified = searchParams.get("verified");
     const approvedFilter = searchParams.get("approved");
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const query: any = {};
+    const query: Record<string, unknown> = {};
 
     if (search) {
       query.$or = [
@@ -35,8 +40,8 @@ export async function GET(request: Request) {
       count: registrations.length,
       data: registrations,
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -46,8 +51,8 @@ export async function DELETE(request: Request) {
     const { id } = await request.json();
     await Registration.findByIdAndDelete(id);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -56,8 +61,7 @@ export async function PATCH(request: Request) {
     await dbConnect();
     const { id, approved, role, name, email, phone, linkedin, year, department, otpVerified } = await request.json();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const update: any = {};
+    const update: Record<string, unknown> = {};
     if (typeof approved === "boolean") update.approved = approved;
     if (typeof otpVerified === "boolean") update.otpVerified = otpVerified;
     if (typeof role === "string") update.role = role.trim();
@@ -72,7 +76,7 @@ export async function PATCH(request: Request) {
     if (!updated) return NextResponse.json({ success: false, error: "Record not found" }, { status: 404 });
 
     return NextResponse.json({ success: true, data: updated });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }

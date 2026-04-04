@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Event from "@/models/Event";
 
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  return "Unknown error";
+};
+
 export async function POST(request: Request) {
   try {
     await dbConnect();
@@ -18,7 +24,8 @@ export async function POST(request: Request) {
     }
 
     // Check for duplicate registration
-    const isDuplicate = event.registrations.some((r: any) => r.email === email || r.regNo === regNo);
+    const registrations = (event.registrations || []) as Array<{ email: string; regNo: string }>;
+    const isDuplicate = registrations.some((r) => r.email === email || r.regNo === regNo);
     if (isDuplicate) {
       return NextResponse.json({ success: false, error: "You are already registered for this event" }, { status: 400 });
     }
@@ -54,11 +61,11 @@ export async function POST(request: Request) {
       success: true,
       message: "Registration completed",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Critical Registration Error:", error);
     return NextResponse.json({
       success: false,
-      error: error.message,
+      error: getErrorMessage(error),
     }, { status: 500 });
   }
 }

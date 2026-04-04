@@ -15,7 +15,7 @@ const mockGallery = [
 ];
 
 export default function MembersGallery() {
-  const [images, setImages] = useState(mockGallery);
+  const [images] = useState(mockGallery);
   const sectionRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 

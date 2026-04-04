@@ -6,8 +6,13 @@ if (!MONGODB_URI) {
   throw new Error("Please define the DATABASE_URL environment variable inside .env.local");
 }
 
+type MongooseCache = {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+};
+
 declare global {
-  var mongoose: any;
+  var mongoose: MongooseCache | undefined;
 }
 
 let cached = global.mongoose;

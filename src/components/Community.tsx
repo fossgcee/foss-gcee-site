@@ -1,4 +1,5 @@
 ﻿"use client";
+/* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -101,7 +102,7 @@ export default function Community() {
 
         {/* ── Heading ─────────────────────────────────────────── */}
         <div className="comm-heading text-center mb-16">
-          <span className="tag-badge mb-4 inline-block">// community</span>
+          <span className="tag-badge mb-4 inline-block">{"// community"}</span>
           <h2 className="text-3xl sm:text-4xl font-bold mt-3 text-text">
             Events &amp; <span className="text-text">Activities</span>
           </h2>

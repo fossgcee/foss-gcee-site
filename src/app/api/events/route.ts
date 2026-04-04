@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Event from "@/models/Event";
 
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  return "Unknown error";
+};
+
 /**
  * Returns today's date string in "YYYY-MM-DD" format using IST (UTC+5:30).
  * This avoids UTC-midnight off-by-one errors for Indian users.
@@ -33,11 +39,11 @@ export async function GET() {
       count: events.length,
       data: events,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Fetch Events Error:", error);
     return NextResponse.json({
       success: false,
-      error: error.message,
+      error: getErrorMessage(error),
     }, { status: 500 });
   }
 }

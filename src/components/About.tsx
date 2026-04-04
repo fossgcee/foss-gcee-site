@@ -67,7 +67,7 @@ export default function About() {
 
         {/* Heading */}
         <div className="about-heading text-center mb-16">
-          <span className="tag-badge mb-4 inline-block">// about</span>
+          <span className="tag-badge mb-4 inline-block">{"// about"}</span>
           <h2 className="text-3xl sm:text-4xl font-bold mt-3 text-text">
             Who <span className="text-text">We Are</span>
           </h2>
