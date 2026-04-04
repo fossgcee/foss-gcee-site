@@ -18,7 +18,8 @@ Official website of the **Free and Open Source Software Club** at Government Col
 8. [Deploying](#deploying)
 9. [Design System](#design-system)
 10. [Adding New Pages or Sections](#adding-new-pages-or-sections)
-11. [Troubleshooting](#troubleshooting)
+11. [Contributing](#contributing)
+12. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -289,6 +290,19 @@ File: `src/app/layout.tsx` — edit the `metadata` export.
 
 ---
 
+## Contributing
+
+We welcome contributions from new and experienced developers.
+
+- Start with [CONTRIBUTING.md](./CONTRIBUTING.md) for the workflow and expectations.
+- Use the issue templates in [.github/ISSUE_TEMPLATE](./.github/ISSUE_TEMPLATE) for bugs, feature suggestions, documentation updates, and ideas for new features.
+- Use [.github/pull_request_template.md](./.github/pull_request_template.md) when opening a pull request.
+- Keep changes focused so they are easier to review and merge.
+
+If you are unsure where to start, open an issue and describe what you want to improve. We especially welcome suggestions for features, enhancements, and quality-of-life improvements.
+
+---
+
 ## Deploying
 
 The site is deployed on **Netlify** from the `main` branch automatically.
@@ -429,7 +443,7 @@ npm run build && npm start
 
 ## Contact
 
-Questions about the website? Reach out on the FOSSGCEE Telegram group or email **fossgcee@gmail.com**.
+Questions about the website? Open an issue for bugs, feature requests, documentation updates, or suggestions for new features. For general community questions, reach out on the FOSSGCEE Telegram group or email **fossgcee@gmail.com**.
 
 ---
 

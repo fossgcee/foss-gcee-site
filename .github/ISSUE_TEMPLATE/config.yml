@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and general discussion
+    url: https://github.com/fossgcee/foss-gcee-site/issues
+    about: Please open an issue if you need help, want to report a problem, or have a suggestion that does not fit the templates.
