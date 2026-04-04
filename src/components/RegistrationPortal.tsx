@@ -5,6 +5,7 @@ import {
   User, Mail, Link2, Phone, GraduationCap, BookOpen,
   ArrowRight, Loader2, CheckCircle2, RefreshCw, RotateCcw
 } from "lucide-react";
+import { GitHubIcon, YouTubeIcon, InstagramIcon, DiscordIcon, LinkedInIcon, EmailIcon } from "@/components/icons/SocialIcons";
 
 const DEPARTMENTS = [
   "Computer Science & Engineering",
@@ -29,6 +30,15 @@ interface FormData {
   year: string;
   department: string;
 }
+
+const SOCIALS = [
+  { Icon: GitHubIcon, label: "GitHub", href: "https://github.com/fossgcee", sub: "github.com/fossgcee", active: true },
+  { Icon: YouTubeIcon, label: "YouTube", href: "https://www.youtube.com/channel/UCTtzkb23e6iQAMMkgigHQqQ", sub: "FOSSGCEE Channel", active: true },
+  { Icon: InstagramIcon, label: "Instagram", href: "https://www.instagram.com/fossgcee/", sub: "@fossgcee", active: true },
+  { Icon: DiscordIcon, label: "Discord", href: "https://discord.com/invite/d6SUMn4JF", sub: "Join our server", active: true },
+  { Icon: LinkedInIcon, label: "LinkedIn", href: "#", sub: "Coming soon", active: false },
+  { Icon: EmailIcon, label: "Email", href: "mailto:fossgcee@gmail.com", sub: "fossgcee@gmail.com", active: true },
+];
 
 const getErrorMessage = (error: unknown) => {
   if (error instanceof Error) return error.message;
@@ -249,6 +259,31 @@ export default function RegistrationPortal() {
           <p className="font-mono text-[10px] text-black/40 dark:text-white/30">
             Watch your inbox for further updates from the club.
           </p>
+
+          <div className="pt-6 space-y-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-black/50 dark:text-white/40">
+              Follow us for updates
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+              {SOCIALS.map((s) => (
+                <a
+                  key={s.label}
+                  href={s.active ? s.href : undefined}
+                  target={s.active ? "_blank" : undefined}
+                  rel="noopener noreferrer"
+                  className={`flex items-center gap-3 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.03] px-3 py-2.5 text-black/70 dark:text-white/70 transition-colors ${s.active ? "hover:text-black dark:hover:text-white hover:bg-black/[0.06] dark:hover:bg-white/[0.06]" : "opacity-50 pointer-events-none"}`}
+                >
+                  <span className="w-8 h-8 rounded-lg border border-black/10 dark:border-white/10 flex items-center justify-center text-black/60 dark:text-white/60">
+                    <s.Icon />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-xs font-semibold">{s.label}</span>
+                    <span className="block text-[10px] font-mono text-black/40 dark:text-white/40 truncate">{s.sub}</span>
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
     );
