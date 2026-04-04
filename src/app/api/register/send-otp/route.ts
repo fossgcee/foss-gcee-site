@@ -52,19 +52,25 @@ export async function POST(request: Request) {
     await Registration.findOneAndUpdate(
       { email: normalizedEmail },
       {
-        name,
-        email: normalizedEmail,
-        linkedin,
-        phone: normalizedPhone,
-        year,
-        department,
-        otp,
-        otpExpiresAt,
-        otpVerified: false,
-        otpAttempts: 0,
-        otpLockedUntil: null,
+        $set: {
+          name,
+          email: normalizedEmail,
+          linkedin,
+          phone: normalizedPhone,
+          year,
+          department,
+          otp,
+          otpExpiresAt,
+          otpVerified: false,
+          otpAttempts: 0,
+          otpLockedUntil: null,
+        },
+        $setOnInsert: {
+          role: "Member",
+          approved: false,
+        },
       },
-      { upsert: true, new: true, select: "+otp +otpExpiresAt" }
+      { upsert: true, new: true, select: "+otp +otpExpiresAt", setDefaultsOnInsert: true }
     );
 
     await sendOtpEmail(normalizedEmail, name, otp);

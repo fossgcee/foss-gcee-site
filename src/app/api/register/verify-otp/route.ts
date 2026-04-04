@@ -67,6 +67,9 @@ export async function POST(request: Request) {
 
     // Mark as verified & clear OTP
     registration.otpVerified = true;
+    if (!registration.role || registration.role.trim().length === 0) {
+      registration.role = "Member";
+    }
     registration.otp = undefined;
     registration.otpExpiresAt = undefined;
     registration.otpAttempts = 0;

@@ -60,7 +60,7 @@ const RegistrationSchema = new mongoose.Schema<IRegistration>(
     },
     role: {
       type: String,
-      default: "",
+      default: "Member",
       trim: true,
     },
     otp: {
