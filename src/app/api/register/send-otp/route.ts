@@ -19,14 +19,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "All fields are required." }, { status: 400 });
     }
 
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const normalizedPhone = String(phone).replace(/\s+/g, "").trim();
+
+    const existingByPhone = await Registration.findOne({ phone: normalizedPhone }).select("email");
+    if (existingByPhone && existingByPhone.email?.toLowerCase() !== normalizedEmail) {
+      return NextResponse.json({ success: false, error: "This mobile number is already registered." }, { status: 400 });
+    }
+
     const otp = generateOtp();
     const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     // Upsert: allow re-registration if not yet verified
     await Registration.findOneAndUpdate(
-      { email },
+      { email: normalizedEmail },
       {
-        name, email, linkedin, phone, year, department,
+        name,
+        email: normalizedEmail,
+        linkedin,
+        phone: normalizedPhone,
+        year,
+        department,
         otp,
         otpExpiresAt,
         otpVerified: false,
