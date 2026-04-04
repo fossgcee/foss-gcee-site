@@ -83,6 +83,18 @@ export default function Footer() {
               ))}
             </div>
             <p className="font-mono text-xs text-muted">fossgcee@gmail.com</p>
+            <p className="mt-4 font-mono text-xs leading-relaxed text-muted-2 max-w-xs">
+              Found a bug? Got suggestions for improvement?{" "}
+              <a
+                href="https://github.com/fossgcee/foss-gcee-site/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link text-text underline underline-offset-4 decoration-border transition-colors duration-200"
+              >
+                Open an issue
+              </a>
+              .
+            </p>
           </div>
         </div>
 
