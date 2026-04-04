@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Registration from "@/models/Registration";
+import { requireAdmin } from "@/lib/adminAuth";
 
 const getErrorMessage = (error: unknown) => {
   if (error instanceof Error) return error.message;
@@ -9,6 +10,9 @@ const getErrorMessage = (error: unknown) => {
 };
 
 export async function GET(request: Request) {
+  const auth = await requireAdmin(request);
+  if (auth) return auth;
+
   try {
     await dbConnect();
 
@@ -46,6 +50,9 @@ export async function GET(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const auth = await requireAdmin(request);
+  if (auth) return auth;
+
   try {
     await dbConnect();
     const { id } = await request.json();
@@ -57,6 +64,9 @@ export async function DELETE(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  const auth = await requireAdmin(request);
+  if (auth) return auth;
+
   try {
     await dbConnect();
     const { id, approved, role, name, email, phone, linkedin, year, department, otpVerified } = await request.json();

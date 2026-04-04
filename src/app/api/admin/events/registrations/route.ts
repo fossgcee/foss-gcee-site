@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Event from "@/models/Event";
+import { requireAdmin } from "@/lib/adminAuth";
 
 type RegistrationSummary = {
   registeredAt?: string | Date;
@@ -13,6 +14,9 @@ const getErrorMessage = (error: unknown) => {
 };
 
 export async function GET(request: Request) {
+  const auth = await requireAdmin(request);
+  if (auth) return auth;
+
   try {
     const { searchParams } = new URL(request.url);
     const eventSlug = searchParams.get('eventSlug');

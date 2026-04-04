@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Event from "@/models/Event";
 import { sendBulkEmail } from "@/lib/mailer";
+import { requireAdmin } from "@/lib/adminAuth";
 
 export const runtime = "nodejs";
 
@@ -44,6 +45,9 @@ const getErrorMessage = (error: unknown) => {
 };
 
 export async function POST(request: Request) {
+  const auth = await requireAdmin(request);
+  if (auth) return auth;
+
   try {
     const body = await request.json();
     const eventSlug = String(body?.eventSlug || "").trim().toLowerCase();

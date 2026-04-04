@@ -1,21 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-
-const mockGallery = [
-  { _id: "1", pic: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=500&q=80" },
-  { _id: "2", pic: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=500&q=80" },
-  { _id: "3", pic: "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=500&q=80" },
-  { _id: "4", pic: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=500&q=80" },
-  { _id: "5", pic: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=500&q=80" },
-];
+import { membersGallery } from "@/data/membersGallery";
 
 export default function MembersGallery() {
-  const [images] = useState(mockGallery);
+  const images = membersGallery;
   const sectionRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -39,12 +32,14 @@ export default function MembersGallery() {
 
   // Auto-scroll effect
   useEffect(() => {
+    if (images.length < 4) return;
+
     const interval = setInterval(() => {
       scrollRight();
     }, 3500); // Auto-scroll every 3.5 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [images.length]);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -98,6 +93,14 @@ export default function MembersGallery() {
           )}
         </div>
         
+        <div className="mb-8 rounded-2xl border border-dashed border-border-2 bg-surface-2/40 p-5">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-2">How To Upload</p>
+          <div className="mt-3 grid gap-2 text-sm text-muted-2">
+            <p>1. Add images to <span className="font-mono">public/members-gallery/</span></p>
+            <p>2. Register them in <span className="font-mono">src/data/membersGallery.ts</span></p>
+          </div>
+        </div>
+
         {images.length > 0 ? (
           <div 
             ref={scrollContainerRef}
@@ -106,13 +109,13 @@ export default function MembersGallery() {
           >
             {images.map((image) => (
               <div 
-                key={image._id} 
+                key={image.id} 
                 className="gallery-card group flex-none w-[85vw] sm:w-[45vw] md:w-[30vw] relative rounded-xl overflow-hidden bg-bg-2 border border-border snap-center"
               >
                 <div className="relative w-full aspect-[16/9]">
                   <Image
-                    src={image.pic}
-                    alt="Gallery item"
+                    src={image.src}
+                    alt={image.alt || "Members gallery item"}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
@@ -122,7 +125,7 @@ export default function MembersGallery() {
           </div>
         ) : (
           <div className="text-center py-12 text-muted-2 border border-dashed border-border-2 rounded-2xl">
-            <p className="font-mono text-sm">No images in gallery.</p>
+            <p className="font-mono text-sm">No images in gallery yet. Add photos using the steps above.</p>
           </div>
         )}
 

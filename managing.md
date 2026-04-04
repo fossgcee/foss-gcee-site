@@ -34,9 +34,9 @@ Currently, the Members Gallery `/members` is statically built as a placeholder p
 
 ### Phase 1: Static Management (Current)
 If you want to change the display photos manually before the backend is finished:
-1. Open `src/components/MembersGallery.tsx`.
-2. Locate the `mockGallery` array at the top of the file.
-3. Update the `pic` URLs to point to your new images (you can use direct links, or add images to the `public/gallery/` folder and use paths like `/gallery/pic1.jpg`).
+1. Drop images into `public/members-gallery/`.
+2. Open `src/data/membersGallery.ts`.
+3. Add entries to the `membersGallery` array using paths like `/members-gallery/pic1.jpg`.
 
 ### Phase 2: Backend Integration (Future)
 Your backend team will integrate the React/Redux upload form. Once the backend API and Cloudinary are wired up:

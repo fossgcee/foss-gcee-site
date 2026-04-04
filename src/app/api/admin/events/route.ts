@@ -3,6 +3,7 @@ import dbConnect from "@/lib/db";
 import Event from "@/models/Event";
 import Registration from "@/models/Registration";
 import { sendBulkEmail } from "@/lib/mailer";
+import { requireAdmin } from "@/lib/adminAuth";
 
 const getErrorMessage = (error: unknown) => {
   if (error instanceof Error) return error.message;
@@ -175,6 +176,9 @@ const buildEventEmail = (event: { title: string; slug: string; startDate: string
 };
 
 export async function GET(request: Request) {
+  const auth = await requireAdmin(request);
+  if (auth) return auth;
+
   try {
     await dbConnect();
     const { searchParams } = new URL(request.url);
@@ -204,6 +208,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const auth = await requireAdmin(request);
+  if (auth) return auth;
+
   try {
     await dbConnect();
     const body = await request.json();
@@ -245,6 +252,9 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
+  const auth = await requireAdmin(request);
+  if (auth) return auth;
+
   try {
     await dbConnect();
     const { searchParams } = new URL(request.url);
@@ -326,6 +336,9 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const auth = await requireAdmin(request);
+  if (auth) return auth;
+
   try {
     await dbConnect();
     const { searchParams } = new URL(request.url);
