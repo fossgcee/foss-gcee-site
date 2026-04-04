@@ -4,6 +4,7 @@ import Link from "next/link";
 import dbConnect from "@/lib/db";
 import Event from "@/models/Event";
 import { ArrowLeft, CheckCircle2, ListChecks, Award, ExternalLink } from "lucide-react";
+import EventRegisterButton from "@/components/EventRegisterButton";
 
 type AgendaItem = { time: string; topic: string };
 
@@ -136,6 +137,12 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
             </div>
 
          </div>
+
+         {!isPast && (
+           <div className="mt-10">
+             <EventRegisterButton eventTitle={event.title} eventSlug={event.slug} />
+           </div>
+         )}
       </div>
 
       {/* Description */}

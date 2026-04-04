@@ -117,6 +117,11 @@ export default function EventsPage() {
     return () => ctx.revert();
   }, [loading, events, selectedYear]);
 
+  const handleRegister = (event: PublicEvent) => {
+    setSelectedEvent(event);
+    setIsModalOpen(true);
+  };
+
   // Date formatter: DD/MM/YYYY
   const formatDDMMYYYY = (dateStr: string) => {
     if (!dateStr) return "";
@@ -175,6 +180,16 @@ export default function EventsPage() {
                            <Clock className="w-3 h-3 text-text opacity-50" />
                            <span className="text-text">TIME:</span> {event.startTime} - {event.endTime} <span className="opacity-40 ml-1">(IST/24H)</span>
                         </p>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleRegister(event);
+                          }}
+                          className="mt-3 w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-border bg-text text-bg font-mono text-[10px] uppercase tracking-widest hover:scale-[1.02] transition-transform"
+                        >
+                          REGISTER_NOW
+                        </button>
                       </div>
                   </div>
                 </Link>
