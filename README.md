@@ -2,7 +2,7 @@
 
 Official website of the **Free and Open Source Software Club** at Government College of Engineering, Erode.
 
-🌐 **Live:** [fossgcee.netlify.app](https://fossgcee.netlify.app) &nbsp;|&nbsp; 📁 **Stack:** Next.js 16 · Tailwind CSS v4 · MongoDB · Nodemailer
+🌐 **Live:** [fossgcee.netlify.app](https://fossgcee.vercel.app) &nbsp;|&nbsp; 📁 **Stack:** Next.js 16 · Tailwind CSS v4 · MongoDB · Nodemailer
 
 ---
 
