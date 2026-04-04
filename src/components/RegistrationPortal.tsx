@@ -107,7 +107,7 @@ export default function RegistrationPortal() {
   const resendIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const [form, setForm] = useState<FormData>({
-    name: "", email: "", linkedin: "", phone: "", year: "", department: "",
+    name: "", email: "", linkedin: "", phone: "+91 ", year: "", department: "",
   });
 
   const startResendTimer = () => {
@@ -287,7 +287,7 @@ export default function RegistrationPortal() {
           {/* ——— STEP 1: FORM ——— */}
           {step === "form" && (
             <form onSubmit={handleFormSubmit} className="space-y-5">
-              <Field icon={User} label="Full Name" name="name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} placeholder="e.g. Vishnu Kumar" />
+              <Field icon={User} label="Full Name" name="name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} placeholder="e.g. Linus Torvalds" />
               <Field icon={Mail} label="Gmail Address" name="email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} placeholder="e.g. you@gmail.com" />
               <Field
                 icon={Link2}
@@ -339,11 +339,10 @@ export default function RegistrationPortal() {
                       value={digit}
                       onChange={(e) => handleOtpChange(i, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                      className={`w-10 sm:w-12 h-12 sm:h-14 text-center text-xl sm:text-2xl font-pixel text-black dark:text-white bg-black/[0.04] dark:bg-white/[0.04] border rounded-xl focus:outline-none focus:ring-2 ring-black/20 dark:ring-white/30 transition-all caret-transparent ${
-                        digit
+                      className={`w-10 sm:w-12 h-12 sm:h-14 text-center text-xl sm:text-2xl font-pixel text-black dark:text-white bg-black/[0.04] dark:bg-white/[0.04] border rounded-xl focus:outline-none focus:ring-2 ring-black/20 dark:ring-white/30 transition-all caret-transparent ${digit
                           ? "border-black/40 dark:border-white/40"
                           : "border-black/10 dark:border-white/10"
-                      }`}
+                        }`}
                     />
                   ))}
                 </div>
