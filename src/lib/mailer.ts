@@ -35,28 +35,31 @@ export async function sendOtpEmail(to: string, name: string, otp: string) {
         <meta charset="UTF-8" />
       </head>
       <body style="margin: 0; padding: 0; background-color: #080808; font-family: 'Inter', system-ui, -apple-system, sans-serif;">
-        <div style="max-width: 560px; margin: 40px auto; background-color: #0f0f0f; border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
-          <div style="padding: 40px 40px 32px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center;">
-            <div style="margin-bottom: 24px;">
-              <img src="${getLogoUrl()}" alt="FOSS Club GCE Erode" width="72" height="72" style="display:block; margin: 0 auto 14px; width:72px; height:72px; border-radius:14px;" />
-              <div style="display: inline-block; background: #ffffff; color: #000000; padding: 10px 16px; border-radius: 10px; font-family: 'Courier New', monospace; font-size: 14px; font-weight: 800; letter-spacing: 2px;">
-                FOSS CLUB
-              </div>
+        <div style="max-width: 600px; margin: 40px auto; background-color: #0f0f0f; border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; overflow: hidden; box-shadow: 0 24px 48px rgba(0,0,0,0.45);">
+          <div style="padding: 36px 40px 28px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center;">
+            <img src="${getLogoUrl()}" alt="FOSS Club GCE Erode" width="72" height="72" style="display:block; margin: 0 auto 16px; width:72px; height:72px; border-radius:16px;" />
+            <div style="display:inline-block; padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8); font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;">
+              FOSS CLUB
             </div>
-            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.02em;">Verify your email</h1>
-            <p style="color: rgba(255,255,255,0.5); margin: 12px 0 0; font-size: 15px; line-height: 1.6;">Hello, ${name}. Your one-time password for FOSSGCEE is below.</p>
+            <h1 style="color: #ffffff; margin: 18px 0 0; font-size: 24px; font-weight: 700; letter-spacing: -0.02em;">Verify your email</h1>
+            <p style="color: rgba(255,255,255,0.55); margin: 12px 0 0; font-size: 14px; line-height: 1.7;">
+              Hello ${name}, use the one‑time password below to complete your registration.
+            </p>
           </div>
           
-          <div style="padding: 48px 40px; text-align: center;">
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px; display: inline-block;">
-              <span style="color: #ffffff; font-family: 'Courier New', monospace; font-size: 42px; font-weight: 700; letter-spacing: 8px; margin-right: -8px;">${otp}</span>
+          <div style="padding: 42px 40px; text-align: center;">
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 22px 26px; display: inline-block;">
+              <span style="color: #ffffff; font-family: 'Courier New', monospace; font-size: 40px; font-weight: 700; letter-spacing: 10px; margin-right: -10px;">${otp}</span>
             </div>
-            <p style="color: rgba(255,255,255,0.35); font-size: 13px; margin-top: 32px; line-height: 1.7;">⏱ This code expires in <strong style="color:rgba(255,255,255,0.6)">10 minutes</strong>.<br/>If you did not initiate this, please ignore this email.</p>
+            <p style="color: rgba(255,255,255,0.4); font-size: 13px; margin-top: 26px; line-height: 1.7;">
+              This code expires in <strong style="color:rgba(255,255,255,0.7)">10 minutes</strong>.<br/>
+              If you did not initiate this request, you can safely ignore this email.
+            </p>
           </div>
 
-          <div style="padding: 32px 40px; border-top: 1px solid rgba(255,255,255,0.05); background-color: rgba(255,255,255,0.01); text-align: center;">
-            <div style="color: rgba(255,255,255,0.2); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase;">
-              FOSS Club · GCE Erode &nbsp;|&nbsp; Free &amp; Open Source Software
+          <div style="padding: 26px 40px; border-top: 1px solid rgba(255,255,255,0.05); background-color: rgba(255,255,255,0.01); text-align: center;">
+            <div style="color: rgba(255,255,255,0.25); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;">
+              FOSS Club · GCE Erode
             </div>
           </div>
         </div>
@@ -79,18 +82,21 @@ export async function sendEventRegistrationEmail(to: string, name: string, event
       <!DOCTYPE html>
       <html>
       <head><meta charset="UTF-8" /></head>
-      <body style="margin: 0; padding: 0; background-color: #080808; font-family: sans-serif;">
-        <div style="max-width: 560px; margin: 40px auto; background-color: #0f0f0f; border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; overflow: hidden;">
-          <div style="padding: 40px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
-            <img src="${getLogoUrl()}" alt="FOSS Club GCE Erode" width="64" height="64" style="display:block; margin: 0 auto 16px; width:64px; height:64px; border-radius:12px;" />
-            <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Registration Confirmed!</h1>
-            <p style="color: rgba(255,255,255,0.5); margin: 12px 0 0;">Hello ${name}, you are all set for the event.</p>
+      <body style="margin: 0; padding: 0; background-color: #080808; font-family: 'Inter', system-ui, -apple-system, sans-serif;">
+        <div style="max-width: 600px; margin: 40px auto; background-color: #0f0f0f; border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; overflow: hidden;">
+          <div style="padding: 36px 40px 28px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <img src="${getLogoUrl()}" alt="FOSS Club GCE Erode" width="64" height="64" style="display:block; margin: 0 auto 14px; width:64px; height:64px; border-radius:14px;" />
+            <div style="display:inline-block; padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8); font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;">
+              FOSS CLUB
+            </div>
+            <h1 style="color: #ffffff; margin: 16px 0 0; font-size: 22px;">Registration Confirmed</h1>
+            <p style="color: rgba(255,255,255,0.55); margin: 10px 0 0; font-size: 14px;">Hello ${name}, you are all set for the event.</p>
           </div>
-          <div style="padding: 40px; text-align: center;">
-            <div style="color: #ffffff; font-size: 18px; font-weight: bold; margin-bottom: 8px;">${eventTitle}</div>
-            <p style="color: rgba(255,255,255,0.4); font-size: 14px;">We have received your registration. Stay tuned for further updates on WhatsApp.</p>
+          <div style="padding: 36px 40px; text-align: center;">
+            <div style="color: #ffffff; font-size: 18px; font-weight: 700; margin-bottom: 8px;">${eventTitle}</div>
+            <p style="color: rgba(255,255,255,0.45); font-size: 14px;">We have received your registration. Stay tuned for further updates on WhatsApp.</p>
           </div>
-          <div style="padding: 24px; background: rgba(255,255,255,0.02); text-align: center; color: rgba(255,255,255,0.2); font-size: 10px; text-transform: uppercase;">
+          <div style="padding: 22px 40px; background: rgba(255,255,255,0.02); text-align: center; color: rgba(255,255,255,0.25); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em;">
             FOSS Club · GCE Erode
           </div>
         </div>
