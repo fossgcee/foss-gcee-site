@@ -37,11 +37,27 @@ interface PublicEvent {
   organizers: string[];
   poster?: string;
   photos?: string[];
+  galleryLink?: string;
   status: "upcoming" | "completed" | "draft";
   isFeatured?: boolean;
   academicYear: string;
   registrationsCount: number;
 }
+
+const formatAcademicYear = (startYear: number) =>
+  `${startYear} - ${String(startYear + 1).slice(-2)}`;
+
+const getAcademicYearRange = () => {
+  const clubStartYear = 2026;
+  const now = new Date();
+  const currentStartYear = now.getMonth() >= 5 ? now.getFullYear() : now.getFullYear() - 1;
+  const startYear = Math.max(currentStartYear, clubStartYear);
+  const years: string[] = [];
+  for (let year = startYear; year >= clubStartYear; year -= 1) {
+    years.push(formatAcademicYear(year));
+  }
+  return years;
+};
 
 export default function EventsPage() {
   const [events, setEvents] = useState<PublicEvent[]>([]);
@@ -80,16 +96,14 @@ export default function EventsPage() {
   const pastEvents = events.filter(e => e.status !== "draft" && isPastEvent(e));
 
   // 2. Get unique past years from API direct
-  const availableYears = Array.from(new Set(pastEvents.map(e => e.academicYear)))
-    .filter(y => !!y)
-    .sort((a, b) => b.localeCompare(a));
+  const academicYearOptions = getAcademicYearRange();
 
   // 3. Set default year once available
   useEffect(() => {
-    if (availableYears.length > 0 && !selectedYear) {
-      setSelectedYear(availableYears[0]);
+    if (academicYearOptions.length > 0 && !selectedYear) {
+      setSelectedYear(academicYearOptions[0]);
     }
-  }, [availableYears, selectedYear]);
+  }, [academicYearOptions, selectedYear]);
 
   // 4. Filter past events by selected year
   const displayedPastEvents = pastEvents
@@ -189,23 +203,21 @@ export default function EventsPage() {
              </h2>
              
              {/* Dropdown Filter */}
-             {availableYears.length > 0 && (
-               <div className="inline-block relative">
-                  <select 
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(e.target.value)}
-                    className="px-6 py-2 bg-surface text-text font-mono rounded border border-border focus:outline-none appearance-none pr-10 hover:bg-surface-2 transition-colors cursor-pointer"
-                  >
-                    <option value="" disabled>Select Year</option>
-                    {availableYears.map(year => (
-                      <option key={year} value={year}>{year}</option>
-                    ))}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-text">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                  </div>
-               </div>
-             )}
+             <div className="inline-block relative">
+                <select 
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className="px-6 py-2 bg-surface text-text font-mono text-[11px] rounded border border-border focus:outline-none appearance-none pr-10 hover:bg-surface-2 transition-colors cursor-pointer"
+                >
+                  <option value="" disabled>Select Year</option>
+                  {academicYearOptions.map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-text">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+             </div>
           </div>
 
           <div className="events-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
@@ -250,7 +262,7 @@ export default function EventsPage() {
         <div className="pt-24 text-center">
            <Link 
              href="/join"
-             className="inline-flex items-center gap-4 px-12 py-6 rounded-[24px] bg-text text-bg font-pixel text-[11px] hover:scale-[1.05] active:scale-[0.95] transition-all shadow-[0_10px_60px_rgba(255,255,255,0.15)] uppercase tracking-widest"
+             className="inline-flex items-center gap-4 px-12 py-6 rounded-[24px] bg-text text-bg font-pixel text-[11px] border border-border hover:scale-[1.05] active:scale-[0.95] transition-all shadow-[0_10px_60px_rgba(255,255,255,0.15)] uppercase tracking-widest"
            >
               INITIATE_JOIN_SEQUENCE <ArrowRight className="w-4 h-4" />
            </Link>
