@@ -12,6 +12,8 @@ export interface IRegistration extends mongoose.Document {
   role: string;
   otp?: string;
   otpExpiresAt?: Date;
+  otpAttempts?: number;
+  otpLockedUntil?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -68,6 +70,14 @@ const RegistrationSchema = new mongoose.Schema<IRegistration>(
     otpExpiresAt: {
       type: Date,
       select: false,
+    },
+    otpAttempts: {
+      type: Number,
+      default: 0,
+    },
+    otpLockedUntil: {
+      type: Date,
+      default: null,
     },
   },
   {

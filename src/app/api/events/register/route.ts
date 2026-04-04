@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Event from "@/models/Event";
+import { getClientIp, rateLimit } from "@/lib/rateLimit";
 
 const getErrorMessage = (error: unknown) => {
   if (error instanceof Error) return error.message;
@@ -10,6 +11,15 @@ const getErrorMessage = (error: unknown) => {
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const ipLimit = rateLimit(`event-register:ip:${ip}`, 5, 10 * 60 * 1000);
+    if (!ipLimit.allowed) {
+      return NextResponse.json(
+        { success: false, error: "Too many requests. Please wait a bit." },
+        { status: 429, headers: { "Retry-After": Math.ceil((ipLimit.reset - Date.now()) / 1000).toString() } }
+      );
+    }
+
     await dbConnect();
     const body = await request.json();
     const { name, regNo, college, year, mobile, email, eventSlug, eventTitle } = body;
