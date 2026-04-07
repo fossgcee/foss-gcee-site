@@ -82,7 +82,7 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
   const hasAgenda   = !isPast && agenda.length > 0;
 
   return (
-    <div className="min-h-screen bg-bg text-text pt-24 pb-20">
+    <div className="min-h-screen bg-bg text-text pt-24 pb-32 md:pb-20">
 
       {/* Back */}
       <div className="max-w-4xl mx-auto px-6 mb-8">
@@ -225,6 +225,27 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
           <ArrowLeft className="w-5 h-5" /> RETURN_TO_LOGS
         </Link>
       </div>
+    
+      {/* Sticky Mobile Register Button */}
+      {(!isPast && event) && (
+        <div className="md:hidden fixed bottom-6 left-6 right-6 z-50">
+          <div className="glass-strong p-4 rounded-[28px] shadow-2xl flex items-center justify-between gap-4 border border-border-2">
+            <div className="flex-1 min-w-0 pl-2">
+              <p className="font-pixel text-[7px] text-text uppercase tracking-tighter truncate">
+                {event.title}
+              </p>
+              <p className="font-mono text-[9px] text-muted-2 uppercase mt-1 tracking-widest">
+                JOIN_MISSION
+              </p>
+            </div>
+            <EventRegisterButton 
+              eventTitle={event.title} 
+              eventSlug={event.slug} 
+              className="flex-shrink-0 px-5 py-3 !bg-text !text-bg rounded-2xl font-pixel text-[9px] uppercase tracking-widest active:scale-95 transition-transform" 
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
