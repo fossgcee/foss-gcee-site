@@ -19,7 +19,7 @@ export function FloatingThemeToggle() {
   if (!mounted) {
     return (
       <div
-        className="fixed bottom-6 right-5 z-50 w-12 h-12 rounded-full pointer-events-none"
+        className="fixed bottom-[calc(5.75rem+env(safe-area-inset-bottom))] right-4 z-50 h-12 w-12 rounded-full pointer-events-none md:bottom-6 md:right-5"
         aria-hidden="true"
       />
     );
@@ -32,7 +32,7 @@ export function FloatingThemeToggle() {
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       className={[
-        "fixed bottom-6 right-5 z-50",
+        "fixed bottom-[calc(5.75rem+env(safe-area-inset-bottom))] right-4 z-50 md:bottom-6 md:right-5",
         "w-12 h-12 rounded-full",
         "flex items-center justify-center",
         "shadow-lg",
