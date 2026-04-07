@@ -35,7 +35,7 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
       const res = await fetch("/api/events/register", {
         method: "POST",
@@ -64,7 +64,7 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           {/* Backdrop */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -73,7 +73,7 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
           />
 
           {/* Modal */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -85,7 +85,7 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
                 <h3 className="text-xl font-pixel text-white mb-1">EVENT_REGISTRATION</h3>
                 <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest">{eventTitle}</p>
               </div>
-              <button 
+              <button
                 onClick={onClose}
                 className="p-2 rounded-xl hover:bg-white/5 text-white/40 hover:text-white transition-colors"
               >
@@ -105,7 +105,7 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
                       Your registration for &quot;{eventTitle}&quot; has been recorded. Check your mail for confirmation.
                     </p>
                   </div>
-                  <button 
+                  <button
                     onClick={onClose}
                     className="px-8 py-3 bg-white text-black rounded-xl font-pixel text-[11px] hover:bg-white/90 transition-all"
                   >
@@ -120,11 +120,11 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
                       <label className="flex items-center gap-2 text-[10px] font-mono text-white/40 uppercase tracking-widest pl-1">
                         <User className="w-3 h-3" /> Name with Initial
                       </label>
-                      <input 
+                      <input
                         required
-                        type="text" 
+                        type="text"
                         name="name"
-                        placeholder="e.g. VISHNU S" 
+                        placeholder="e.g. Linus"
                         className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl font-mono text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.07] transition-all"
                         value={formData.name}
                         onChange={handleChange}
@@ -137,11 +137,11 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
                         <label className="flex items-center gap-2 text-[10px] font-mono text-white/40 uppercase tracking-widest pl-1">
                           <Hash className="w-3 h-3" /> Reg No
                         </label>
-                        <input 
+                        <input
                           required
-                          type="text" 
+                          type="text"
                           name="regNo"
-                          placeholder="College Reg No" 
+                          placeholder="College Reg No"
                           className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl font-mono text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.07] transition-all"
                           value={formData.regNo}
                           onChange={handleChange}
@@ -153,7 +153,7 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
                         <label className="flex items-center gap-2 text-[10px] font-mono text-white/40 uppercase tracking-widest pl-1">
                           <GraduationCap className="w-3 h-3" /> Year
                         </label>
-                        <select 
+                        <select
                           required
                           name="year"
                           className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-white/20 focus:bg-white/[0.07] transition-all appearance-none"
@@ -173,11 +173,11 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
                       <label className="flex items-center gap-2 text-[10px] font-mono text-white/40 uppercase tracking-widest pl-1">
                         <School className="w-3 h-3" /> College Name
                       </label>
-                      <input 
+                      <input
                         required
-                        type="text" 
+                        type="text"
                         name="college"
-                        placeholder="Your College Name" 
+                        placeholder="Your College Name"
                         className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl font-mono text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.07] transition-all"
                         value={formData.college}
                         onChange={handleChange}
@@ -189,11 +189,11 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
                       <label className="flex items-center gap-2 text-[10px] font-mono text-white/40 uppercase tracking-widest pl-1">
                         <Phone className="w-3 h-3" /> Mobile Number (WhatsApp)
                       </label>
-                      <input 
+                      <input
                         required
-                        type="tel" 
+                        type="tel"
                         name="mobile"
-                        placeholder="+91 00000 00000" 
+                        placeholder="+91 00000 00000"
                         className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl font-mono text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.07] transition-all"
                         value={formData.mobile}
                         onChange={handleChange}
@@ -205,11 +205,11 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
                       <label className="flex items-center gap-2 text-[10px] font-mono text-white/40 uppercase tracking-widest pl-1">
                         <Mail className="w-3 h-3" /> Mail ID
                       </label>
-                      <input 
+                      <input
                         required
-                        type="email" 
+                        type="email"
                         name="email"
-                        placeholder="you@example.com" 
+                        placeholder="you@example.com"
                         className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl font-mono text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.07] transition-all"
                         value={formData.email}
                         onChange={handleChange}
@@ -217,7 +217,7 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
                     </div>
                   </div>
 
-                  <button 
+                  <button
                     disabled={isSubmitting}
                     type="submit"
                     className="w-full mt-4 flex items-center justify-center gap-3 px-8 py-4 bg-white text-black rounded-2xl font-pixel text-xs hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] shadow-[0_0_30px_rgba(255,255,255,0.05)]"
@@ -232,7 +232,7 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
                       </>
                     )}
                   </button>
-                  
+
                   <p className="text-center font-mono text-[9px] text-white/20 uppercase tracking-widest">
                     By registering you agree to receive event updates via WhatsApp and Email
                   </p>

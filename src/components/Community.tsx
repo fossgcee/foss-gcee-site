@@ -61,10 +61,10 @@ export default function Community() {
 
   // Featured: manual flag first, then soonest upcoming, then most-recent past
   const upcoming = events.filter(e => !isPast(e)).sort((a, b) => a.startDate.localeCompare(b.startDate));
-  const past     = events.filter(e => isPast(e)).sort((a, b) => b.startDate.localeCompare(a.startDate));
+  const past = events.filter(e => isPast(e)).sort((a, b) => b.startDate.localeCompare(a.startDate));
 
-  const featured  = events.find(e => e.isFeatured) ?? upcoming[0] ?? null;
-  const moreUp    = upcoming.filter(e => e._id !== featured?._id).slice(0, 3);
+  const featured = events.find(e => e.isFeatured) ?? upcoming[0] ?? null;
+  const moreUp = upcoming.filter(e => e._id !== featured?._id).slice(0, 3);
   const recentPast = past.slice(0, 4);
 
   /* ── GSAP animations ───────────────────────────────────────── */

@@ -14,7 +14,7 @@ const stats = [
 
 const cards = [
   {
-    icon: "💚",
+    icon: "heart",
     title: "What is FOSSGCEE?",
     text: "FOSSGCEE is the official Free and Open Source Software club of Government College of Engineering, Erode — a community of passionate students who believe in open collaboration and transparent technology.",
   },
@@ -90,7 +90,16 @@ export default function About() {
         <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {cards.map((c) => (
             <div key={c.title} className="about-card glass-card p-7">
-              <div className="text-3xl mb-4">{c.icon}</div>
+              <div className="text-3xl mb-4">
+                {c.icon === "heart" ? (
+                  <>
+                    <span className="dark:hidden">🖤</span>
+                    <span className="hidden dark:inline">🤍</span>
+                  </>
+                ) : (
+                  c.icon
+                )}
+              </div>
               <h3 className="font-semibold text-base mb-3 text-text">{c.title}</h3>
               <p className="text-sm leading-relaxed text-muted-2">{c.text}</p>
             </div>
