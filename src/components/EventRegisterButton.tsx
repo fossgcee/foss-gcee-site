@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useState } from "react";
 import RegistrationModal from "@/components/RegistrationModal";
 
@@ -8,9 +9,16 @@ type EventRegisterButtonProps = {
   eventSlug: string;
   label?: string;
   className?: string;
+  children?: ReactNode;
 };
 
-export default function EventRegisterButton({ eventTitle, eventSlug, label = "REGISTER_NOW", className }: EventRegisterButtonProps) {
+export default function EventRegisterButton({
+  eventTitle,
+  eventSlug,
+  label = "REGISTER_NOW",
+  className,
+  children,
+}: EventRegisterButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -20,7 +28,7 @@ export default function EventRegisterButton({ eventTitle, eventSlug, label = "RE
         onClick={() => setIsOpen(true)}
         className={className || "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-text text-bg font-pixel text-[11px] uppercase tracking-widest hover:scale-[1.03] transition-transform"}
       >
-        {label}
+        {children ?? label}
       </button>
       <RegistrationModal
         isOpen={isOpen}

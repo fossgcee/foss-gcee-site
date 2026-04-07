@@ -19,21 +19,21 @@ export default function Home() {
       </main>
 
       {/* Sticky Mobile Club Registration Button */}
-      <div className="md:hidden fixed bottom-6 left-6 right-6 z-50">
+      <div className="md:hidden fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 z-50">
         <Link
           href="/join"
-          className="glass-strong p-4 rounded-[28px] shadow-2xl flex items-center justify-between gap-4 border border-white/20 dark:border-white/10 transition-all active:scale-95 no-underline"
+          className="glass-strong px-4 py-3 rounded-[24px] shadow-[0_18px_44px_rgba(0,0,0,0.22)] flex items-center justify-between gap-3 border border-white/15 dark:border-white/10 bg-white/85 dark:bg-[#111]/85 backdrop-blur-xl transition-all active:scale-[0.98] no-underline"
         >
-          <div className="flex-1 min-w-0 pl-2">
-            <p className="font-pixel text-[7px] text-text uppercase tracking-tighter truncate">
+          <div className="flex-1 min-w-0 pl-1">
+            <p className="font-pixel text-[6px] text-text uppercase tracking-[0.22em] truncate leading-none">
               FOSS_GCE_ERODE
             </p>
-            <p className="font-mono text-[9px] text-muted-2 uppercase mt-1 tracking-widest">
+            <p className="font-mono text-[9px] text-muted-2 uppercase mt-1 tracking-[0.18em] leading-none">
               JOIN_COMMUNITY
             </p>
           </div>
-          <div className="flex-shrink-0 px-6 py-3 bg-white dark:bg-white text-black rounded-2xl font-pixel text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(255,255,255,0.3)] transform transition-transform">
-            REGISTER_NOW
+          <div className="flex-shrink-0 px-4 py-2.5 bg-text text-bg rounded-full font-pixel text-[9px] uppercase tracking-[0.18em] shadow-[0_10px_24px_rgba(0,0,0,0.18)]">
+            REGISTER
           </div>
         </Link>
       </div>

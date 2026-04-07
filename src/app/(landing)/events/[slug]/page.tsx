@@ -227,23 +227,25 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
       </div>
     
       {/* Sticky Mobile Register Button */}
-      {(!isPast && event) && (
-        <div className="md:hidden fixed bottom-6 left-6 right-6 z-50">
-          <div className="glass-strong p-4 rounded-[28px] shadow-2xl flex items-center justify-between gap-4 border border-border-2">
-            <div className="flex-1 min-w-0 pl-2">
-              <p className="font-pixel text-[7px] text-text uppercase tracking-tighter truncate">
+      {!isPast && event && (
+        <div className="md:hidden fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 z-50">
+          <EventRegisterButton
+            eventTitle={event.title}
+            eventSlug={event.slug}
+            className="glass-strong w-full px-4 py-3 rounded-[24px] shadow-[0_18px_44px_rgba(0,0,0,0.24)] flex items-center justify-between gap-3 border border-border-2/80 bg-bg/85 backdrop-blur-xl active:scale-[0.98] transition-transform"
+          >
+            <div className="flex-1 min-w-0 pl-1 text-left">
+              <p className="font-pixel text-[6px] text-text uppercase tracking-[0.22em] truncate leading-none">
                 {event.title}
               </p>
-              <p className="font-mono text-[9px] text-muted-2 uppercase mt-1 tracking-widest">
+              <p className="font-mono text-[9px] text-muted-2 uppercase mt-1 tracking-[0.18em] leading-none">
                 JOIN_MISSION
               </p>
             </div>
-            <EventRegisterButton 
-              eventTitle={event.title} 
-              eventSlug={event.slug} 
-              className="flex-shrink-0 px-5 py-3 !bg-text !text-bg rounded-2xl font-pixel text-[9px] uppercase tracking-widest active:scale-95 transition-transform" 
-            />
-          </div>
+            <span className="flex-shrink-0 px-4 py-2.5 bg-text text-bg rounded-full font-pixel text-[9px] uppercase tracking-[0.18em] shadow-[0_10px_24px_rgba(0,0,0,0.18)] whitespace-nowrap">
+              REGISTER
+            </span>
+          </EventRegisterButton>
         </div>
       )}
     </div>
