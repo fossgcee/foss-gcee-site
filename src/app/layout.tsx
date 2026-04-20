@@ -42,6 +42,16 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+viewport: {
+		width: "device-width",
+		initialScale: 1,
+		maximumScale: 5,
+		userScalable: true,
+	},
+	themeColor: [
+		{ media: "(prefers-color-scheme: light)", color: "#ffffff" },
+		{ media: "(prefers-color-scheme: dark)", color: "#080808" },
+	],
   openGraph: {
     title: "FOSSGCEE – FOSS Club GCE Erode",
     description: "Promoting Linux, open-source culture, and real-world contributions at Government College of Engineering, Erode.",

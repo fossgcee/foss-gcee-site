@@ -33,11 +33,11 @@ export default function WhatWeDo() {
   }, []);
 
   return (
-    <section id="whatwedo" ref={sectionRef} className="py-28 relative bg-bg-2">
+    <section id="whatwedo" ref={sectionRef} className="py-16 sm:py-28 relative bg-bg-2">
       <div className="section-divider" />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        <div className="wwd-heading text-center mb-16">
+        <div className="wwd-heading text-center mb-10 sm:mb-16">
           <span className="tag-badge mb-4 inline-block">{"// what we do"}</span>
           <h2 className="text-3xl sm:text-4xl font-bold mt-3 text-text">
             What We <span className="text-text">Do</span>

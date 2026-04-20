@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useRef, useState } from "react";
@@ -97,11 +97,11 @@ export default function Community() {
   }, [loading]);
 
   return (
-    <section id="community" ref={sectionRef} className="py-24 px-4 sm:px-6 lg:px-8 relative bg-bg">
+    <section id="community" ref={sectionRef} className="py-14 sm:py-24 px-4 sm:px-6 lg:px-8 relative bg-bg">
       <div className="max-w-6xl mx-auto">
 
         {/* ── Heading ─────────────────────────────────────────── */}
-        <div className="comm-heading text-center mb-16">
+        <div className="comm-heading text-center mb-10 sm:mb-16">
           <span className="tag-badge mb-4 inline-block">{"// community"}</span>
           <h2 className="text-3xl sm:text-4xl font-bold mt-3 text-text">
             Events &amp; <span className="text-text">Activities</span>
@@ -134,7 +134,7 @@ export default function Community() {
             </div>
 
             {/* Body */}
-            <div className="p-6 sm:p-8 font-mono text-sm">
+            <div className="p-4 sm:p-8 font-mono text-sm">
               <p className="mb-1 text-text/90">
                 <span className="text-muted-2">FOSSGCEE</span>
                 <span className="text-muted">:~$ </span>

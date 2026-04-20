@@ -77,7 +77,7 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-lg bg-[#0f0f0f] border border-white/10 rounded-[32px] overflow-hidden shadow-2xl"
+            className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#0f0f0f] border border-white/10 rounded-[32px] shadow-2xl"
           >
             {/* Header */}
             <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
@@ -142,6 +142,7 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
                           type="text"
                           name="regNo"
                           placeholder="College Reg No"
+                          inputMode="numeric"
                           className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl font-mono text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.07] transition-all"
                           value={formData.regNo}
                           onChange={handleChange}
@@ -194,6 +195,7 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
                         type="tel"
                         name="mobile"
                         placeholder="+91 00000 00000"
+                        inputMode="tel"
                         className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl font-mono text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.07] transition-all"
                         value={formData.mobile}
                         onChange={handleChange}
@@ -210,6 +212,7 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
                         type="email"
                         name="email"
                         placeholder="you@example.com"
+                        inputMode="email"
                         className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl font-mono text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.07] transition-all"
                         value={formData.email}
                         onChange={handleChange}

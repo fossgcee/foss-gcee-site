@@ -49,11 +49,12 @@ const getErrorMessage = (error: unknown) => {
 // ————— Input field component —————
 function Field({
   icon: Icon, label, name, type = "text", value, onChange, placeholder, disabled,
-  pattern, hint, title: inputTitle,
+  pattern, hint, title: inputTitle, inputMode,
 }: {
   icon: React.ElementType; label: string; name: string; type?: string;
   value: string; onChange: (v: string) => void; placeholder: string; disabled?: boolean;
-  pattern?: string; hint?: string; title?: string;
+  pattern?: string; hint?: string; title?: string; 
+  inputMode?: "text" | "none" | "tel" | "url" | "email" | "numeric" | "decimal" | "search";
 }) {
   return (
     <div className="space-y-2">
@@ -72,6 +73,7 @@ function Field({
           disabled={disabled}
           pattern={pattern}
           title={inputTitle}
+          inputMode={inputMode}
           className="w-full bg-black/[0.04] dark:bg-white/[0.03] border border-black/10 dark:border-white/8 rounded-xl py-3.5 pl-12 pr-4 font-mono text-sm text-black dark:text-white placeholder:text-black/30 dark:placeholder:text-white/20 focus:outline-none focus:ring-1 ring-black/20 dark:ring-white/20 hover:bg-black/[0.07] dark:hover:bg-white/[0.05] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         />
       </div>
@@ -271,7 +273,7 @@ export default function RegistrationPortal() {
                   href={s.active ? s.href : undefined}
                   target={s.active ? "_blank" : undefined}
                   rel="noopener noreferrer"
-                  className={`flex items-center gap-3 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.03] px-3 py-2.5 text-black/70 dark:text-white/70 transition-colors ${s.active ? "hover:text-black dark:hover:text-white hover:bg-black/[0.06] dark:hover:bg-white/[0.06]" : "opacity-50 pointer-events-none"}`}
+                  className={`flex items-center min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 gap-3 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.03] px-3 py-2.5 text-black/70 dark:text-white/70 transition-colors ${s.active ? "hover:text-black dark:hover:text-white hover:bg-black/[0.06] dark:hover:bg-white/[0.06]" : "opacity-50 pointer-events-none"}`}
                 >
                   <span className="w-8 h-8 rounded-lg border border-black/10 dark:border-white/10 flex items-center justify-center text-black/60 dark:text-white/60">
                     <s.Icon />
@@ -328,7 +330,7 @@ export default function RegistrationPortal() {
           {step === "form" && (
             <form onSubmit={handleFormSubmit} className="space-y-5">
               <Field icon={User} label="Full Name" name="name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} placeholder="e.g. Linus Torvalds" />
-              <Field icon={Mail} label="Gmail Address" name="email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} placeholder="e.g. you@gmail.com" />
+              <Field icon={Mail} label="Gmail Address" name="email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} placeholder="e.g. you@gmail.com" inputMode="email" />
               <Field
                 icon={Link2}
                 label="LinkedIn Profile URL"
@@ -341,7 +343,7 @@ export default function RegistrationPortal() {
                 title="Must start with www. (e.g. www.linkedin.com/in/yourname)"
                 hint="https:// is optional — but www. is required"
               />
-              <Field icon={Phone} label="Phone Number" name="phone" type="tel" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="+91 9876543210" />
+              <Field icon={Phone} label="Phone Number" name="phone" type="tel" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="+91 9876543210" inputMode="tel" />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <SelectField icon={GraduationCap} label="Year" name="year" value={form.year} onChange={(v) => setForm({ ...form, year: v })} options={YEARS} placeholder="Select year" />
                 <SelectField icon={BookOpen} label="Department" name="department" value={form.department} onChange={(v) => setForm({ ...form, department: v })} options={DEPARTMENTS} placeholder="Select dept." />

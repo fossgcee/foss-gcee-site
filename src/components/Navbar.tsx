@@ -77,20 +77,20 @@ export default function Navbar() {
           </ul>
 
           {/* CTA */}
-          <div className="hidden md:flex items-center gap-4 shrink-0">
-            <ThemeToggle />
-            <Link
-              href="/join"
-              className="inline-flex shrink-0 items-center gap-1.5 px-4 py-1.5 rounded-full font-mono text-[11px] font-semibold transition-all duration-200 hover:scale-105 bg-text text-bg shadow-[0_0_20px_rgba(0,0,0,0.4)] dark:shadow-[0_0_24px_rgba(255,255,255,0.5)]"
-            >
-              $ Register
-            </Link>
-          </div>
+<div className="hidden md:flex items-center gap-4 shrink-0">
+	<ThemeToggle />
+	<Link
+		href="/join"
+		className="inline-flex shrink-0 items-center gap-1.5 px-4 py-1.5 rounded-full font-mono text-[11px] font-semibold transition-all duration-200 hover:scale-105 bg-text text-bg shadow-[0_0_20px_rgba(0,0,0,0.4)] dark:shadow-[0_0_24px_rgba(255,255,255,0.5)]"
+	>
+		$ Register
+	</Link>
+</div>
 
           {/* Hamburger */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden flex items-center justify-center p-1.5 rounded-full transition-colors duration-200 bg-surface text-muted-2 hover:text-text hover:bg-surface-2"
+            className="md:hidden flex items-center justify-center min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 p-1.5 rounded-full transition-colors duration-200 bg-surface text-muted-2 hover:text-text hover:bg-surface-2"
             aria-label="Toggle menu"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -119,22 +119,22 @@ export default function Navbar() {
                 </Link>
               </li>
             ))}
-              <li className="flex gap-3">
-                <Link
-                  href="/#join"
-                  onClick={() => setMenuOpen(false)}
-                  className="inline-flex items-center px-4 py-1.5 rounded-full font-mono text-xs font-semibold mt-2 bg-text text-bg hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,0,0,0.4)] dark:shadow-[0_0_24px_rgba(255,255,255,0.5)]"
-                >
-                  $ Community
-                </Link>
-                <Link
-                  href="/join"
-                  onClick={() => setMenuOpen(false)}
-                  className="inline-flex items-center px-4 py-1.5 rounded-full font-mono text-xs font-semibold mt-2 bg-text text-bg hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,0,0,0.4)] dark:shadow-[0_0_24px_rgba(255,255,255,0.5)]"
-                >
-                  $ Register
-                </Link>
-              </li>
+<li className="flex gap-3">
+	<Link
+		href="/#join"
+		onClick={() => setMenuOpen(false)}
+		className="inline-flex items-center px-4 py-1.5 rounded-full font-mono text-xs font-semibold mt-2 bg-text text-bg hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,0,0,0.4)] dark:shadow-[0_0_24px_rgba(255,255,255,0.5)]"
+	>
+		$ Community
+	</Link>
+	<Link
+		href="/join"
+		onClick={() => setMenuOpen(false)}
+		className="inline-flex items-center px-4 py-1.5 rounded-full font-mono text-xs font-semibold mt-2 bg-text text-bg hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,0,0,0.4)] dark:shadow-[0_0_24px_rgba(255,255,255,0.5)]"
+	>
+		$ Register
+	</Link>
+</li>
             </ul>
           </div>
         )}

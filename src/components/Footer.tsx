@@ -28,14 +28,14 @@ export default function Footer() {
         .footer-link:hover { color: var(--text) !important; }
         .footer-icon:hover  { color: var(--text) !important; transform: scale(1.15); }
       `}</style>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 mb-10">
 
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2.5 mb-4">
               <Image src="/foss_gcee_logo.png" alt="FOSSGCEE" width={44} height={44} className="rounded-full object-contain filter dark:invert-0 light:invert" />
-              <span className="font-pixel text-[9px] text-text">FOSSGCEE</span>
+              <span className="font-pixel text-xs md:text-[9px] text-text">FOSSGCEE</span>
             </div>
             <p className="text-sm leading-relaxed max-w-xs text-muted-2">
               Free and Open Source Software Club at Government College of Engineering, Erode.
@@ -44,7 +44,7 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-mono text-[10px] uppercase tracking-widest mb-5 text-muted">
+            <h4 className="font-mono text-xs md:text-[10px] uppercase tracking-widest mb-5 text-muted">
               Quick Links
             </h4>
             <ul className="space-y-2.5">
@@ -64,7 +64,7 @@ export default function Footer() {
 
           {/* Connect */}
           <div>
-            <h4 className="font-mono text-[10px] uppercase tracking-widest mb-5 text-muted">
+            <h4 className="font-mono text-xs md:text-[10px] uppercase tracking-widest mb-5 text-muted">
               Connect
             </h4>
             <div className="flex flex-wrap gap-2 mb-4">
@@ -76,7 +76,7 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   aria-label={active ? label : `${label} (coming soon)`}
                   title={active ? label : `${label} — coming soon`}
-                  className={`footer-icon w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200 bg-surface border border-border text-muted-2${!active ? " opacity-30 pointer-events-none" : ""}`}
+                  className={`footer-icon min-w-[44px] min-h-[44px] md:min-w-9 md:min-h-9 md:w-9 md:h-9 rounded-lg flex items-center justify-center transition-all duration-200 bg-surface border border-border text-muted-2${!active ? " opacity-30 pointer-events-none" : ""}`}
                 >
                   <Icon />
                 </a>

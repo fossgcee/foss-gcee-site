@@ -61,12 +61,12 @@ export default function About() {
   }, []);
 
   return (
-    <section id="about" ref={sectionRef} className="py-28 relative">
+    <section id="about" ref={sectionRef} className="py-16 sm:py-28 relative">
       <div className="section-divider" />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
 
         {/* Heading */}
-        <div className="about-heading text-center mb-16">
+        <div className="about-heading text-center mb-10 sm:mb-16">
           <span className="tag-badge mb-4 inline-block">{"// about"}</span>
           <h2 className="text-3xl sm:text-4xl font-bold mt-3 text-text">
             Who <span className="text-text">We Are</span>
@@ -77,7 +77,7 @@ export default function About() {
         </div>
 
         {/* Stats */}
-        <div ref={statsRef} className="mb-16 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-10">
+        <div ref={statsRef} className="mb-10 sm:mb-16 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-10">
           {stats.map((s) => (
             <div key={s.label} className="about-stat text-center glass-card px-4 sm:px-8 py-5 sm:py-6 cursor-default">
               <div className="font-pixel text-xl sm:text-2xl mb-1 text-text">{s.value}</div>

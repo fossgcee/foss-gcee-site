@@ -11,6 +11,13 @@ export default function PageLoader() {
   const textRef    = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
+    // Check for slow connection to bypass loader
+    const conn = (navigator as any).connection;
+    if (conn && (conn.effectiveType === '2g' || conn.effectiveType === 'slow-2g')) {
+      if (loaderRef.current) loaderRef.current.style.display = "none";
+      return;
+    }
+
     if (!loaderRef.current) return;
 
     const tl = gsap.timeline();

@@ -51,8 +51,10 @@
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
@@ -217,6 +219,31 @@ body {
   border: 1px solid var(--border-2);
   color: var(--text);
   letter-spacing: 0.05em;
+}
+
+/* ─── Mobile-specific tweaks ───────────────────────────────────── */
+/* Disable hover lift on touch devices — prevents jarring jump on tap */
+@media (hover: none) and (pointer: coarse) {
+  .glass-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  .glass-card:active {
+    background: var(--surface-2);
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* Prevent long strings (e.g. URLs, mono code) from blowing out mobile layout */
+p, h1, h2, h3, h4, span {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Ensure images never exceed their container on mobile */
+img, svg {
+  max-width: 100%;
 }
 
 
