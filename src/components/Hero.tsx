@@ -127,7 +127,7 @@ export default function Hero() {
           {/* Typewriter heading */}
           <h1
             className="font-pixel leading-relaxed text-text whitespace-pre-wrap break-normal min-h-[3.3em] w-full"
-            style={{ fontSize: "clamp(0.85rem, 5vw, 2.4rem)" }}
+            style={{ fontSize: "clamp(0.75rem, 4vw, 2.1rem)" }}
           >
             {displayText}
             <span className="animate-blink text-text">_</span>
