@@ -28,7 +28,7 @@ export default function Footer() {
         .footer-link:hover { color: var(--text) !important; }
         .footer-icon:hover  { color: var(--text) !important; transform: scale(1.15); }
       `}</style>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-28 sm:py-14">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 mb-10">
 
           {/* Brand */}

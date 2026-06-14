@@ -8,7 +8,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="min-h-screen overflow-x-hidden relative bg-white dark:bg-[#080808] text-black dark:text-[#f0f0f0] pb-20 md:pb-0">
+    <div className="min-h-screen overflow-x-hidden relative bg-white dark:bg-[#080808] text-black dark:text-[#f0f0f0]">
       <PageLoader />
       <main>
         <Hero />
