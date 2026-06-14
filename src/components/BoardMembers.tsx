@@ -4,7 +4,12 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import { membersData, getUniqueYears } from "@/data/members";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger, useGSAP);
+}
 
 export default function BoardMembers() {
   const years = getUniqueYears();
@@ -14,24 +19,18 @@ export default function BoardMembers() {
 
   const filteredMembers = membersData.filter((m) => m.year === selectedYear);
 
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    if (sectionRef.current) {
-      const ctx = gsap.context(() => {
-        gsap.from(".board-header", {
-          immediateRender: false,
-          scrollTrigger: { trigger: ".board-header", start: "top 85%" },
-          y: 40, opacity: 0, duration: 0.8, ease: "power3.out",
-        });
-        gsap.from(".year-select", {
-          immediateRender: false,
-          scrollTrigger: { trigger: ".year-select", start: "top 85%" },
-          y: 20, opacity: 0, duration: 0.8, delay: 0.2, ease: "power3.out",
-        });
-      }, sectionRef);
-      return () => ctx.revert();
-    }
-  }, []);
+  useGSAP(() => {
+    gsap.from(".board-header", {
+      immediateRender: false,
+      scrollTrigger: { trigger: ".board-header", start: "top 85%" },
+      y: 40, opacity: 0, duration: 0.8, ease: "power3.out",
+    });
+    gsap.from(".year-select", {
+      immediateRender: false,
+      scrollTrigger: { trigger: ".year-select", start: "top 85%" },
+      y: 20, opacity: 0, duration: 0.8, delay: 0.2, ease: "power3.out",
+    });
+  }, { scope: sectionRef });
 
   useEffect(() => {
     if (!gridRef.current) return;

@@ -148,6 +148,15 @@ export default function EventsPage() {
              EVENTS
            </h1>
         </div>
+        
+        {/* ── Empty State ───────────────────────────────── */}
+        {events.length === 0 && (
+          <div className="flex flex-col items-center gap-4 py-24 text-muted-2">
+            <span className="font-pixel text-2xl">{'{ }'}</span>
+            <p className="font-mono text-sm uppercase tracking-widest">No events yet — stay tuned!</p>
+            <p className="font-mono text-xs text-muted-2 max-w-xs text-center">Follow us on Instagram and Discord to be the first to know.</p>
+          </div>
+        )}
 
         {/* ── Upcoming Events Grid ─────────────────────────────────── */}
         {upcomingEvents.length > 0 && (

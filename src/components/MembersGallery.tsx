@@ -4,7 +4,12 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger, useGSAP);
+}
 import { membersGallery } from "@/data/membersGallery";
 
 export default function MembersGallery() {
@@ -30,37 +35,48 @@ export default function MembersGallery() {
     }
   };
 
-  // Auto-scroll effect
+  const isPausedRef = useRef(false);
+
+  // Auto-scroll effect with pause on hover/touch
   useEffect(() => {
     if (images.length < 4) return;
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const pause = () => { isPausedRef.current = true; };
+    const resume = () => { isPausedRef.current = false; };
+
+    container.addEventListener("mouseenter", pause);
+    container.addEventListener("mouseleave", resume);
+    container.addEventListener("touchstart", pause, { passive: true });
+    container.addEventListener("touchend", resume);
 
     const interval = setInterval(() => {
-      scrollRight();
+      if (!isPausedRef.current) scrollRight();
     }, 3500); // Auto-scroll every 3.5 seconds
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      container.removeEventListener("mouseenter", pause);
+      container.removeEventListener("mouseleave", resume);
+      container.removeEventListener("touchstart", pause);
+      container.removeEventListener("touchend", resume);
+    };
   }, [images.length]);
 
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
+  useGSAP(() => {
+    gsap.from(".gallery-header", {
+      immediateRender: false,
+      scrollTrigger: { trigger: ".gallery-header", start: "top 85%" },
+      y: 40, opacity: 0, duration: 0.8, ease: "power3.out",
+    });
     
-    if (sectionRef.current) {
-      const ctx = gsap.context(() => {
-        gsap.from(".gallery-header", {
-          immediateRender: false,
-          scrollTrigger: { trigger: ".gallery-header", start: "top 85%" },
-          y: 40, opacity: 0, duration: 0.8, ease: "power3.out",
-        });
-        
-        gsap.from(".gallery-card", {
-          immediateRender: false,
-          scrollTrigger: { trigger: ".gallery-grid", start: "top 80%" },
-          y: 30, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out",
-        });
-      }, sectionRef);
-      return () => ctx.revert();
-    }
-  }, []);
+    gsap.from(".gallery-card", {
+      immediateRender: false,
+      scrollTrigger: { trigger: ".gallery-grid", start: "top 80%" },
+      y: 30, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out",
+    });
+  }, { scope: sectionRef });
 
   return (
     <section ref={sectionRef} className="py-24 px-4 sm:px-6 lg:px-8 bg-bg-2 border-t border-border">

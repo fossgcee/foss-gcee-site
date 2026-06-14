@@ -1,9 +1,15 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
+import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import { GitHubIcon, YouTubeIcon, InstagramIcon, DiscordIcon, LinkedInIcon, EmailIcon } from "@/components/icons/SocialIcons";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger, useGSAP);
+}
 
 const steps = [
   { n: "01", title: "Join Our Discord",   desc: "Hop into our community server to say hi and see what we're working on." },
@@ -23,24 +29,20 @@ const socials = [
 export default function JoinUs() {
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    const ctx = gsap.context(() => {
-      gsap.from(".join-heading", {
-        immediateRender: false, scrollTrigger: { trigger: ".join-heading", start: "top 85%" },
-        y: 40, opacity: 0, duration: 0.8, ease: "power3.out",
-      });
-      gsap.from(".join-step", {
-        immediateRender: false, scrollTrigger: { trigger: ".join-steps", start: "top 80%" },
-        y: 30, opacity: 0, duration: 0.6, stagger: 0.12, ease: "power2.out",
-      });
-      gsap.from(".join-social", {
-        immediateRender: false, scrollTrigger: { trigger: ".join-socials", start: "top 80%" },
-        y: 30, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out",
-      });
-    }, sectionRef);
-    return () => ctx.revert();
-  }, []);
+  useGSAP(() => {
+    gsap.from(".join-heading", {
+      immediateRender: false, scrollTrigger: { trigger: ".join-heading", start: "top 85%" },
+      y: 40, opacity: 0, duration: 0.8, ease: "power3.out",
+    });
+    gsap.from(".join-step", {
+      immediateRender: false, scrollTrigger: { trigger: ".join-steps", start: "top 80%" },
+      y: 30, opacity: 0, duration: 0.6, stagger: 0.12, ease: "power2.out",
+    });
+    gsap.from(".join-social", {
+      immediateRender: false, scrollTrigger: { trigger: ".join-socials", start: "top 80%" },
+      y: 30, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out",
+    });
+  }, { scope: sectionRef });
 
   return (
     <section id="join" ref={sectionRef} className="py-16 sm:py-28 relative bg-bg-2">
@@ -49,7 +51,7 @@ export default function JoinUs() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <div className="join-heading text-center mb-10 sm:mb-16">
           <span className="tag-badge mb-4 inline-block">{"// join us"}</span>
-          <h2 className="text-3xl sm:text-4xl font-bold mt-3 text-text">
+          <h2 className="text-3xl sm:text-4xl font-bold mt-3 text-muted">
             Become Part of the <span className="text-text">Community</span>
           </h2>
           <p className="mt-4 max-w-xl mx-auto text-sm sm:text-base text-muted-2">
@@ -82,7 +84,7 @@ export default function JoinUs() {
                 
                 {/* Registration CTA */}
                 <div className="join-step pt-4 flex justify-center sm:justify-start">
-                  <a
+                  <Link
                     href="/join"
                     className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl font-mono text-[13px] font-semibold transition-all duration-200 hover:scale-105 bg-text text-bg shadow-[0_0_20px_rgba(0,0,0,0.4)] dark:shadow-[0_0_24px_rgba(255,255,255,0.5)]"
                   >
@@ -90,7 +92,7 @@ export default function JoinUs() {
                     <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
                       <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

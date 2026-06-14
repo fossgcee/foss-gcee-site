@@ -136,6 +136,10 @@ export default function Navbar() {
 	</Link>
 </li>
             </ul>
+            <div className="pt-4 pb-2 border-t border-border mt-3 flex items-center justify-between">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-muted">Theme</span>
+              <ThemeToggle />
+            </div>
           </div>
         )}
       </div>

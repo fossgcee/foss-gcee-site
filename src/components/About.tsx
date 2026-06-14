@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { HeartHandshake, Target, Telescope } from "lucide-react";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -68,7 +69,7 @@ export default function About() {
         {/* Heading */}
         <div className="about-heading text-center mb-10 sm:mb-16">
           <span className="tag-badge mb-4 inline-block">{"// about"}</span>
-          <h2 className="text-3xl sm:text-4xl font-bold mt-3 text-text">
+          <h2 className="text-3xl sm:text-4xl font-bold mt-3 text-muted">
             Who <span className="text-text">We Are</span>
           </h2>
           <p className="mt-4 max-w-xl mx-auto text-sm sm:text-base leading-relaxed text-muted-2">
@@ -90,14 +91,13 @@ export default function About() {
         <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {cards.map((c) => (
             <div key={c.title} className="about-card glass-card p-7">
-              <div className="text-3xl mb-4">
+              <div className="mb-4 text-text">
                 {c.icon === "heart" ? (
-                  <>
-                    <span className="dark:hidden">🖤</span>
-                    <span className="hidden dark:inline">🤍</span>
-                  </>
+                  <HeartHandshake className="w-7 h-7" />
+                ) : c.icon === "🎯" ? (
+                  <Target className="w-7 h-7" />
                 ) : (
-                  c.icon
+                  <Telescope className="w-7 h-7" />
                 )}
               </div>
               <h3 className="font-semibold text-base mb-3 text-text">{c.title}</h3>

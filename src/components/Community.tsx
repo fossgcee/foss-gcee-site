@@ -5,7 +5,12 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import { Calendar, MapPin, Clock, Users, ArrowRight, Zap, History, Terminal } from "lucide-react";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger, useGSAP);
+}
 
 interface LiveEvent {
   _id: string;
@@ -68,33 +73,29 @@ export default function Community() {
   const recentPast = past.slice(0, 4);
 
   /* ── GSAP animations ───────────────────────────────────────── */
-  useEffect(() => {
+  useGSAP(() => {
     if (loading) return;
-    gsap.registerPlugin(ScrollTrigger);
-    const ctx = gsap.context(() => {
-      gsap.from(".comm-heading", {
-        immediateRender: false,
-        scrollTrigger: { trigger: ".comm-heading", start: "top 85%" },
-        y: 40, opacity: 0, duration: 0.8, ease: "power3.out",
-      });
-      gsap.from(".featured-card", {
-        immediateRender: false,
-        scrollTrigger: { trigger: ".featured-card", start: "top 80%" },
-        y: 40, opacity: 0, duration: 0.9, ease: "power3.out",
-      });
-      gsap.from(".past-item", {
-        immediateRender: false,
-        scrollTrigger: { trigger: ".past-list", start: "top 80%" },
-        x: -30, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out",
-      });
-      gsap.from(".upcoming-item", {
-        immediateRender: false,
-        scrollTrigger: { trigger: ".upcoming-list", start: "top 80%" },
-        x: 30, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out",
-      });
-    }, sectionRef);
-    return () => ctx.revert();
-  }, [loading]);
+    gsap.from(".comm-heading", {
+      immediateRender: false,
+      scrollTrigger: { trigger: ".comm-heading", start: "top 85%" },
+      y: 40, opacity: 0, duration: 0.8, ease: "power3.out",
+    });
+    gsap.from(".featured-card", {
+      immediateRender: false,
+      scrollTrigger: { trigger: ".featured-card", start: "top 80%" },
+      y: 40, opacity: 0, duration: 0.9, ease: "power3.out",
+    });
+    gsap.from(".past-item", {
+      immediateRender: false,
+      scrollTrigger: { trigger: ".past-list", start: "top 80%" },
+      x: -30, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out",
+    });
+    gsap.from(".upcoming-item", {
+      immediateRender: false,
+      scrollTrigger: { trigger: ".upcoming-list", start: "top 80%" },
+      x: 30, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out",
+    });
+  }, { scope: sectionRef, dependencies: [loading] });
 
   return (
     <section id="community" ref={sectionRef} className="py-14 sm:py-24 px-4 sm:px-6 lg:px-8 relative bg-bg">
@@ -103,7 +104,7 @@ export default function Community() {
         {/* ── Heading ─────────────────────────────────────────── */}
         <div className="comm-heading text-center mb-10 sm:mb-16">
           <span className="tag-badge mb-4 inline-block">{"// community"}</span>
-          <h2 className="text-3xl sm:text-4xl font-bold mt-3 text-text">
+          <h2 className="text-3xl sm:text-4xl font-bold mt-3 text-muted">
             Events &amp; <span className="text-text">Activities</span>
           </h2>
           <p className="mt-4 max-w-xl mx-auto text-sm sm:text-base text-muted-2">
