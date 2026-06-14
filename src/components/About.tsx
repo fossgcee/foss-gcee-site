@@ -1,8 +1,13 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger, useGSAP);
+}
 
 
 const stats = [
@@ -35,30 +40,25 @@ export default function About() {
   const statsRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    const ctx = gsap.context(() => {
-      // Section heading
-      gsap.from(".about-heading", {
-        immediateRender: false, scrollTrigger: { trigger: ".about-heading", start: "top 85%" },
-        y: 40, opacity: 0, duration: 0.8, ease: "power3.out",
-      });
+  useGSAP(() => {
+    // Section heading
+    gsap.from(".about-heading", {
+      immediateRender: false, scrollTrigger: { trigger: ".about-heading", start: "top 85%" },
+      y: 40, opacity: 0, duration: 0.8, ease: "power3.out",
+    });
 
-      // Stats count-up feel
-      gsap.from(".about-stat", {
-        immediateRender: false, scrollTrigger: { trigger: statsRef.current, start: "top 80%" },
-        y: 30, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out",
-      });
+    // Stats count-up feel
+    gsap.from(".about-stat", {
+      immediateRender: false, scrollTrigger: { trigger: statsRef.current, start: "top 80%" },
+      y: 30, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out",
+    });
 
-      // Cards
-      gsap.from(".about-card", {
-        immediateRender: false, scrollTrigger: { trigger: cardsRef.current, start: "top 80%" },
-        y: 50, opacity: 0, duration: 0.7, stagger: 0.15, ease: "power3.out",
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
+    // Cards
+    gsap.from(".about-card", {
+      immediateRender: false, scrollTrigger: { trigger: cardsRef.current, start: "top 80%" },
+      y: 50, opacity: 0, duration: 0.7, stagger: 0.15, ease: "power3.out",
+    });
+  }, { scope: sectionRef });
 
   return (
     <section id="about" ref={sectionRef} className="py-16 sm:py-28 relative">

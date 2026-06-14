@@ -4,13 +4,18 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(useGSAP);
+}
 import { useTheme } from "next-themes";
 
 /* ── Phrases that cycle in the typewriter ─────────────────── */
 const PHRASES = [
   "FOSSGCEE",
   "GCEE",
-  "Free\u00a0and\u00a0Open\nSource\u00a0Software",
+  "Free\u00a0and\u00a0Open\nSource Software",
   "FOSSGCEE",
 ];
 
@@ -61,24 +66,21 @@ export default function Hero() {
   }, [displayText, typing, phraseIdx]);
 
   /* ── GSAP entrance animations ─────────────────────────── */
-  useEffect(() => {
+  useGSAP(() => {
     if (!containerRef.current) return;
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-      tl.from(leftRef.current, { x: -60, opacity: 0, duration: 1, delay: 0.2 })
-        .from(tuxRef.current, { x: 60, opacity: 0, duration: 1.1, ease: "power2.out" }, "-=0.7");
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+    tl.from(leftRef.current, { x: -60, opacity: 0, duration: 1, delay: 0.2 })
+      .from(tuxRef.current, { x: 60, opacity: 0, duration: 1.1, ease: "power2.out" }, "-=0.7");
 
-      // Tux gentle float
-      gsap.to(tuxRef.current, {
-        y: -16,
-        duration: 3.5,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-    }, containerRef);
-    return () => ctx.revert();
-  }, []);
+    // Tux gentle float
+    gsap.to(tuxRef.current, {
+      y: -16,
+      duration: 3.5,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut",
+    });
+  }, { scope: containerRef });
 
   return (
     <section
@@ -124,8 +126,8 @@ export default function Hero() {
 
           {/* Typewriter heading */}
           <h1
-            className="font-pixel leading-relaxed text-text whitespace-pre-wrap break-normal"
-            style={{ fontSize: "clamp(0.65rem, 3.5vw, 2.0rem)", minHeight: "3.3em" }}
+            className="font-pixel leading-relaxed text-text whitespace-pre-wrap break-normal min-h-[4.9em] sm:min-h-[3.3em]"
+            style={{ fontSize: "clamp(0.9rem, 5vw, 2.4rem)" }}
           >
             {displayText}
             <span className="animate-blink text-text">_</span>

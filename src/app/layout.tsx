@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Press_Start_2P, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import "@/lib/env";
@@ -42,16 +42,6 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-viewport: {
-		width: "device-width",
-		initialScale: 1,
-		maximumScale: 5,
-		userScalable: true,
-	},
-	themeColor: [
-		{ media: "(prefers-color-scheme: light)", color: "#ffffff" },
-		{ media: "(prefers-color-scheme: dark)", color: "#080808" },
-	],
   openGraph: {
     title: "FOSSGCEE – FOSS Club GCE Erode",
     description: "Promoting Linux, open-source culture, and real-world contributions at Government College of Engineering, Erode.",
@@ -78,6 +68,17 @@ viewport: {
     index: true,
     follow: true,
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#080808" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export default function RootLayout({

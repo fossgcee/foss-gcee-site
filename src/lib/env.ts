@@ -9,7 +9,10 @@ const requiredEnvVars = [
   "EMAIL_FROM",
 ] as const;
 
+let hasWarned = false;
+
 export function validateEnv() {
+  if (hasWarned) return;
   const missing = requiredEnvVars.filter((name) => !process.env[name]);
 
   if (missing.length > 0) {
@@ -17,6 +20,7 @@ export function validateEnv() {
     // crash static page collection (/_not-found, /, etc.) on Vercel
     // if env vars are not yet set in the deployment environment.
     console.warn(`[WARNING] Missing environment variables: ${missing.join(", ")}`);
+    hasWarned = true;
   }
 }
 

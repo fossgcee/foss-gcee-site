@@ -1,8 +1,13 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger, useGSAP);
+}
 
 
 const activities = [
@@ -17,20 +22,16 @@ const activities = [
 export default function WhatWeDo() {
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    const ctx = gsap.context(() => {
-      gsap.from(".wwd-heading", {
-        immediateRender: false, scrollTrigger: { trigger: ".wwd-heading", start: "top 85%" },
-        y: 40, opacity: 0, duration: 0.8, ease: "power3.out",
-      });
-      gsap.from(".wwd-card", {
-        immediateRender: false, scrollTrigger: { trigger: ".wwd-grid", start: "top 80%" },
-        y: 50, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power3.out",
-      });
-    }, sectionRef);
-    return () => ctx.revert();
-  }, []);
+  useGSAP(() => {
+    gsap.from(".wwd-heading", {
+      immediateRender: false, scrollTrigger: { trigger: ".wwd-heading", start: "top 85%" },
+      y: 40, opacity: 0, duration: 0.8, ease: "power3.out",
+    });
+    gsap.from(".wwd-card", {
+      immediateRender: false, scrollTrigger: { trigger: ".wwd-grid", start: "top 80%" },
+      y: 50, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power3.out",
+    });
+  }, { scope: sectionRef });
 
   return (
     <section id="whatwedo" ref={sectionRef} className="py-16 sm:py-28 relative bg-bg-2">
@@ -49,7 +50,7 @@ export default function WhatWeDo() {
 
         <div className="wwd-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {activities.map((a) => (
-            <div key={a.title} className="wwd-card glass-card p-7 cursor-default group">
+            <div key={a.title} className="wwd-card glass-card p-7 cursor-default group" tabIndex={0} role="article" aria-label={a.title}>
               <div
                 className="font-mono text-xl font-bold mb-4 transition-colors duration-200 text-muted"
               >
