@@ -118,10 +118,10 @@ export default function Hero() {
 
           {/* Terminal badge */}
           <div
-            className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full font-mono text-[9px] sm:text-[11px] glass text-text/50 border-border max-w-full"
+            className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full font-mono text-[9px] sm:text-[11px] glass text-text/50 border-border max-w-full self-center lg:self-start"
           >
             <span className="w-1.5 h-1.5 shrink-0 rounded-full animate-pulse bg-text" />
-            <span className="truncate">Free &amp; Open Source Software Club — GCE Erode</span>
+            <span className="whitespace-normal text-center">Free &amp; Open Source Software Club — GCE Erode</span>
           </div>
 
           {/* Typewriter heading */}

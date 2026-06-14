@@ -60,6 +60,11 @@ export default function Navbar() {
             >
               FOSSGCEE
             </span>
+            <span
+              className="font-pixel text-[8px] sm:hidden tracking-wider text-text"
+            >
+              FOSS-GCE Erode
+            </span>
           </Link>
 
           {/* Desktop links — centered */}
