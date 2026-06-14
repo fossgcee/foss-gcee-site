@@ -12,7 +12,7 @@ export default function PageLoader() {
 
   useEffect(() => {
     // Check for slow connection to bypass loader
-    const conn = (navigator as any).connection;
+    const conn = (navigator as Navigator & { connection?: { effectiveType?: string } }).connection;
     if (conn && (conn.effectiveType === '2g' || conn.effectiveType === 'slow-2g')) {
       if (loaderRef.current) loaderRef.current.style.display = "none";
       return;

@@ -10,7 +10,7 @@ import { useTheme } from "next-themes";
 const PHRASES = [
   "FOSSGCEE",
   "GCEE",
-  "Free and Open\nSource\u00a0Software",
+  "Free\u00a0and\u00a0Open\nSource\u00a0Software",
   "FOSSGCEE",
 ];
 
@@ -24,7 +24,8 @@ export default function Hero() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const frame = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   const isDark = mounted ? resolvedTheme !== "light" : true; 
@@ -123,8 +124,8 @@ export default function Hero() {
 
           {/* Typewriter heading */}
           <h1
-            className="font-pixel leading-relaxed text-text whitespace-pre-wrap break-words"
-            style={{ fontSize: "clamp(1rem, 5vw, 2.4rem)", minHeight: "2.8em" }}
+            className="font-pixel leading-relaxed text-text whitespace-pre-wrap break-normal"
+            style={{ fontSize: "clamp(0.65rem, 3.5vw, 2.0rem)", minHeight: "3.3em" }}
           >
             {displayText}
             <span className="animate-blink text-text">_</span>
@@ -132,7 +133,7 @@ export default function Hero() {
 
           {/* Description */}
           <p
-            className="text-base md:text-lg lg:text-lg leading-relaxed max-w-lg font-mono text-muted-2"
+            className="text-base md:text-lg lg:text-lg leading-relaxed max-w-lg font-mono text-muted-2 mt-3"
           >
             We foster a culture of{" "}
             <span className="text-text">Linux</span>,{" "}
