@@ -111,7 +111,7 @@ export default function Hero() {
       />
 
       {/* ── Two-column layout ────────────────────────────── */}
-      <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-10 lg:px-16 w-full py-16 lg:py-24 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
+      <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-10 lg:px-12 xl:px-16 w-full py-16 lg:py-24 grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-6 lg:gap-8 items-center">
 
         {/* ── LEFT: Text content ──────────────────────────── */}
         <div ref={leftRef} className="flex flex-col items-start gap-4 sm:gap-6 pt-2 lg:pt-0">
@@ -126,8 +126,8 @@ export default function Hero() {
 
           {/* Typewriter heading */}
           <h1
-            className="font-pixel leading-relaxed text-text whitespace-pre-wrap break-normal min-h-[3.3em]"
-            style={{ fontSize: "clamp(0.8rem, 4.8vw, 2.4rem)" }}
+            className="font-pixel leading-relaxed text-text whitespace-pre-wrap break-normal min-h-[3.3em] w-full"
+            style={{ fontSize: "clamp(0.85rem, 5vw, 2.4rem)" }}
           >
             {displayText}
             <span className="animate-blink text-text">_</span>
