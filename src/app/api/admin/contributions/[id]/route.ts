@@ -29,3 +29,54 @@ export async function DELETE(
     return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 });
   }
 }
+
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    await dbConnect();
+    const { id } = await params;
+    const body = await req.json();
+
+    const contribution = await Contribution.findById(id);
+    if (!contribution) {
+      return NextResponse.json({ success: false, error: "Contribution not found" }, { status: 404 });
+    }
+
+    // Check if memberId changed
+    if (body.memberId && body.memberId !== contribution.memberId.toString()) {
+      // Decrement old member
+      const oldMember = await Member.findById(contribution.memberId);
+      if (oldMember && oldMember.contributionsCount > 0) {
+        oldMember.contributionsCount -= 1;
+        await oldMember.save();
+      }
+      // Increment new member
+      const newMember = await Member.findById(body.memberId);
+      if (newMember) {
+        newMember.contributionsCount += 1;
+        await newMember.save();
+      }
+    }
+
+    const updated = await Contribution.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          memberId: body.memberId || contribution.memberId,
+          title: body.title !== undefined ? body.title : contribution.title,
+          description: body.description !== undefined ? body.description : contribution.description,
+          url: body.url !== undefined ? body.url : contribution.url,
+          imageUrl: body.imageUrl !== undefined ? body.imageUrl : contribution.imageUrl,
+          isFeatured: body.isFeatured !== undefined ? body.isFeatured : contribution.isFeatured,
+        }
+      },
+      { new: true }
+    );
+
+    return NextResponse.json({ success: true, data: updated });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 });
+  }
+}

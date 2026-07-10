@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { GitCommit, Search, RefreshCw, Trash2, Plus, X, Link2 } from "lucide-react";
+import { GitCommit, Search, RefreshCw, Trash2, Plus, X, Link2, Pencil } from "lucide-react";
 
 interface Member {
   _id: string;
@@ -16,26 +16,29 @@ interface Contribution {
   title: string;
   description: string;
   url: string;
+  imageUrl?: string;
   isFeatured: boolean;
   createdAt: string;
 }
 
-function AddModal({
+function ContributionModal({
   members,
+  initialData,
   onSave,
   onClose,
 }: {
   members: Member[];
+  initialData?: Contribution | null;
   onSave: (data: { memberId: string; title: string; description: string; url: string; imageUrl: string; isFeatured: boolean }) => Promise<void>;
   onClose: () => void;
 }) {
   const [formData, setFormData] = useState({
-    memberId: "",
-    title: "",
-    description: "",
-    url: "",
-    imageUrl: "",
-    isFeatured: false,
+    memberId: initialData?.memberId?._id || "",
+    title: initialData?.title || "",
+    description: initialData?.description || "",
+    url: initialData?.url || "",
+    imageUrl: initialData?.imageUrl || "",
+    isFeatured: initialData?.isFeatured || false,
   });
   const [loading, setLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -80,7 +83,7 @@ function AddModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
       <div className="w-full max-w-lg bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
         <div className="px-6 py-4 border-b border-white/5 flex justify-between items-center">
-          <h2 className="font-pixel text-lg text-white">ADD_CONTRIBUTION</h2>
+          <h2 className="font-pixel text-lg text-white">{initialData ? "EDIT_CONTRIBUTION" : "ADD_CONTRIBUTION"}</h2>
           <button onClick={onClose} className="p-2 text-white/40 hover:text-white transition-colors">
             <X className="w-5 h-5" />
           </button>
@@ -182,7 +185,7 @@ function AddModal({
               disabled={loading || !formData.memberId}
               className="px-8 py-2.5 rounded-xl bg-white text-black font-mono text-xs font-bold hover:bg-white/90 transition-all disabled:opacity-50"
             >
-              {loading ? "Adding..." : "Add Contribution"}
+              {loading ? (initialData ? "Saving..." : "Adding...") : (initialData ? "Save Changes" : "Add Contribution")}
             </button>
           </div>
         </form>
@@ -197,14 +200,15 @@ export default function AdminContributionsPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingContribution, setEditingContribution] = useState<Contribution | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const [contribRes, membersRes] = await Promise.all([
         fetch("/api/admin/contributions"),
-        fetch("/api/admin/members?approved=true") // assuming you only add contributions for approved members
+        fetch("/api/admin/members?approved=true")
       ]);
       
       const contribData = await contribRes.json();
@@ -234,18 +238,27 @@ export default function AdminContributionsPage() {
     }
   };
 
-  const handleAdd = async (data: { memberId: string; title: string; description: string; url: string; imageUrl: string; isFeatured: boolean }) => {
-    const res = await fetch("/api/admin/contributions", {
-      method: "POST",
+  const handleEdit = (contribution: Contribution) => {
+    setEditingContribution(contribution);
+    setIsModalOpen(true);
+  };
+
+  const handleSave = async (data: { memberId: string; title: string; description: string; url: string; imageUrl: string; isFeatured: boolean }) => {
+    const url = editingContribution ? `/api/admin/contributions/${editingContribution._id}` : "/api/admin/contributions";
+    const method = editingContribution ? "PUT" : "POST";
+    
+    const res = await fetch(url, {
+      method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
     const result = await res.json();
     if (result.success) {
-      // Refresh to get populated member details
       fetchData();
+      setIsModalOpen(false);
+      setEditingContribution(null);
     } else {
-      alert("Error adding contribution: " + result.error);
+      alert(`Error ${editingContribution ? "updating" : "adding"} contribution: ` + result.error);
     }
   };
 
@@ -264,7 +277,10 @@ export default function AdminContributionsPage() {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={() => {
+              setEditingContribution(null);
+              setIsModalOpen(true);
+            }}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-black font-mono text-xs font-bold hover:bg-white/90 transition-all"
           >
             <Plus className="w-3.5 h-3.5" />
@@ -359,7 +375,14 @@ export default function AdminContributionsPage() {
             </span>
 
             {/* Actions */}
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-end gap-1">
+              <button
+                onClick={() => handleEdit(c)}
+                title="Edit contribution"
+                className="p-2 rounded-lg text-white/40 hover:text-white hover:bg-white/5 transition-all"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
               <button
                 onClick={() => handleDelete(c._id)}
                 disabled={deleting === c._id}
@@ -379,11 +402,15 @@ export default function AdminContributionsPage() {
         </p>
       )}
 
-      {isAddModalOpen && (
-        <AddModal
+      {isModalOpen && (
+        <ContributionModal
           members={members}
-          onSave={handleAdd}
-          onClose={() => setIsAddModalOpen(false)}
+          initialData={editingContribution}
+          onSave={handleSave}
+          onClose={() => {
+            setIsModalOpen(false);
+            setEditingContribution(null);
+          }}
         />
       )}
     </div>
