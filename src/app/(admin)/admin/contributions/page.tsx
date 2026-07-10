@@ -21,6 +21,24 @@ interface Contribution {
   createdAt: string;
 }
 
+function convertDriveUrl(url: string): string {
+  if (!url) return url;
+  
+  // Pattern 1: https://drive.google.com/file/d/FILE_ID/view...
+  const fileMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (fileMatch) return `https://lh3.googleusercontent.com/d/${fileMatch[1]}`;
+  
+  // Pattern 2: https://drive.google.com/open?id=FILE_ID
+  const openMatch = url.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
+  if (openMatch) return `https://lh3.googleusercontent.com/d/${openMatch[1]}`;
+  
+  // Pattern 3: https://drive.google.com/uc?id=FILE_ID
+  const ucMatch = url.match(/drive\.google\.com\/uc\?(?:export=view&)?id=([a-zA-Z0-9_-]+)/);
+  if (ucMatch) return `https://lh3.googleusercontent.com/d/${ucMatch[1]}`;
+  
+  return url;
+}
+
 function ContributionModal({
   members,
   initialData,
@@ -132,19 +150,36 @@ function ContributionModal({
           
           <div className="space-y-1.5">
             <label className="font-mono text-[10px] uppercase tracking-widest text-white/40 ml-1">Project Image</label>
-            <div className="flex gap-4 items-center">
-              {formData.imageUrl && (
-                <div className="w-16 h-16 rounded overflow-hidden relative shrink-0">
-                  <img src={formData.imageUrl} alt="Project" className="w-full h-full object-cover" />
-                  <button type="button" onClick={() => setFormData(prev => ({ ...prev, imageUrl: "" }))} className="absolute top-0 right-0 p-1 bg-black/50 text-white rounded-bl">
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              )}
-              <label className="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl font-mono text-sm text-white/60 hover:bg-white/10 cursor-pointer transition-colors text-center">
-                {isUploading ? "Uploading..." : formData.imageUrl ? "Change Image" : "Upload Image"}
-                <input type="file" accept="image/*" onChange={handleUploadImage} disabled={isUploading} className="hidden" />
-              </label>
+            <div className="flex flex-col gap-3">
+              <div className="flex gap-4 items-center">
+                {formData.imageUrl && (
+                  <div className="w-16 h-16 rounded overflow-hidden relative shrink-0 border border-white/10">
+                    <img src={formData.imageUrl} alt="Project" className="w-full h-full object-cover" />
+                    <button type="button" onClick={() => setFormData(prev => ({ ...prev, imageUrl: "" }))} className="absolute top-0 right-0 p-1 bg-black/70 text-white rounded-bl hover:bg-red-500 transition-colors">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+                <label className="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl font-mono text-sm text-white/60 hover:bg-white/10 cursor-pointer transition-colors text-center">
+                  {isUploading ? "Uploading..." : formData.imageUrl ? "Upload Different Image" : "Upload Image File"}
+                  <input type="file" accept="image/*" onChange={handleUploadImage} disabled={isUploading} className="hidden" />
+                </label>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-px bg-white/10 flex-1"></div>
+                <span className="font-mono text-[10px] text-white/40">OR</span>
+                <div className="h-px bg-white/10 flex-1"></div>
+              </div>
+              <input
+                type="url"
+                value={formData.imageUrl}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setFormData({ ...formData, imageUrl: convertDriveUrl(val) });
+                }}
+                placeholder="https://drive.google.com/... or any image URL"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 font-mono text-sm text-white focus:outline-none focus:ring-1 ring-white/20"
+              />
             </div>
           </div>
           

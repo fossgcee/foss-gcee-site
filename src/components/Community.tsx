@@ -93,21 +93,29 @@ export default function Community() {
       scrollTrigger: { trigger: ".comm-heading", start: "top 85%" },
       y: 40, opacity: 0, duration: 0.8, ease: "power3.out",
     });
-    gsap.from(".featured-card", {
-      immediateRender: false,
-      scrollTrigger: { trigger: ".featured-card", start: "top 80%" },
-      y: 40, opacity: 0, duration: 0.9, ease: "power3.out",
-    });
-    gsap.from(".past-item", {
-      immediateRender: false,
-      scrollTrigger: { trigger: ".past-list", start: "top 80%" },
-      x: -30, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out",
-    });
-    gsap.from(".upcoming-item", {
-      immediateRender: false,
-      scrollTrigger: { trigger: ".upcoming-list", start: "top 80%" },
-      x: 30, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out",
-    });
+    if (featured) {
+      gsap.from(".featured-card", {
+        immediateRender: false,
+        scrollTrigger: { trigger: ".featured-card", start: "top 80%" },
+        y: 40, opacity: 0, duration: 0.9, ease: "power3.out",
+      });
+    }
+    
+    if (recentPast.length > 0) {
+      gsap.from(".past-item", {
+        immediateRender: false,
+        scrollTrigger: { trigger: ".past-list", start: "top 80%" },
+        x: -30, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out",
+      });
+    }
+    
+    if (moreUp.length > 0) {
+      gsap.from(".upcoming-item", {
+        immediateRender: false,
+        scrollTrigger: { trigger: ".upcoming-list", start: "top 80%" },
+        x: 30, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out",
+      });
+    }
   }, { scope: sectionRef, dependencies: [loading] });
 
   return (
