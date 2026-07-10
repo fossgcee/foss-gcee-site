@@ -108,53 +108,60 @@ export default function AllProjects() {
             {contributions.map((c) => (
               <div
                 key={c._id}
-                className="contrib-card group relative p-6 sm:p-8 rounded-3xl bg-surface border border-border hover:border-text/30 transition-all duration-300 shadow-sm hover:shadow-xl flex flex-col h-full"
+                className="contrib-card group relative p-6 sm:p-8 rounded-3xl bg-surface border border-border hover:border-text/30 transition-all duration-300 shadow-sm hover:shadow-xl flex flex-col justify-between overflow-hidden min-h-[300px]"
               >
-                {/* Image Section (if available) */}
+                {/* Background Image with Gradient Fade */}
                 {c.imageUrl && (
-                  <div className="w-full aspect-video rounded-2xl overflow-hidden mb-6 border border-border">
-                    <img src={c.imageUrl} alt={c.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <div className="absolute inset-0 z-0 pointer-events-none">
+                    <img 
+                      src={c.imageUrl} 
+                      alt="" 
+                      className="absolute inset-0 w-full h-full object-cover object-right sm:object-center opacity-60 transition-transform duration-700 group-hover:scale-105" 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/80 sm:via-surface/70 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/60 sm:via-surface/30 to-transparent" />
                   </div>
                 )}
                 
-                <div className="flex flex-col flex-1 min-w-0">
-                  {/* Title & Link */}
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="mt-1 p-2 bg-black/5 dark:bg-white/5 rounded-xl text-text border border-border shrink-0">
-                      <GitCommit className="w-4 h-4" />
+                <div className="relative z-10 flex flex-col h-full justify-between">
+                  {/* Content Section */}
+                  <div className="space-y-4 min-w-0 md:w-4/5">
+                    <div className="flex items-start gap-4">
+                      <div className="mt-1 p-2.5 bg-black/20 dark:bg-white/10 backdrop-blur-sm rounded-xl text-text border border-border shrink-0 shadow-lg">
+                        <GitCommit className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-xl text-text leading-tight group-hover:text-text/80 transition-colors break-words drop-shadow-sm">
+                          {c.title}
+                        </h3>
+                        {c.url && (
+                          <a
+                            href={c.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 mt-2 font-mono text-[11px] text-blue-400 hover:text-blue-300 transition-colors truncate max-w-full"
+                          >
+                            <Link2 className="w-3.5 h-3.5 shrink-0" />
+                            <span className="truncate">{c.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}</span>
+                          </a>
+                        )}
+                      </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-semibold text-xl text-text leading-tight group-hover:text-text/80 transition-colors truncate">
-                        {c.title}
-                      </h3>
-                      {c.url && (
-                        <a
-                          href={c.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 mt-2 font-mono text-[11px] text-blue-500 hover:text-blue-400 transition-colors truncate max-w-full"
-                        >
-                          <Link2 className="w-3 h-3 shrink-0" />
-                          <span className="truncate">{c.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}</span>
-                        </a>
-                      )}
-                    </div>
+                    
+                    <p className="text-sm text-muted-2 leading-relaxed pt-2 line-clamp-4 drop-shadow-sm">
+                      {c.description}
+                    </p>
                   </div>
-                  
-                  {/* Description */}
-                  <p className="text-sm text-muted-2 leading-relaxed mb-6 flex-1 break-words">
-                    {c.description}
-                  </p>
 
                   {/* Author Info */}
-                  <div className="flex items-center justify-between gap-3 pt-5 border-t border-border mt-auto">
+                  <div className="flex items-center justify-between gap-3 pt-5 border-t border-border/50 mt-8">
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-black/10 dark:bg-white/10 flex items-center justify-center shrink-0">
-                        <User className="w-3.5 h-3.5 text-text/60" />
+                      <div className="w-8 h-8 rounded-full bg-black/20 dark:bg-white/10 backdrop-blur-sm flex items-center justify-center shrink-0 border border-border/50">
+                        <User className="w-4 h-4 text-text/80" />
                       </div>
-                      <p className="font-mono text-xs font-semibold text-text truncate max-w-[150px]">{c.memberId?.name || "Unknown Member"}</p>
+                      <p className="font-mono text-xs font-semibold text-text truncate max-w-[150px] drop-shadow-sm">{c.memberId?.name || "Unknown Member"}</p>
                     </div>
-                    <p className="font-mono text-[10px] text-muted-2 shrink-0">
+                    <p className="font-mono text-[10px] text-muted-2 shrink-0 drop-shadow-sm">
                       {new Date(c.createdAt).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",

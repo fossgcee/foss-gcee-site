@@ -189,10 +189,10 @@ export default function Contributions() {
                     <img 
                       src={c.imageUrl} 
                       alt="" 
-                      className="absolute inset-0 w-full h-full object-cover object-right opacity-60 sm:opacity-70 transition-transform duration-700 group-hover:scale-105" 
+                      className="absolute inset-0 w-full h-full object-cover object-right sm:object-center opacity-60 sm:opacity-70 transition-transform duration-700 group-hover:scale-105" 
                     />
-                    <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/90 sm:via-surface/70 to-transparent" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/30 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/80 sm:via-surface/70 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/50 sm:via-surface/30 to-transparent" />
                   </div>
                 )}
 
@@ -204,7 +204,7 @@ export default function Contributions() {
                         <GitCommit className="w-5 h-5" />
                       </div>
                       <div className="min-w-0">
-                        <h3 className="font-semibold text-xl sm:text-2xl text-text leading-tight group-hover:text-text/80 transition-colors truncate">
+                        <h3 className="font-semibold text-xl sm:text-2xl text-text leading-tight group-hover:text-text/80 transition-colors break-words">
                           {c.title}
                         </h3>
                         {c.url && (
