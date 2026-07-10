@@ -25,7 +25,6 @@ const menuItems = [
   { icon: Users, label: "Members", href: "/admin/members" },
   { icon: Calendar, label: "Events", href: "/admin/events" },
   { icon: GitCommit, label: "Contributions", href: "/admin/contributions" },
-  { icon: Settings, label: "Settings", href: "/admin/settings" },
 ];
 
 export default function AdminSidebar() {
