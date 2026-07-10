@@ -16,6 +16,7 @@ interface Contribution {
   title: string;
   description: string;
   url: string;
+  links?: { label: string; url: string }[];
   imageUrl?: string;
   isFeatured: boolean;
   createdAt: string;
@@ -47,7 +48,7 @@ function ContributionModal({
 }: {
   members: Member[];
   initialData?: Contribution | null;
-  onSave: (data: { memberId: string; title: string; description: string; url: string; imageUrl: string; isFeatured: boolean }) => Promise<void>;
+  onSave: (data: { memberId: string; title: string; description: string; url: string; links: {label: string, url: string}[]; imageUrl: string; isFeatured: boolean }) => Promise<void>;
   onClose: () => void;
 }) {
   const [formData, setFormData] = useState({
@@ -55,6 +56,7 @@ function ContributionModal({
     title: initialData?.title || "",
     description: initialData?.description || "",
     url: initialData?.url || "",
+    links: initialData?.links || [],
     imageUrl: initialData?.imageUrl || "",
     isFeatured: initialData?.isFeatured || false,
   });
@@ -196,14 +198,64 @@ function ContributionModal({
           </div>
           
           <div className="space-y-1.5">
-            <label className="font-mono text-[10px] uppercase tracking-widest text-white/40 ml-1">URL (Optional)</label>
+            <label className="font-mono text-[10px] uppercase tracking-widest text-white/40 ml-1">Main Link (Optional)</label>
             <input
               type="url"
               value={formData.url}
               onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-              placeholder="e.g. https://github.com/foss-gcee/site/pull/1"
+              placeholder="e.g. https://github.com/foss-gcee/site"
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 font-mono text-sm text-white focus:outline-none focus:ring-1 ring-white/20"
             />
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center ml-1">
+              <label className="font-mono text-[10px] uppercase tracking-widest text-white/40">Additional Links</label>
+              <button 
+                type="button" 
+                onClick={() => setFormData({ ...formData, links: [...formData.links, { label: "", url: "" }] })}
+                className="text-[10px] font-mono text-white/60 hover:text-white px-2 py-1 bg-white/5 rounded border border-white/10"
+              >
+                + Add Link
+              </button>
+            </div>
+            {formData.links.map((link, idx) => (
+              <div key={idx} className="flex gap-2 items-start mt-2">
+                <input
+                  type="text"
+                  value={link.label}
+                  onChange={(e) => {
+                    const newLinks = [...formData.links];
+                    newLinks[idx].label = e.target.value;
+                    setFormData({ ...formData, links: newLinks });
+                  }}
+                  placeholder="Label (e.g. GitHub)"
+                  className="w-1/3 bg-white/5 border border-white/10 rounded-xl px-3 py-2 font-mono text-xs text-white focus:outline-none focus:ring-1 ring-white/20"
+                />
+                <input
+                  type="url"
+                  value={link.url}
+                  onChange={(e) => {
+                    const newLinks = [...formData.links];
+                    newLinks[idx].url = e.target.value;
+                    setFormData({ ...formData, links: newLinks });
+                  }}
+                  placeholder="URL"
+                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 font-mono text-xs text-white focus:outline-none focus:ring-1 ring-white/20"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newLinks = [...formData.links];
+                    newLinks.splice(idx, 1);
+                    setFormData({ ...formData, links: newLinks });
+                  }}
+                  className="p-2 text-white/40 hover:text-red-400 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
           </div>
 
           <div className="flex items-center gap-3 pt-2">
@@ -290,7 +342,7 @@ export default function AdminContributionsPage() {
     setIsModalOpen(true);
   };
 
-  const handleSave = async (data: { memberId: string; title: string; description: string; url: string; imageUrl: string; isFeatured: boolean }) => {
+  const handleSave = async (data: { memberId: string; title: string; description: string; url: string; links: {label: string, url: string}[]; imageUrl: string; isFeatured: boolean }) => {
     const url = editingContribution ? `/api/admin/contributions/${editingContribution._id}` : "/api/admin/contributions";
     const method = editingContribution ? "PUT" : "POST";
     

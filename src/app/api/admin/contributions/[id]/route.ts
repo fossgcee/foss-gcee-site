@@ -68,6 +68,7 @@ export async function PUT(
           title: body.title !== undefined ? body.title : contribution.title,
           description: body.description !== undefined ? body.description : contribution.description,
           url: body.url !== undefined ? body.url : contribution.url,
+          links: body.links !== undefined ? body.links : contribution.links,
           imageUrl: body.imageUrl !== undefined ? body.imageUrl : contribution.imageUrl,
           isFeatured: body.isFeatured !== undefined ? body.isFeatured : contribution.isFeatured,
         }

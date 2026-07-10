@@ -5,6 +5,7 @@ export interface IContribution extends mongoose.Document {
   title: string;
   description: string;
   url?: string;
+  links?: { label: string; url: string }[];
   imageUrl?: string;
   isFeatured?: boolean;
   createdAt: Date;
@@ -30,6 +31,12 @@ const ContributionSchema = new mongoose.Schema<IContribution>(
     url: {
       type: String,
     },
+    links: [
+      {
+        label: String,
+        url: String,
+      }
+    ],
     imageUrl: {
       type: String,
     },

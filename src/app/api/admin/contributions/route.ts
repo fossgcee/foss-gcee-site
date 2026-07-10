@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   try {
     await dbConnect();
     const body = await req.json();
-    const { memberId, title, description, url, imageUrl, isFeatured } = body;
+    const { memberId, title, description, url, links, imageUrl, isFeatured } = body;
     
     if (!memberId || !title || !description) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
       title,
       description,
       url,
+      links,
       imageUrl,
       isFeatured: isFeatured || false,
     });

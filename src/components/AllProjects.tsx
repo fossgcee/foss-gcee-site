@@ -23,6 +23,7 @@ interface Contribution {
   title: string;
   description: string;
   url: string;
+  links?: { label: string; url: string }[];
   isFeatured: boolean;
   imageUrl?: string;
   createdAt: string;
@@ -31,6 +32,7 @@ interface Contribution {
 export default function AllProjects() {
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedProject, setSelectedProject] = useState<Contribution | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -108,7 +110,8 @@ export default function AllProjects() {
             {contributions.map((c) => (
               <div
                 key={c._id}
-                className="contrib-card group relative p-6 sm:p-8 rounded-3xl bg-surface border border-border hover:border-text/30 transition-all duration-300 shadow-sm hover:shadow-xl flex flex-col justify-between overflow-hidden min-h-[300px]"
+                onClick={() => setSelectedProject(c)}
+                className="contrib-card group relative p-6 sm:p-8 rounded-3xl bg-surface border border-border hover:border-text/30 transition-all duration-300 shadow-sm hover:shadow-xl flex flex-col justify-between overflow-hidden min-h-[300px] cursor-pointer"
               >
                 {/* Background Image with Gradient Fade */}
                 {c.imageUrl && (
@@ -141,6 +144,7 @@ export default function AllProjects() {
                             href={c.url}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
                             className="inline-flex items-center gap-1.5 mt-2 font-mono text-[11px] text-blue-400 hover:text-blue-300 transition-colors truncate max-w-full"
                           >
                             <Link2 className="w-3.5 h-3.5 shrink-0" />
@@ -150,7 +154,7 @@ export default function AllProjects() {
                       </div>
                     </div>
                     
-                    <p className="text-sm text-muted-2 leading-relaxed pt-2 line-clamp-4 drop-shadow-sm">
+                    <p className="text-sm text-muted-2 leading-relaxed pt-2 drop-shadow-sm">
                       {c.description}
                     </p>
                   </div>
@@ -177,6 +181,75 @@ export default function AllProjects() {
           </div>
         )}
       </div>
+
+      {/* Project Detail Modal */}
+      {selectedProject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md" onClick={() => setSelectedProject(null)}>
+          <div 
+            className="w-full max-w-2xl bg-surface border border-border/50 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Modal Image Header */}
+            {selectedProject.imageUrl && (
+              <div className="w-full h-48 sm:h-64 relative shrink-0">
+                <img src={selectedProject.imageUrl} alt="" className="w-full h-full object-cover object-left" />
+                <div className="absolute inset-0 bg-gradient-to-t from-surface to-transparent" />
+                <button 
+                  onClick={() => setSelectedProject(null)}
+                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/80 transition-colors backdrop-blur-sm"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+            
+            {!selectedProject.imageUrl && (
+              <div className="flex justify-end p-4 pb-0 shrink-0">
+                <button onClick={() => setSelectedProject(null)} className="w-8 h-8 rounded-full bg-surface-2 text-text flex items-center justify-center hover:bg-surface-3 transition-colors">✕</button>
+              </div>
+            )}
+
+            {/* Modal Content */}
+            <div className="p-6 sm:p-8 overflow-y-auto">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="mt-1 p-3 bg-surface-2 border border-border rounded-xl text-text shrink-0">
+                  <GitCommit className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="font-bold text-2xl sm:text-3xl text-text leading-tight">{selectedProject.title}</h2>
+                  <div className="flex items-center gap-2 mt-2 font-mono text-xs text-muted-2">
+                    <User className="w-3.5 h-3.5" />
+                    <span>{selectedProject.memberId?.name || "Unknown Member"}</span>
+                    <span>•</span>
+                    <span>{new Date(selectedProject.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="prose prose-invert max-w-none mb-8">
+                <p className="text-muted-2 text-base leading-relaxed whitespace-pre-wrap">{selectedProject.description}</p>
+              </div>
+
+              {/* Links Section */}
+              <div className="flex flex-wrap gap-3 pt-6 border-t border-border/50">
+                {selectedProject.url && (
+                  <a href={selectedProject.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-text text-bg rounded-full font-mono text-xs font-bold hover:bg-text/90 transition-colors">
+                    <Link2 className="w-4 h-4" />
+                    Visit Project
+                  </a>
+                )}
+                
+                {selectedProject.links?.map((link, idx) => (
+                  <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-surface-2 border border-border rounded-full font-mono text-xs text-text hover:bg-surface-3 transition-colors">
+                    <Link2 className="w-3.5 h-3.5" />
+                    {link.label || "Link"}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

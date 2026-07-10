@@ -223,7 +223,7 @@ export default function Contributions() {
                       </div>
                     </div>
                     
-                    <p className="text-sm sm:text-base text-muted-2 leading-relaxed pt-2 line-clamp-4 drop-shadow-sm">
+                    <p className="text-sm sm:text-base text-muted-2 leading-relaxed pt-2 drop-shadow-sm">
                       {c.description}
                     </p>
                   </div>
