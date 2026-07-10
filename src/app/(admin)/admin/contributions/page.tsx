@@ -64,6 +64,12 @@ function ContributionModal({
   const [isUploading, setIsUploading] = useState(false);
 
   const [memberSearch, setMemberSearch] = useState(initialData?.memberId?.name || "");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  
+  const filteredMembers = members.filter(m => 
+    m.name.toLowerCase().includes(memberSearch.toLowerCase()) || 
+    m.department.toLowerCase().includes(memberSearch.toLowerCase())
+  );
 
   const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -112,31 +118,50 @@ function ContributionModal({
         </div>
         
         <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto overflow-x-hidden">
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 relative">
             <label className="font-mono text-[10px] uppercase tracking-widest text-white/40 ml-1">Member (Search by Name)</label>
             <input
-              required
-              list="member-options"
+              required={!formData.memberId}
               value={memberSearch}
               onChange={(e) => {
                 setMemberSearch(e.target.value);
-                const selected = members.find(m => m.name === e.target.value);
-                if (selected) {
-                  setFormData({ ...formData, memberId: selected._id });
-                } else {
+                setIsDropdownOpen(true);
+                // Clear memberId if they start typing something else
+                if (formData.memberId && e.target.value !== members.find(m => m._id === formData.memberId)?.name) {
                   setFormData({ ...formData, memberId: "" });
                 }
               }}
-              placeholder="Start typing a name..."
+              onFocus={() => setIsDropdownOpen(true)}
+              onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
+              placeholder="Start typing a name or department..."
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 font-mono text-sm text-white focus:outline-none focus:ring-1 ring-white/20"
             />
-            <datalist id="member-options">
-              {members.map((m) => (
-                <option key={m._id} value={m.name}>
-                  {m.department} - Yr {m.year}
-                </option>
-              ))}
-            </datalist>
+            
+            {isDropdownOpen && memberSearch.length > 0 && (
+              <div 
+                className="absolute z-50 w-full mt-1 bg-[#1a1a1a] border border-white/10 rounded-xl max-h-48 overflow-y-auto shadow-2xl"
+                onMouseDown={(e) => e.preventDefault()}
+              >
+                {filteredMembers.length > 0 ? (
+                  filteredMembers.map(m => (
+                    <div 
+                      key={m._id}
+                      className="px-4 py-3 hover:bg-white/10 cursor-pointer border-b border-white/5 last:border-b-0 transition-colors"
+                      onClick={() => {
+                        setMemberSearch(m.name);
+                        setFormData({ ...formData, memberId: m._id });
+                        setIsDropdownOpen(false);
+                      }}
+                    >
+                      <div className="font-semibold text-sm text-white">{m.name}</div>
+                      <div className="font-mono text-[10px] text-white/40 mt-0.5">{m.department} • Year {m.year}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-3 font-mono text-xs text-white/40">No members found matching "{memberSearch}"</div>
+                )}
+              </div>
+            )}
           </div>
           
           <div className="space-y-1.5">
