@@ -61,6 +61,8 @@ function ContributionModal({
   const [loading, setLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
+  const [memberSearch, setMemberSearch] = useState(initialData?.memberId?.name || "");
+
   const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -107,22 +109,32 @@ function ContributionModal({
           </button>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto overflow-x-hidden">
           <div className="space-y-1.5">
-            <label className="font-mono text-[10px] uppercase tracking-widest text-white/40 ml-1">Member</label>
-            <select
+            <label className="font-mono text-[10px] uppercase tracking-widest text-white/40 ml-1">Member (Search by Name)</label>
+            <input
               required
-              value={formData.memberId}
-              onChange={(e) => setFormData({ ...formData, memberId: e.target.value })}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 font-mono text-sm text-white focus:outline-none focus:ring-1 ring-white/20 appearance-none shadow-inner"
-            >
-              <option value="" disabled className="bg-[#0a0a0a]">Select a member...</option>
+              list="member-options"
+              value={memberSearch}
+              onChange={(e) => {
+                setMemberSearch(e.target.value);
+                const selected = members.find(m => m.name === e.target.value);
+                if (selected) {
+                  setFormData({ ...formData, memberId: selected._id });
+                } else {
+                  setFormData({ ...formData, memberId: "" });
+                }
+              }}
+              placeholder="Start typing a name..."
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 font-mono text-sm text-white focus:outline-none focus:ring-1 ring-white/20"
+            />
+            <datalist id="member-options">
               {members.map((m) => (
-                <option key={m._id} value={m._id} className="bg-[#0a0a0a]">
-                  {m.name} ({m.department} - Yr {m.year})
+                <option key={m._id} value={m.name}>
+                  {m.department} - Yr {m.year}
                 </option>
               ))}
-            </select>
+            </datalist>
           </div>
           
           <div className="space-y-1.5">

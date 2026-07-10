@@ -189,8 +189,10 @@ export default function Contributions() {
                     <img 
                       src={c.imageUrl} 
                       alt="" 
-                      className="absolute inset-0 w-full h-full object-cover object-right sm:object-center opacity-60 sm:opacity-70 transition-transform duration-700 group-hover:scale-105" 
+                      className="absolute inset-0 w-full h-full object-cover object-right sm:object-center opacity-70 transition-transform duration-700 group-hover:scale-105" 
                     />
+                    {/* Glassmorphic Layer */}
+                    <div className="absolute inset-0 bg-surface/40 backdrop-blur-md" />
                     <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/80 sm:via-surface/70 to-transparent" />
                     <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/50 sm:via-surface/30 to-transparent" />
                   </div>
