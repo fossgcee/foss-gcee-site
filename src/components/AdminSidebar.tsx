@@ -11,7 +11,9 @@ import {
   LogOut,
   ShieldCheck,
   Menu,
-  X
+  X,
+  GitCommit,
+  PanelTop
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -19,8 +21,10 @@ import { logoutAction } from "@/app/(admin)/admin/login/actions";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
+  { icon: PanelTop, label: "Site CMS", href: "/admin/site-cms", highlight: true },
   { icon: Users, label: "Members", href: "/admin/members" },
   { icon: Calendar, label: "Events", href: "/admin/events" },
+  { icon: GitCommit, label: "Contributions", href: "/admin/contributions" },
   { icon: Settings, label: "Settings", href: "/admin/settings" },
 ];
 
@@ -60,9 +64,10 @@ export default function AdminSidebar() {
           <span className="font-pixel text-[10px] tracking-wider text-white">ADMIN PANEL</span>
         </div>
 
-        <nav className="flex-1 p-4 flex flex-col gap-2">
+        <nav className="flex-1 p-4 flex flex-col gap-1">
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
+            const isHighlight = "highlight" in item && item.highlight;
             return (
               <Link
                 key={item.href}
@@ -70,13 +75,18 @@ export default function AdminSidebar() {
                 onClick={() => setIsOpen(false)}
                 className={cn(
                   "flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 font-mono text-xs group",
-                  isActive 
-                    ? "bg-white text-black" 
+                  isActive
+                    ? "bg-white text-black"
+                    : isHighlight
+                    ? "text-white bg-white/[0.06] border border-white/10 hover:bg-white/[0.10]"
                     : "text-white/50 hover:text-white hover:bg-white/5"
                 )}
               >
-                <item.icon className={cn("w-4 h-4", isActive ? "text-black" : "text-white/40 group-hover:text-white")} />
+                <item.icon className={cn("w-4 h-4", isActive ? "text-black" : isHighlight ? "text-white" : "text-white/40 group-hover:text-white")} />
                 {item.label}
+                {isHighlight && !isActive && (
+                  <span className="ml-auto px-1.5 py-0.5 rounded text-[8px] bg-white/10 text-white/60 font-pixel">CMS</span>
+                )}
               </Link>
             );
           })}

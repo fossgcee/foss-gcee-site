@@ -1,43 +1,63 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { membersGallery } from "@/data/membersGallery";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, useGSAP);
 }
-import { membersGallery } from "@/data/membersGallery";
+
+interface GalleryImage { id: string; src: string; alt?: string }
 
 export default function MembersGallery() {
-  const images = membersGallery;
   const sectionRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  const scrollLeft = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: -400, behavior: "smooth" });
-    }
-  };
-
-  const scrollRight = () => {
-    if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-      // If we've reached the end, loop back to the start smoothly
-      if (scrollLeft + clientWidth >= scrollWidth - 10) {
-        scrollContainerRef.current.scrollTo({ left: 0, behavior: "smooth" });
-      } else {
-        scrollContainerRef.current.scrollBy({ left: 400, behavior: "smooth" });
-      }
-    }
-  };
-
   const isPausedRef = useRef(false);
 
-  // Auto-scroll effect with pause on hover/touch
+  const [images, setImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // ── Fetch from CMS, fall back to static data ─────────────────────
+  const fetchCMS = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/site-config?section=gallery");
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data?.images) && json.data.images.length > 0) {
+        setImages(json.data.images);
+      } else {
+        setImages(membersGallery as GalleryImage[]);
+      }
+    } catch {
+      setImages(membersGallery as GalleryImage[]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchCMS(); }, [fetchCMS]);
+
+  // ── Scroll helpers ───────────────────────────────────────────────
+  const scrollLeft = () => {
+    scrollContainerRef.current?.scrollBy({ left: -400, behavior: "smooth" });
+  };
+
+  const scrollRight = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 10) {
+      el.scrollTo({ left: 0, behavior: "smooth" });
+    } else {
+      el.scrollBy({ left: 400, behavior: "smooth" });
+    }
+  }, []);
+
+  // ── Auto-scroll ──────────────────────────────────────────────────
   useEffect(() => {
     if (images.length < 4) return;
     const container = scrollContainerRef.current;
@@ -53,7 +73,7 @@ export default function MembersGallery() {
 
     const interval = setInterval(() => {
       if (!isPausedRef.current) scrollRight();
-    }, 3500); // Auto-scroll every 3.5 seconds
+    }, 3500);
 
     return () => {
       clearInterval(interval);
@@ -62,15 +82,15 @@ export default function MembersGallery() {
       container.removeEventListener("touchstart", pause);
       container.removeEventListener("touchend", resume);
     };
-  }, [images.length]);
+  }, [images.length, scrollRight]);
 
+  // ── GSAP entrance ───────────────────────────────────────────────
   useGSAP(() => {
     gsap.from(".gallery-header", {
       immediateRender: false,
       scrollTrigger: { trigger: ".gallery-header", start: "top 85%" },
       y: 40, opacity: 0, duration: 0.8, ease: "power3.out",
     });
-    
     gsap.from(".gallery-card", {
       immediateRender: false,
       scrollTrigger: { trigger: ".gallery-grid", start: "top 80%" },
@@ -78,27 +98,27 @@ export default function MembersGallery() {
     });
   }, { scope: sectionRef });
 
+  // ── Render ───────────────────────────────────────────────────────
   return (
     <section ref={sectionRef} className="py-24 px-4 sm:px-6 lg:px-8 bg-bg-2 border-t border-border">
       <div className="max-w-6xl mx-auto">
 
-
-        {/* Gallery Section */}
+        {/* Header */}
         <div className="flex justify-between items-end mb-8">
           <h3 className="gallery-header text-3xl font-bold text-text">
             Members Gallery
           </h3>
-          
+
           {images.length > 3 && (
             <div className="flex gap-2">
-              <button 
+              <button
                 onClick={scrollLeft}
                 className="p-2 border border-border-2 rounded-full hover:bg-surface-2 transition-colors text-text"
                 aria-label="Scroll left"
               >
                 <ChevronLeftIcon className="w-5 h-5" />
               </button>
-              <button 
+              <button
                 onClick={scrollRight}
                 className="p-2 border border-border-2 rounded-full hover:bg-surface-2 transition-colors text-text"
                 aria-label="Scroll right"
@@ -108,41 +128,56 @@ export default function MembersGallery() {
             </div>
           )}
         </div>
-        
-        <div className="mb-8 rounded-2xl border border-dashed border-border-2 bg-surface-2/40 p-5">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-2">How To Upload</p>
-          <div className="mt-3 grid gap-2 text-sm text-muted-2">
-            <p>1. Add images to <span className="font-mono">public/members-gallery/</span></p>
-            <p>2. Register them in <span className="font-mono">src/data/membersGallery.ts</span></p>
-          </div>
-        </div>
 
-        {images.length > 0 ? (
-          <div 
+        {/* Loading skeleton */}
+        {loading && (
+          <div className="flex gap-6 overflow-hidden pb-8 pt-2">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="flex-none w-[85vw] sm:w-[45vw] md:w-[30vw] rounded-xl overflow-hidden bg-black/5 dark:bg-white/5 animate-pulse aspect-[16/9]"
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Gallery grid */}
+        {!loading && images.length > 0 && (
+          <div
             ref={scrollContainerRef}
-            className="gallery-grid flex gap-6 overflow-x-auto snap-x snap-mandatory pb-8 pt-2 scrollbar-hide"
+            className="gallery-grid flex gap-6 overflow-x-auto snap-x snap-mandatory pb-8 pt-2"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {images.map((image) => (
-              <div 
-                key={image.id} 
+              <div
+                key={image.id}
                 className="gallery-card group flex-none w-[85vw] sm:w-[45vw] md:w-[30vw] relative rounded-xl overflow-hidden bg-bg-2 border border-border snap-center"
               >
                 <div className="relative w-full aspect-[16/9]">
                   <Image
                     src={image.src}
-                    alt={image.alt || "Members gallery item"}
+                    alt={image.alt || "Members gallery photo"}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                     sizes="(max-width: 768px) 85vw, (max-width: 1024px) 50vw, 33vw"
+                    unoptimized={image.src.startsWith("https://lh3.googleusercontent.com")}
                   />
                 </div>
+                {image.alt && (
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <p className="font-mono text-xs text-white/90 truncate">{image.alt}</p>
+                  </div>
+                )}
               </div>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-12 text-muted-2 border border-dashed border-border-2 rounded-2xl">
-            <p className="font-mono text-sm">No images in gallery yet. Add photos using the steps above.</p>
+        )}
+
+        {/* Empty state — clean, no developer instructions */}
+        {!loading && images.length === 0 && (
+          <div className="text-center py-16 border border-dashed border-border-2 rounded-2xl">
+            <div className="text-4xl mb-4">📷</div>
+            <p className="font-mono text-sm text-muted-2">No photos yet — check back soon!</p>
           </div>
         )}
 

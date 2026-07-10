@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -9,18 +9,49 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, useGSAP);
 }
 
+interface Activity {
+  icon: string;
+  title: string;
+  desc: string;
+  tag: string;
+}
 
-const activities = [
-  { icon: ">_",   title: "Linux & Git Workshops",       desc: "Hands‑on sessions on the Linux terminal, shell scripting, and mastering Git for version control.",    tag: "#terminal" },
-  { icon: "⎇",   title: "OSS Contribution Drives",     desc: "Guided drives to help students make their first pull requests to real open‑source projects.",          tag: "#contribute" },
-  { icon: "⚡",  title: "Talks & Hackathons",           desc: "Expert talks, lightning talks, and hackathons focused on open‑source tooling and ideas.",              tag: "#community" },
-  { icon: "</>",  title: "Student‑led Projects",        desc: "Launch your own open‑source projects with mentorship from senior members and alumni contributors.",    tag: "#build" },
-  { icon: "⚙",  title: "DevOps & Cloud",               desc: "CI/CD, containerisation, self‑hosting, and infrastructure‑as‑code using open‑source stacks.",         tag: "#infra" },
-  { icon: "◉",   title: "Community Meetups",            desc: "Informal meetups, reading groups, and demo days to share what you've been building.",                  tag: "#meetup" },
-];
+interface WhatWeDoConfig {
+  activities: Activity[];
+}
+
+const defaultWhatWeDoData: WhatWeDoConfig = {
+  activities: [
+    { icon: ">_",   title: "Linux & Git Workshops",       desc: "Hands‑on sessions on the Linux terminal, shell scripting, and mastering Git for version control.",    tag: "#terminal" },
+    { icon: "⎇",   title: "OSS Contribution Drives",     desc: "Guided drives to help students make their first pull requests to real open‑source projects.",          tag: "#contribute" },
+    { icon: "⚡",  title: "Talks & Hackathons",           desc: "Expert talks, lightning talks, and hackathons focused on open‑source tooling and ideas.",              tag: "#community" },
+    { icon: "</>",  title: "Student‑led Projects",        desc: "Launch your own open‑source projects with mentorship from senior members and alumni contributors.",    tag: "#build" },
+    { icon: "⚙",  title: "DevOps & Cloud",               desc: "CI/CD, containerisation, self‑hosting, and infrastructure‑as‑code using open‑source stacks.",         tag: "#infra" },
+    { icon: "◉",   title: "Community Meetups",            desc: "Informal meetups, reading groups, and demo days to share what you've been building.",                  tag: "#meetup" },
+  ],
+};
 
 export default function WhatWeDo() {
   const sectionRef = useRef<HTMLDivElement>(null);
+
+  const [data, setData] = useState<WhatWeDoConfig>(defaultWhatWeDoData);
+
+  useEffect(() => {
+    let active = true;
+    async function fetchCMS() {
+      try {
+        const res = await fetch("/api/site-config?section=whatwedo");
+        const json = await res.json();
+        if (active && json.success && json.data?.activities) {
+          setData({ activities: json.data.activities });
+        }
+      } catch {
+        // Keep defaults on error
+      }
+    }
+    fetchCMS();
+    return () => { active = false; };
+  }, []);
 
   useGSAP(() => {
     gsap.from(".wwd-heading", {
@@ -49,8 +80,8 @@ export default function WhatWeDo() {
         </div>
 
         <div className="wwd-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {activities.map((a) => (
-            <div key={a.title} className="wwd-card glass-card p-7 cursor-default group" tabIndex={0} role="article" aria-label={a.title}>
+          {data.activities.map((a, idx) => (
+            <div key={idx} className="wwd-card glass-card p-7 cursor-default group" tabIndex={0} role="article" aria-label={a.title}>
               <div
                 className="font-mono text-xl font-bold mb-4 transition-colors duration-200 text-muted"
               >

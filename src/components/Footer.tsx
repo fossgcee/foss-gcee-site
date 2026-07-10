@@ -1,25 +1,73 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { GitHubIcon, YouTubeIcon, InstagramIcon, DiscordIcon, LinkedInIcon, EmailIcon } from "@/components/icons/SocialIcons";
 
-const quickLinks = [
-  { label: "About",      href: "/#about" },
-  { label: "What We Do", href: "/#whatwedo" },
-  { label: "Events",     href: "/#community" },
-  { label: "Join Us",    href: "/#join" },
-];
+interface SocialLink { platform: string; href: string; active: boolean; }
+interface QuickLink { label: string; href: string; }
 
-const socials = [
-  { Icon: GitHubIcon,    href: "https://github.com/fossgcee",                               label: "GitHub",    active: true },
-  { Icon: YouTubeIcon,   href: "https://www.youtube.com/channel/UCTtzkb23e6iQAMMkgigHQqQ", label: "YouTube",   active: true },
-  { Icon: InstagramIcon, href: "https://www.instagram.com/fossgcee/",                       label: "Instagram", active: true },
-  { Icon: DiscordIcon,   href: "https://discord.com/invite/d6SUMn4JF",                      label: "Discord",   active: true },
-  { Icon: LinkedInIcon,  href: "#",                                                          label: "LinkedIn",  active: false },
-  { Icon: EmailIcon,     href: "mailto:fossgcee@gmail.com",                                 label: "Email",     active: true },
-];
+interface FooterConfig {
+  about: string;
+  email: string;
+  builtBy: string;
+  socials: SocialLink[];
+  quickLinks: QuickLink[];
+}
+
+const defaultFooterData: FooterConfig = {
+  about: "Free and Open Source Software Club at Government College of Engineering, Erode.",
+  email: "fossgcee@gmail.com",
+  builtBy: "Prem Kumar P, Bharath Kumar P & Vikash V",
+  socials: [
+    { platform: "GitHub", href: "https://github.com/fossgcee", active: true },
+    { platform: "YouTube", href: "https://www.youtube.com/channel/UCTtzkb23e6iQAMMkgigHQqQ", active: true },
+    { platform: "Instagram", href: "https://www.instagram.com/fossgcee/", active: true },
+    { platform: "Discord", href: "https://discord.com/invite/d6SUMn4JF", active: true },
+    { platform: "LinkedIn", href: "#", active: false },
+    { platform: "Email", href: "mailto:fossgcee@gmail.com", active: true },
+  ],
+  quickLinks: [
+    { label: "About", href: "/#about" },
+    { label: "What We Do", href: "/#whatwedo" },
+    { label: "Projects", href: "/#contributions" },
+    { label: "Events", href: "/#community" },
+    { label: "Join Us", href: "/#join" },
+  ],
+};
+
+function getSocialIcon(platform: string) {
+  switch (platform.toLowerCase()) {
+    case "github": return GitHubIcon;
+    case "youtube": return YouTubeIcon;
+    case "instagram": return InstagramIcon;
+    case "discord": return DiscordIcon;
+    case "linkedin": return LinkedInIcon;
+    case "email": return EmailIcon;
+    default: return GitHubIcon; // Fallback
+  }
+}
 
 export default function Footer() {
+  const [footerData, setFooterData] = useState<FooterConfig>(defaultFooterData);
+
+  useEffect(() => {
+    let active = true;
+    async function fetchCMS() {
+      try {
+        const res = await fetch("/api/site-config?section=footer");
+        const json = await res.json();
+        if (active && json.success && json.data) {
+          setFooterData({ ...defaultFooterData, ...json.data });
+        }
+      } catch {
+        // Keep defaults on error
+      }
+    }
+    fetchCMS();
+    return () => { active = false; };
+  }, []);
+
   return (
     <footer
       className="relative border-t bg-bg border-border-2"
@@ -38,7 +86,7 @@ export default function Footer() {
               <span className="font-pixel text-xs md:text-[9px] text-text">FOSSGCEE</span>
             </div>
             <p className="text-sm leading-relaxed max-w-xs text-muted-2">
-              Free and Open Source Software Club at Government College of Engineering, Erode.
+              {footerData.about}
             </p>
           </div>
 
@@ -48,7 +96,7 @@ export default function Footer() {
               Quick Links
             </h4>
             <ul className="space-y-2.5">
-              {quickLinks.map(({ label, href }) => (
+              {footerData.quickLinks.map(({ label, href }) => (
                 <li key={label}>
                   <a
                     href={href}
@@ -68,21 +116,24 @@ export default function Footer() {
               Connect
             </h4>
             <div className="flex flex-wrap gap-2 mb-4">
-              {socials.map(({ Icon, href, label, active }) => (
-                <a
-                  key={label}
-                  href={active ? href : undefined}
-                  target={active && !href.startsWith("mailto") ? "_blank" : undefined}
-                  rel="noopener noreferrer"
-                  aria-label={active ? label : `${label} (coming soon)`}
-                  title={active ? label : `${label} — coming soon`}
-                  className={`footer-icon min-w-[44px] min-h-[44px] md:min-w-9 md:min-h-9 md:w-9 md:h-9 rounded-lg flex items-center justify-center transition-all duration-200 bg-surface border border-border text-muted-2${!active ? " opacity-30 pointer-events-none" : ""}`}
-                >
-                  <Icon />
-                </a>
-              ))}
+              {footerData.socials.map(({ platform, href, active }) => {
+                const Icon = getSocialIcon(platform);
+                return (
+                  <a
+                    key={platform}
+                    href={active ? href : undefined}
+                    target={active && !href.startsWith("mailto") ? "_blank" : undefined}
+                    rel="noopener noreferrer"
+                    aria-label={active ? platform : `${platform} (coming soon)`}
+                    title={active ? platform : `${platform} — coming soon`}
+                    className={`footer-icon min-w-[44px] min-h-[44px] md:min-w-9 md:min-h-9 md:w-9 md:h-9 rounded-lg flex items-center justify-center transition-all duration-200 bg-surface border border-border text-muted-2${!active ? " opacity-30 pointer-events-none" : ""}`}
+                  >
+                    <Icon />
+                  </a>
+                );
+              })}
             </div>
-            <p className="font-mono text-xs text-muted">fossgcee@gmail.com</p>
+            <p className="font-mono text-xs text-muted">{footerData.email}</p>
             <p className="mt-4 font-mono text-xs leading-relaxed text-muted-2 max-w-xs">
               Found a bug? Got suggestions for improvement?{" "}
               <a
@@ -103,7 +154,7 @@ export default function Footer() {
           className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-border"
         >
           <p className="font-mono text-xs text-muted text-center sm:text-left leading-relaxed">
-            &gt;_ Built by: <span className="text-text">Prem Kumar P</span>, <span className="text-text">Bharath Kumar P</span> &amp; <span className="text-text">Vikash V</span><br />
+            &gt;_ Built by: <span className="text-text">{footerData.builtBy}</span><br />
             <span className="sm:inline-block sm:mt-1 opacity-75">powered by open source</span>
           </p>
           <p className="font-mono text-xs text-muted-2 text-center sm:text-right">

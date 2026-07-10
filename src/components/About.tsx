@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -10,36 +10,74 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, useGSAP);
 }
 
+interface AboutStat {
+  value: string;
+  label: string;
+}
 
-const stats = [
-  { value: "100+", label: "Active Members" },
-  { value: "0+", label: "Events Hosted" },
-  { value: "0+", label: "OSS Contributions" },
-  { value: "2026", label: "Founded" },
-];
+interface AboutCard {
+  icon: string;
+  title: string;
+  text: string;
+}
 
-const cards = [
-  {
-    icon: "heart",
-    title: "What is FOSSGCEE?",
-    text: "FOSSGCEE is the official Free and Open Source Software club of Government College of Engineering, Erode — a community of passionate students who believe in open collaboration and transparent technology.",
-  },
-  {
-    icon: "🎯",
-    title: "Our Mission",
-    text: "To promote FOSS culture within campus through hands‑on learning, peer mentorship, and real‑world contributions — building an ecosystem where every student can grow as a developer.",
-  },
-  {
-    icon: "🔭",
-    title: "Our Vision",
-    text: "To build a sustainable open‑source culture where students contribute back to the global commons, launch meaningful projects, and graduate as engineers who value freedom and transparency.",
-  },
-];
+interface AboutConfig {
+  stats: AboutStat[];
+  cards: AboutCard[];
+}
+
+const defaultAboutData: AboutConfig = {
+  stats: [
+    { value: "100+", label: "Active Members" },
+    { value: "0+", label: "Events Hosted" },
+    { value: "0+", label: "OSS Contributions" },
+    { value: "2026", label: "Founded" },
+  ],
+  cards: [
+    {
+      icon: "heart",
+      title: "What is FOSSGCEE?",
+      text: "FOSSGCEE is the official Free and Open Source Software club of Government College of Engineering, Erode — a community of passionate students who believe in open collaboration and transparent technology.",
+    },
+    {
+      icon: "🎯",
+      title: "Our Mission",
+      text: "To promote FOSS culture within campus through hands‑on learning, peer mentorship, and real‑world contributions — building an ecosystem where every student can grow as a developer.",
+    },
+    {
+      icon: "🔭",
+      title: "Our Vision",
+      text: "To build a sustainable open‑source culture where students contribute back to the global commons, launch meaningful projects, and graduate as engineers who value freedom and transparency.",
+    },
+  ],
+};
 
 export default function About() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
+
+  const [aboutData, setAboutData] = useState<AboutConfig>(defaultAboutData);
+
+  useEffect(() => {
+    let active = true;
+    async function fetchCMS() {
+      try {
+        const res = await fetch("/api/site-config?section=about");
+        const json = await res.json();
+        if (active && json.success && json.data) {
+          setAboutData({
+            stats: json.data.stats || defaultAboutData.stats,
+            cards: json.data.cards || defaultAboutData.cards,
+          });
+        }
+      } catch {
+        // Keep defaults on error
+      }
+    }
+    fetchCMS();
+    return () => { active = false; };
+  }, []);
 
   useGSAP(() => {
     // Section heading
@@ -79,8 +117,8 @@ export default function About() {
 
         {/* Stats */}
         <div ref={statsRef} className="mb-10 sm:mb-16 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-10">
-          {stats.map((s) => (
-            <div key={s.label} className="about-stat text-center glass-card px-4 sm:px-8 py-5 sm:py-6 cursor-default">
+          {aboutData.stats.map((s, idx) => (
+            <div key={idx} className="about-stat text-center glass-card px-4 sm:px-8 py-5 sm:py-6 cursor-default">
               <div className="font-pixel text-xl sm:text-2xl mb-1 text-text">{s.value}</div>
               <div className="font-mono text-[9px] sm:text-xs uppercase tracking-widest mt-1 text-muted">{s.label}</div>
             </div>
@@ -89,8 +127,8 @@ export default function About() {
 
         {/* Cards */}
         <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {cards.map((c) => (
-            <div key={c.title} className="about-card glass-card p-7">
+          {aboutData.cards.map((c, idx) => (
+            <div key={idx} className="about-card glass-card p-7">
               <div className="mb-4 text-text">
                 {c.icon === "heart" ? (
                   <HeartHandshake className="w-7 h-7" />

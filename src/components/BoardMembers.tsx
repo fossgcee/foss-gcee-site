@@ -1,23 +1,78 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { membersData, getUniqueYears } from "@/data/members";
+import { membersData } from "@/data/members";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, useGSAP);
 }
 
+interface CMSMember {
+  id: string;
+  name: string;
+  role: string;
+  year: string;
+  imageUrl: string;
+  linkedInUrl?: string;
+}
+
+function getYears(members: CMSMember[]): string[] {
+  return Array.from(new Set(members.map((m) => m.year.trim())))
+    .filter(Boolean)
+    .sort((a, b) => b.localeCompare(a));
+}
+
 export default function BoardMembers() {
-  const years = getUniqueYears();
-  const [selectedYear, setSelectedYear] = useState<string>(years[0] || "");
   const sectionRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
-  const filteredMembers = membersData.filter((m) => m.year === selectedYear);
+  const [allMembers, setAllMembers] = useState<CMSMember[]>([]);
+  const [selectedYear, setSelectedYear] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+
+  const fetchCMS = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/site-config?section=boardmembers");
+      const json = await res.json();
+
+      let members: CMSMember[] = [];
+
+      if (json.success && Array.isArray(json.data?.members) && json.data.members.length > 0) {
+        members = json.data.members;
+      } else {
+        // Fall back to static data
+        members = membersData as CMSMember[];
+      }
+
+      setAllMembers(members);
+
+      // Set the first year immediately — no separate effect needed
+      const years = getYears(members);
+      if (years.length > 0) {
+        setSelectedYear(years[0]);
+      }
+    } catch {
+      // On error fall back to static data
+      const members = membersData as CMSMember[];
+      setAllMembers(members);
+      const years = getYears(members);
+      if (years.length > 0) setSelectedYear(years[0]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCMS();
+  }, [fetchCMS]);
+
+  const years = getYears(allMembers);
+  const filteredMembers = allMembers.filter((m) => m.year.trim() === selectedYear);
 
   useGSAP(() => {
     gsap.from(".board-header", {
@@ -33,13 +88,13 @@ export default function BoardMembers() {
   }, { scope: sectionRef });
 
   useEffect(() => {
-    if (!gridRef.current) return;
+    if (!gridRef.current || filteredMembers.length === 0) return;
     gsap.fromTo(
       gridRef.current.children,
       { y: 20, opacity: 0 },
       { y: 0, opacity: 1, duration: 0.5, stagger: 0.1, ease: "power2.out", overwrite: true }
     );
-  }, [selectedYear]);
+  }, [selectedYear, filteredMembers.length]);
 
   return (
     <section
@@ -54,30 +109,46 @@ export default function BoardMembers() {
           Board Members
         </h1>
 
-        {/* Year Dropdown */}
-        <div className="year-select mb-12 relative w-48">
-          <select
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(e.target.value)}
-            className="w-full appearance-none bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-black dark:text-white font-semibold py-2.5 px-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 transition-colors cursor-pointer"
-            style={{ backgroundImage: "none" }}
-          >
-            {years.map((year) => (
-              <option key={year} value={year} className="bg-white dark:bg-[#111]">
-                {year}
-              </option>
+        {/* Loading skeleton */}
+        {loading && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8 w-full">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="rounded-xl overflow-hidden bg-black/5 dark:bg-white/5 animate-pulse">
+                <div className="aspect-[4/5]" />
+                <div className="p-6">
+                  <div className="h-3 bg-black/10 dark:bg-white/10 rounded mb-2 w-3/4 mx-auto" />
+                  <div className="h-2 bg-black/5 dark:bg-white/5 rounded w-1/2 mx-auto" />
+                </div>
+              </div>
             ))}
-          </select>
-          {/* Custom arrow */}
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-black/40 dark:text-white/40">
-            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-            </svg>
           </div>
-        </div>
+        )}
+
+        {/* Year Dropdown */}
+        {!loading && years.length > 0 && (
+          <div className="year-select mb-12 relative w-48">
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className="w-full appearance-none bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-black dark:text-white font-semibold py-2.5 px-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 transition-colors cursor-pointer"
+              style={{ backgroundImage: "none" }}
+            >
+              {years.map((year) => (
+                <option key={year} value={year} className="bg-white dark:bg-[#111]">
+                  {year}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-black/40 dark:text-white/40">
+              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+              </svg>
+            </div>
+          </div>
+        )}
 
         {/* Members Grid */}
-        {filteredMembers.length > 0 ? (
+        {!loading && filteredMembers.length > 0 && (
           <div
             ref={gridRef}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 w-full"
@@ -87,7 +158,7 @@ export default function BoardMembers() {
                 key={member.id}
                 className="flex flex-col rounded-xl overflow-hidden relative group transition-transform duration-300 hover:-translate-y-2 bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/8 shadow-sm dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
               >
-                {/* Image Container */}
+                {/* Image */}
                 <div className="relative w-full aspect-[4/5] bg-black/5 dark:bg-[#111] overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 dark:from-black/60 via-transparent to-transparent z-10 opacity-60" />
                   {member.imageUrl ? (
@@ -97,17 +168,18 @@ export default function BoardMembers() {
                       fill
                       className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 768px) 85vw, (max-width: 1024px) 50vw, 33vw"
+                      unoptimized={member.imageUrl.startsWith("https://lh3.googleusercontent.com")}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-black/20 dark:text-white/20">
                       <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
                       </svg>
                     </div>
                   )}
                 </div>
 
-                {/* Content */}
+                {/* Info */}
                 <div className="p-6 text-center relative z-20 flex-grow flex flex-col justify-end">
                   <h3 className="text-lg font-bold tracking-wide uppercase mb-1 text-black dark:text-white">
                     {member.name}
@@ -116,17 +188,16 @@ export default function BoardMembers() {
                     {member.role}
                   </p>
 
-                  {/* LinkedIn */}
                   {member.linkedInUrl && (
                     <a
                       href={member.linkedInUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="absolute bottom-4 right-4 text-black/30 dark:text-white/30 hover:text-[#0077b5] dark:hover:text-[#0077b5] transition-colors"
+                      className="absolute bottom-4 right-4 text-black/30 dark:text-white/30 hover:text-[#0077b5] transition-colors"
                       aria-label={`LinkedIn profile for ${member.name}`}
                     >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                       </svg>
                     </a>
                   )}
@@ -134,11 +205,16 @@ export default function BoardMembers() {
               </div>
             ))}
           </div>
-        ) : (
+        )}
+
+        {/* Empty state */}
+        {!loading && filteredMembers.length === 0 && (
           <div className="text-center py-20 text-black/40 dark:text-white/40">
-            <p className="font-mono text-sm">No members found for the selected year.</p>
+            <p className="font-mono text-sm">No members found for {selectedYear || "this year"}.</p>
+            <p className="font-mono text-xs mt-2 opacity-60">Add board members via the Admin CMS.</p>
           </div>
         )}
+
       </div>
     </section>
   );

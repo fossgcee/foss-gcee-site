@@ -3,6 +3,7 @@ import About from "@/components/About";
 import WhatWeDo from "@/components/WhatWeDo";
 import Community from "@/components/Community";
 import JoinUs from "@/components/JoinUs";
+import Contributions from "@/components/Contributions";
 import PageLoader from "@/components/PageLoader";
 import Link from "next/link";
 
@@ -14,6 +15,7 @@ export default function Home() {
         <Hero />
         <About />
         <WhatWeDo />
+        <Contributions />
         <Community />
         <JoinUs />
       </main>

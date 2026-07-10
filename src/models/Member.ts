@@ -7,6 +7,7 @@ export interface IMember extends mongoose.Document {
   department: string;
   year: number;
   role: string;
+  contributionsCount: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,6 +42,10 @@ const MemberSchema = new mongoose.Schema<IMember>(
     role: {
       type: String,
       default: "Member",
+    },
+    contributionsCount: {
+      type: Number,
+      default: 0,
     },
   },
   {

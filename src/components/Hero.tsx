@@ -19,7 +19,29 @@ const PHRASES = [
   "FOSSGCEE",
 ];
 
+interface HeroConfig {
+  badge: string;
+  description: string;
+  ctaPrimaryLabel: string;
+  ctaPrimaryHref: string;
+  ctaSecondaryLabel: string;
+  ctaSecondaryHref: string;
+  githubHref: string;
+  collegeText: string;
+  logoSubtext: string;
+}
 
+const defaultHeroData: HeroConfig = {
+  badge: "Free & Open Source Software Club — GCE Erode",
+  description: "We foster a culture of Linux, open‑source contribution, and real‑world collaboration among students at Government College of Engineering, Erode.",
+  ctaPrimaryLabel: "$ register_now",
+  ctaPrimaryHref: "/join",
+  ctaSecondaryLabel: "$ join_community",
+  ctaSecondaryHref: "/#join",
+  githubHref: "https://github.com/fossgcee",
+  collegeText: "FOSSGCEE",
+  logoSubtext: "Govt. College of Engineering, Erode",
+};
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -27,6 +49,25 @@ export default function Hero() {
   const tuxRef = useRef<HTMLDivElement>(null);
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+
+  const [heroData, setHeroData] = useState<HeroConfig>(defaultHeroData);
+
+  useEffect(() => {
+    let active = true;
+    async function fetchCMS() {
+      try {
+        const res = await fetch("/api/site-config?section=hero");
+        const json = await res.json();
+        if (active && json.success && json.data) {
+          setHeroData({ ...defaultHeroData, ...json.data });
+        }
+      } catch {
+        // Keep defaults on error
+      }
+    }
+    fetchCMS();
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => setMounted(true));
@@ -121,7 +162,7 @@ export default function Hero() {
             className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full font-mono text-[9px] sm:text-[11px] glass text-text/50 border-border max-w-full self-center lg:self-start"
           >
             <span className="w-1.5 h-1.5 shrink-0 rounded-full animate-pulse bg-text" />
-            <span className="whitespace-normal text-center">Free &amp; Open Source Software Club — GCE Erode</span>
+            <span className="whitespace-normal text-center">{heroData.badge}</span>
           </div>
 
           {/* Typewriter heading */}
@@ -137,32 +178,34 @@ export default function Hero() {
           <p
             className="text-base md:text-lg lg:text-lg leading-relaxed max-w-lg font-mono text-muted-2 mt-3"
           >
-            We foster a culture of{" "}
-            <span className="text-text">Linux</span>,{" "}
-            <span className="text-text/85">open‑source contribution</span>, and
-            real‑world collaboration among students at Government College of Engineering, Erode.
+            {heroData.description.split("Linux").map((part, i, arr) => (
+              <span key={i}>
+                {part}
+                {i < arr.length - 1 && <span className="text-text">Linux</span>}
+              </span>
+            ))}
           </p>
 
           {/* CTAs */}
           {mounted && (
             <div className="flex flex-row flex-wrap gap-2 sm:gap-3 mt-1 w-full">
               <Link
-                href="/join"
+                href={heroData.ctaPrimaryHref}
                 className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-xl font-mono text-xs sm:text-sm font-semibold transition-all duration-200 hover:scale-105 bg-text text-bg shadow-[0_0_24px_var(--color-accent-glow)] transform"
               >
-                $ register_now
+                {heroData.ctaPrimaryLabel}
                 <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
                   <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </Link>
               <Link
-                href="/#join"
+                href={heroData.ctaSecondaryHref}
                 className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-xl font-mono text-xs sm:text-sm font-semibold transition-all duration-200 hover:scale-105 glass border border-text/20 dark:border-white/20 hover:border-text/40 dark:hover:border-white/40 text-text/80"
               >
-                $ join_community
+                {heroData.ctaSecondaryLabel}
               </Link>
               <a
-                href="https://github.com/fossgcee"
+                href={heroData.githubHref}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-xl font-mono text-xs sm:text-sm font-semibold transition-all duration-200 hover:scale-105 glass border border-text/20 dark:border-white/20 hover:border-text/40 dark:hover:border-white/40 text-text/80"
@@ -179,8 +222,8 @@ export default function Hero() {
           <div className="flex items-center gap-2.5 mt-2 pt-4 border-t border-border w-full">
             <Image src="/foss_gcee_logo.png" alt="FOSSGCEE Logo" width={36} height={36} className="rounded-full object-contain filter dark:invert-0 light:invert shrink-0" />
             <div>
-              <p className="font-pixel text-[7px] sm:text-[8px] leading-relaxed text-text">FOSSGCEE</p>
-              <p className="font-mono text-[8px] sm:text-[9px] text-muted-2 truncate">Govt. College of Engineering, Erode</p>
+              <p className="font-pixel text-[7px] sm:text-[8px] leading-relaxed text-text">{heroData.collegeText}</p>
+              <p className="font-mono text-[8px] sm:text-[9px] text-muted-2 truncate">{heroData.logoSubtext}</p>
             </div>
           </div>
         </div>

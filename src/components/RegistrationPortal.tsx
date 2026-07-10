@@ -299,7 +299,7 @@ export default function RegistrationPortal() {
           <p className="font-mono text-[10px] text-black/40 dark:text-white/30 tracking-[0.3em] uppercase">
             {step === "form" ? "Step 1 of 2 — Registration Details" : "Step 2 of 2 — Email Verification"}
           </p>
-          <h1 className="text-3xl font-pixel text-black dark:text-white leading-tight">
+          <h1 className="text-[1.35rem] sm:text-3xl font-pixel text-black dark:text-white leading-tight break-all sm:break-normal">
             {step === "form" ? "JOIN_FOSS_CLUB" : "VERIFY_EMAIL"}
           </h1>
           <p className="font-mono text-xs text-black/50 dark:text-white/40 mt-1">
