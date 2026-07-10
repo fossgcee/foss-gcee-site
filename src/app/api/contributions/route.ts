@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Contribution from "@/models/Contribution";
 
+export const dynamic = 'force-dynamic';
+
 // Public read-only endpoint for contributions
 export async function GET() {
   try {
