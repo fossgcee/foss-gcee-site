@@ -184,7 +184,7 @@ interface Stat { value: string; label: string }
 interface Card { icon: string; title: string; text: string }
 interface Activity { icon: string; title: string; desc: string; tag: string }
 interface BoardMember { id: string; name: string; role: string; year: string; imageUrl: string; linkedInUrl?: string }
-interface GalleryImage { id: string; src: string; alt?: string }
+interface GalleryImage { id: string; src: string; alt?: string; year?: string }
 interface SocialLink { platform: string; href: string; active: boolean }
 interface QuickLink { label: string; href: string }
 
@@ -565,71 +565,151 @@ function BoardMembersEditor({
   saved: boolean;
   error: string | null;
 }) {
-  const setMember = (i: number, k: keyof BoardMember, v: string) => {
-    const members = [...data.members];
-    members[i] = { ...members[i], [k]: v };
-    onChange({ ...data, members });
-  };
-  const addMember = () => {
-    const id = `member-${Date.now()}`;
-    onChange({ ...data, members: [...data.members, { id, name: "", role: "", year: "2026 - 27", imageUrl: "", linkedInUrl: "" }] });
-  };
-
-  const removeMember = (i: number) => {
-    onChange({ ...data, members: data.members.filter((_, idx) => idx !== i) });
-  };
+  const [selectedYear, setSelectedYear] = useState<string>("");
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const years = Array.from(new Set(data.members.map(m => m.year))).sort((a, b) => b.localeCompare(a));
+  
+  useEffect(() => {
+    if (!selectedYear && years.length > 0) {
+      setSelectedYear(years[0]);
+    }
+  }, [years, selectedYear]);
+
+  const setMember = (id: string, k: keyof BoardMember, v: string) => {
+    onChange({
+      ...data,
+      members: data.members.map(m => m.id === id ? { ...m, [k]: v } : m)
+    });
+  };
+
+  const addMember = () => {
+    const id = `member-${Date.now()}`;
+    const newYear = selectedYear || "2026 - 27";
+    onChange({ ...data, members: [...data.members, { id, name: "", role: "", year: newYear, imageUrl: "", linkedInUrl: "" }] });
+    if (!selectedYear) setSelectedYear(newYear);
+    setEditingId(id);
+  };
+
+  const removeMember = (id: string) => {
+    onChange({ ...data, members: data.members.filter(m => m.id !== id) });
+    if (editingId === id) setEditingId(null);
+  };
+
+  const filteredMembers = data.members.filter(m => m.year === selectedYear);
+  const editingMember = data.members.find(m => m.id === editingId);
 
   return (
-    <div className="space-y-4 mt-4">
-      {/* Year groups for display clarity */}
-      {years.length === 0 && data.members.length === 0 && (
-        <p className="font-mono text-xs text-white/30 text-center py-8">No board members yet. Add the first one below.</p>
-      )}
-      {data.members.map((m, i) => (
-        <div key={m.id || i} className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-xs text-white/40">Member {i + 1}</span>
+    <div className="space-y-4 mt-4 relative">
+      {years.length > 0 && (
+        <div className="flex gap-2 mb-4 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
+          {years.map(y => (
             <button
-              onClick={() => removeMember(i)}
-              className="p-1.5 rounded-lg text-red-500/40 hover:text-red-400 hover:bg-red-500/10 transition-all"
+              key={y}
+              onClick={() => setSelectedYear(y)}
+              className={`px-4 py-2 rounded-xl font-mono text-xs transition-colors whitespace-nowrap border ${
+                selectedYear === y 
+                  ? "bg-white text-black border-white" 
+                  : "bg-transparent text-white/50 border-white/10 hover:text-white hover:border-white/30"
+              }`}
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              {y}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {filteredMembers.length === 0 && (
+        <p className="font-mono text-xs text-white/30 text-center py-8 border border-dashed border-white/10 rounded-2xl">
+          No board members for {selectedYear || "this year"}. Add one below.
+        </p>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {filteredMembers.map((m) => (
+          <div key={m.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center gap-4 transition-colors hover:bg-white/[0.04]">
+            <div className="w-12 h-12 rounded-lg bg-black/20 overflow-hidden shrink-0 flex items-center justify-center relative border border-white/5">
+               {m.imageUrl ? (
+                 <img src={m.imageUrl} alt={m.name} className="w-full h-full object-cover" />
+               ) : (
+                 <Users className="w-5 h-5 text-white/20" />
+               )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-mono text-sm text-white truncate font-bold">{m.name || "Unnamed Member"}</p>
+              <p className="font-mono text-xs text-white/50 truncate">{m.role || "No role specified"}</p>
+            </div>
+            <button
+              onClick={() => setEditingId(m.id)}
+              className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white font-mono text-xs transition-colors shrink-0 border border-white/5 hover:border-white/20 shadow-sm"
+            >
+              Edit
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <Field label="Full Name">
-              <input className={inputCls} value={m.name} onChange={e => setMember(i, "name", e.target.value)} placeholder="John Doe" />
-            </Field>
-            <Field label="Role">
-              <input className={inputCls} value={m.role} onChange={e => setMember(i, "role", e.target.value)} placeholder="President" />
-            </Field>
-            <Field label="Academic Year">
-              <input className={inputCls} value={m.year} onChange={e => setMember(i, "year", e.target.value)} placeholder="2026 - 27" />
-            </Field>
-            <div className="sm:col-span-2">
-              <Field label="Photo URL" hint="Paste any public image URL or a Google Drive share link — it'll be auto-converted">
-                <ImageUrlInput
-                  value={m.imageUrl}
-                  onChange={url => setMember(i, "imageUrl", url)}
-                  placeholder="/members/photo.jpg or paste a Google Drive link"
-                />
-              </Field>
-            </div>
-            <Field label="LinkedIn URL">
-              <input className={inputCls} value={m.linkedInUrl || ""} onChange={e => setMember(i, "linkedInUrl", e.target.value)} placeholder="https://linkedin.com/in/..." />
-            </Field>
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
+
       <button
         onClick={addMember}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/10 font-mono text-xs text-white/40 hover:text-white hover:border-white/30 transition-all"
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/10 font-mono text-xs text-white/40 hover:text-white hover:border-white/30 transition-all bg-white/[0.01] hover:bg-white/[0.03]"
       >
         <Plus className="w-4 h-4" /> Add Board Member
       </button>
+      
       <SaveBar onSave={onSave} saving={saving} saved={saved} error={error} />
+
+      {/* MODAL */}
+      {editingMember && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="w-full max-w-xl bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+            <div className="px-5 py-4 border-b border-white/5 flex justify-between items-center shrink-0">
+              <h2 className="font-mono text-sm text-white font-bold">Edit Member</h2>
+              <button onClick={() => setEditingId(null)} className="p-1.5 text-white/40 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-lg">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4 overflow-y-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Field label="Full Name">
+                  <input className={inputCls} value={editingMember.name} onChange={e => setMember(editingMember.id, "name", e.target.value)} placeholder="John Doe" />
+                </Field>
+                <Field label="Role">
+                  <input className={inputCls} value={editingMember.role} onChange={e => setMember(editingMember.id, "role", e.target.value)} placeholder="President" />
+                </Field>
+                <Field label="Academic Year">
+                  <input className={inputCls} value={editingMember.year} onChange={e => setMember(editingMember.id, "year", e.target.value)} placeholder="2026 - 27" />
+                </Field>
+                <Field label="LinkedIn URL">
+                  <input className={inputCls} value={editingMember.linkedInUrl || ""} onChange={e => setMember(editingMember.id, "linkedInUrl", e.target.value)} placeholder="https://linkedin.com/in/..." />
+                </Field>
+                <div className="sm:col-span-2">
+                  <Field label="Photo URL" hint="Paste any public image URL or a Google Drive share link">
+                    <ImageUrlInput
+                      value={editingMember.imageUrl}
+                      onChange={url => setMember(editingMember.id, "imageUrl", url)}
+                      placeholder="/members/photo.jpg or paste a Google Drive link"
+                    />
+                  </Field>
+                </div>
+              </div>
+            </div>
+            <div className="px-5 py-4 border-t border-white/5 bg-black/20 flex justify-between items-center shrink-0">
+               <button
+                  onClick={() => removeMember(editingMember.id)}
+                  className="px-4 py-2 rounded-xl text-red-500 hover:bg-red-500/10 font-mono text-xs transition-colors font-semibold"
+                >
+                  Delete
+                </button>
+               <button
+                  onClick={() => setEditingId(null)}
+                  className="px-6 py-2 rounded-xl bg-white text-black font-mono text-xs font-bold hover:bg-white/90 transition-colors shadow-lg"
+                >
+                  Done
+                </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -652,60 +732,143 @@ function GalleryEditor({
   saved: boolean;
   error: string | null;
 }) {
-  const setImage = (i: number, k: keyof GalleryImage, v: string) => {
-    const images = [...data.images];
-    images[i] = { ...images[i], [k]: v };
-    onChange({ ...data, images });
-  };
-  const addImage = () => {
-    const id = `gallery-${Date.now()}`;
-    onChange({ ...data, images: [...data.images, { id, src: "", alt: "" }] });
-  };
-  const removeImage = (i: number) => {
-    onChange({ ...data, images: data.images.filter((_, idx) => idx !== i) });
+  const [selectedYear, setSelectedYear] = useState<string>("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const years = Array.from(new Set(data.images.map(img => img.year))).filter(Boolean).sort((a, b) => b!.localeCompare(a!));
+  
+  useEffect(() => {
+    if (!selectedYear && years.length > 0) {
+      setSelectedYear(years[0]!);
+    }
+  }, [years, selectedYear]);
+
+  const setImage = (id: string, k: keyof GalleryImage, v: string) => {
+    onChange({
+      ...data,
+      images: data.images.map(img => img.id === id ? { ...img, [k]: v } : img)
+    });
   };
 
+  const addImage = () => {
+    const id = `gallery-${Date.now()}`;
+    const newYear = selectedYear || "2026 - 27";
+    onChange({ ...data, images: [...data.images, { id, src: "", alt: "", year: newYear }] });
+    if (!selectedYear) setSelectedYear(newYear);
+    setEditingId(id);
+  };
+
+  const removeImage = (id: string) => {
+    onChange({ ...data, images: data.images.filter(img => img.id !== id) });
+    if (editingId === id) setEditingId(null);
+  };
+
+  const filteredImages = data.images.filter(img => img.year === selectedYear);
+  const editingImage = data.images.find(img => img.id === editingId);
+
   return (
-    <div className="space-y-4 mt-4">
-      {data.images.length === 0 && (
-        <p className="font-mono text-xs text-white/30 text-center py-8">No gallery images yet. Add photos from public/members-gallery/.</p>
+    <div className="space-y-4 mt-4 relative">
+      {years.length > 0 && (
+        <div className="flex gap-2 mb-4 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
+          {years.map(y => (
+            <button
+              key={y!}
+              onClick={() => setSelectedYear(y!)}
+              className={`px-4 py-2 rounded-xl font-mono text-xs transition-colors whitespace-nowrap border ${
+                selectedYear === y 
+                  ? "bg-white text-black border-white" 
+                  : "bg-transparent text-white/50 border-white/10 hover:text-white hover:border-white/30"
+              }`}
+            >
+              {y}
+            </button>
+          ))}
+        </div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {data.images.map((img, i) => (
-          <div key={img.id || i} className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-2">
-            <div className="flex items-center justify-between mb-1">
-              {img.src && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={img.src} alt={img.alt || ""} className="w-16 h-12 object-cover rounded-lg bg-white/5" onError={e => ((e.target as HTMLImageElement).style.display = "none")} />
-              )}
-              {!img.src && <div className="w-16 h-12 rounded-lg bg-white/5 flex items-center justify-center"><ImageIcon className="w-5 h-5 text-white/20" /></div>}
-              <button
-                onClick={() => removeImage(i)}
-                className="p-1.5 rounded-lg text-red-500/40 hover:text-red-400 hover:bg-red-500/10 transition-all"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-            <Field label="Image URL" hint="Paste any public image URL or a Google Drive share link">
-              <ImageUrlInput
-                value={img.src}
-                onChange={url => setImage(i, "src", url)}
-                placeholder="/members-gallery/photo.jpg or paste a Google Drive link"
-              />
-            </Field>
-            <Field label="Alt Text">
-              <input className={inputCls} value={img.alt || ""} onChange={e => setImage(i, "alt", e.target.value)} placeholder="Description of the photo" />
-            </Field>
+
+      {filteredImages.length === 0 && (
+        <p className="font-mono text-xs text-white/30 text-center py-8 border border-dashed border-white/10 rounded-2xl">
+          No gallery images for {selectedYear || "this year"}. Add photos below.
+        </p>
+      )}
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        {filteredImages.map((img) => (
+          <div key={img.id} className="relative aspect-video rounded-xl overflow-hidden bg-white/5 border border-white/5 group">
+             {img.src ? (
+               <img src={img.src} alt={img.alt || ""} className="w-full h-full object-cover" />
+             ) : (
+               <div className="w-full h-full flex items-center justify-center"><ImageIcon className="w-6 h-6 text-white/20" /></div>
+             )}
+             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">
+                <button
+                  onClick={() => setEditingId(img.id)}
+                  className="px-4 py-2 rounded-lg bg-white text-black font-mono text-[10px] font-bold hover:bg-white/90 shadow-lg"
+                >
+                  Edit Image
+                </button>
+             </div>
           </div>
         ))}
       </div>
+
       <button
         onClick={addImage}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/10 font-mono text-xs text-white/40 hover:text-white hover:border-white/30 transition-all"
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/10 font-mono text-xs text-white/40 hover:text-white hover:border-white/30 transition-all bg-white/[0.01] hover:bg-white/[0.03]"
       >
         <Plus className="w-4 h-4" /> Add Image
       </button>
+      
       <SaveBar onSave={onSave} saving={saving} saved={saved} error={error} />
+
+      {/* MODAL */}
+      {editingImage && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="w-full max-w-xl bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+            <div className="px-5 py-4 border-b border-white/5 flex justify-between items-center shrink-0">
+              <h2 className="font-mono text-sm text-white font-bold">Edit Gallery Image</h2>
+              <button onClick={() => setEditingId(null)} className="p-1.5 text-white/40 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-lg">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4 overflow-y-auto">
+                <Field label="Academic Year">
+                  <input className={inputCls} value={editingImage.year || ""} onChange={e => setImage(editingImage.id, "year", e.target.value)} placeholder="2026 - 27" />
+                </Field>
+                <Field label="Image URL" hint="Paste any public image URL or a Google Drive share link">
+                  <ImageUrlInput
+                    value={editingImage.src}
+                    onChange={url => setImage(editingImage.id, "src", url)}
+                    placeholder="/members-gallery/photo.jpg or paste a Google Drive link"
+                  />
+                </Field>
+                <Field label="Alt Text">
+                  <input className={inputCls} value={editingImage.alt || ""} onChange={e => setImage(editingImage.id, "alt", e.target.value)} placeholder="Description of the photo" />
+                </Field>
+                
+                {editingImage.src && (
+                  <div className="mt-4 aspect-video rounded-xl overflow-hidden bg-black/20 border border-white/5 relative">
+                     <img src={editingImage.src} alt="Preview" className="w-full h-full object-cover" onError={e => ((e.target as HTMLImageElement).style.display = "none")} />
+                  </div>
+                )}
+            </div>
+            <div className="px-5 py-4 border-t border-white/5 bg-black/20 flex justify-between items-center shrink-0">
+               <button
+                  onClick={() => removeImage(editingImage.id)}
+                  className="px-4 py-2 rounded-xl text-red-500 hover:bg-red-500/10 font-mono text-xs transition-colors font-semibold"
+                >
+                  Delete Image
+                </button>
+               <button
+                  onClick={() => setEditingId(null)}
+                  className="px-6 py-2 rounded-xl bg-white text-black font-mono text-xs font-bold hover:bg-white/90 transition-colors shadow-lg"
+                >
+                  Done
+                </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

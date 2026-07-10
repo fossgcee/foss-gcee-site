@@ -2,6 +2,7 @@ export interface MembersGalleryImage {
   id: string;
   src: string;
   alt?: string;
+  year: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────

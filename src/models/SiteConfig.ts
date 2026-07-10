@@ -57,6 +57,7 @@ export interface GalleryImage {
   id: string;
   src: string;
   alt?: string;
+  year: string;
 }
 
 // ─── Social Link ─────────────────────────────────────────────────
