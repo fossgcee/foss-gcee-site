@@ -16,6 +16,7 @@ interface Contribution {
   title: string;
   description: string;
   url: string;
+  isFeatured: boolean;
   createdAt: string;
 }
 
@@ -25,7 +26,7 @@ function AddModal({
   onClose,
 }: {
   members: Member[];
-  onSave: (data: { memberId: string; title: string; description: string; url: string }) => Promise<void>;
+  onSave: (data: { memberId: string; title: string; description: string; url: string; imageUrl: string; isFeatured: boolean }) => Promise<void>;
   onClose: () => void;
 }) {
   const [formData, setFormData] = useState({
@@ -33,8 +34,36 @@ function AddModal({
     title: "",
     description: "",
     url: "",
+    imageUrl: "",
+    isFeatured: false,
   });
   const [loading, setLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const name = file.name || "image";
+      const ext = name.includes(".") ? name.split(".").pop()!.toLowerCase() : "";
+      const base = name.replace(/\.[^/.]+$/, "").toLowerCase();
+      const safeBase = base.replace(/[^a-z0-9-]+/g, "-").replace(/(^-|-$)/g, "") || "image";
+      const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+      const filename = `contributions/${stamp}-${safeBase}${ext ? `.${ext}` : ""}`;
+
+      const res = await fetch(`/api/admin/contributions/upload?filename=${encodeURIComponent(filename)}`, {
+        method: "POST", body: file,
+      });
+      const d = await res.json();
+      if (d.url) setFormData(prev => ({ ...prev, imageUrl: d.url }));
+      else alert("Upload failed");
+    } finally {
+      setIsUploading(false);
+      e.target.value = "";
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,6 +128,24 @@ function AddModal({
           </div>
           
           <div className="space-y-1.5">
+            <label className="font-mono text-[10px] uppercase tracking-widest text-white/40 ml-1">Project Image</label>
+            <div className="flex gap-4 items-center">
+              {formData.imageUrl && (
+                <div className="w-16 h-16 rounded overflow-hidden relative shrink-0">
+                  <img src={formData.imageUrl} alt="Project" className="w-full h-full object-cover" />
+                  <button type="button" onClick={() => setFormData(prev => ({ ...prev, imageUrl: "" }))} className="absolute top-0 right-0 p-1 bg-black/50 text-white rounded-bl">
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+              <label className="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl font-mono text-sm text-white/60 hover:bg-white/10 cursor-pointer transition-colors text-center">
+                {isUploading ? "Uploading..." : formData.imageUrl ? "Change Image" : "Upload Image"}
+                <input type="file" accept="image/*" onChange={handleUploadImage} disabled={isUploading} className="hidden" />
+              </label>
+            </div>
+          </div>
+          
+          <div className="space-y-1.5">
             <label className="font-mono text-[10px] uppercase tracking-widest text-white/40 ml-1">URL (Optional)</label>
             <input
               type="url"
@@ -107,6 +154,19 @@ function AddModal({
               placeholder="e.g. https://github.com/foss-gcee/site/pull/1"
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 font-mono text-sm text-white focus:outline-none focus:ring-1 ring-white/20"
             />
+          </div>
+
+          <div className="flex items-center gap-3 pt-2">
+            <input
+              type="checkbox"
+              id="isFeatured"
+              checked={formData.isFeatured}
+              onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+              className="w-4 h-4 rounded border-white/20 bg-white/5 text-white focus:ring-1 focus:ring-white/20"
+            />
+            <label htmlFor="isFeatured" className="font-mono text-[10px] uppercase tracking-widest text-white/60">
+              Featured on Home Page
+            </label>
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
@@ -174,7 +234,7 @@ export default function AdminContributionsPage() {
     }
   };
 
-  const handleAdd = async (data: { memberId: string; title: string; description: string; url: string }) => {
+  const handleAdd = async (data: { memberId: string; title: string; description: string; url: string; imageUrl: string; isFeatured: boolean }) => {
     const res = await fetch("/api/admin/contributions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

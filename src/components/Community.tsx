@@ -68,7 +68,20 @@ export default function Community() {
   const upcoming = events.filter(e => !isPast(e)).sort((a, b) => a.startDate.localeCompare(b.startDate));
   const past = events.filter(e => isPast(e)).sort((a, b) => b.startDate.localeCompare(a.startDate));
 
-  const featured = events.find(e => e.isFeatured) ?? upcoming[0] ?? null;
+  const featuredList = events.filter(e => e.isFeatured);
+  const cycleList = featuredList.length > 0 ? featuredList : (upcoming.length > 0 ? [upcoming[0]] : []);
+  
+  const [featuredIndex, setFeaturedIndex] = useState(0);
+  
+  useEffect(() => {
+    if (cycleList.length <= 1) return;
+    const interval = setInterval(() => {
+      setFeaturedIndex(prev => (prev + 1) % cycleList.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [cycleList.length]);
+
+  const featured = cycleList[featuredIndex] ?? null;
   const moreUp = upcoming.filter(e => e._id !== featured?._id).slice(0, 3);
   const recentPast = past.slice(0, 4);
 

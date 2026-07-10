@@ -23,11 +23,14 @@ interface Contribution {
   title: string;
   description: string;
   url: string;
+  isFeatured: boolean;
+  imageUrl?: string;
   createdAt: string;
 }
 
 export default function Contributions() {
   const [contributions, setContributions] = useState<Contribution[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const sectionRef = useRef<HTMLElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -39,7 +42,9 @@ export default function Contributions() {
         const res = await fetch("/api/contributions");
         const json = await res.json();
         if (active && json.success && json.data) {
-          setContributions(json.data);
+          // Filter to only show featured contributions on the home page
+          const featured = json.data.filter((c: Contribution) => c.isFeatured);
+          setContributions(featured);
         }
       } catch {
         // Silently fail
@@ -50,6 +55,14 @@ export default function Contributions() {
     fetchContributions();
     return () => { active = false; };
   }, []);
+
+  useEffect(() => {
+    if (contributions.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex(prev => (prev + 1) % contributions.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [contributions.length]);
 
   useGSAP(() => {
     if (loading) return;
@@ -102,62 +115,78 @@ export default function Contributions() {
 
         {/* Contributions List */}
         {!loading && contributions.length > 0 && (
-          <div ref={listRef} className="w-full max-w-4xl mx-auto grid gap-4">
-            {contributions.map((c) => (
-              <div
-                key={c._id}
-                className="contrib-card group relative p-6 rounded-2xl bg-surface border border-border hover:border-text/20 transition-all duration-300"
-              >
-                <div className="flex flex-col sm:flex-row gap-4 sm:items-start justify-between">
-                  <div className="space-y-3">
-                    {/* Title & Link */}
-                    <div className="flex items-start gap-3">
-                      <div className="mt-1 p-2 bg-black/5 dark:bg-white/5 rounded-lg text-text">
-                        <GitCommit className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg text-text leading-tight group-hover:text-text/80 transition-colors">
-                          {c.title}
-                        </h3>
-                        {c.url && (
-                          <a
-                            href={c.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 mt-1.5 font-mono text-[11px] text-blue-500 hover:text-blue-400 transition-colors"
-                          >
-                            <Link2 className="w-3 h-3" />
-                            {c.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Description */}
-                    <p className="text-sm text-muted-2 leading-relaxed ml-11">
-                      {c.description}
-                    </p>
+          <div ref={listRef} className="w-full max-w-4xl mx-auto">
+            <div
+              key={contributions[currentIndex]._id}
+              className="contrib-card group relative p-6 sm:p-8 rounded-[24px] bg-surface border border-border hover:border-text/30 transition-all duration-300 shadow-2xl"
+            >
+              <div className="flex flex-col md:flex-row gap-8 items-start">
+                
+                {/* Image Section */}
+                {contributions[currentIndex].imageUrl && (
+                  <div className="w-full md:w-1/3 aspect-video md:aspect-square rounded-xl overflow-hidden shrink-0 border border-border relative">
+                    <img src={contributions[currentIndex].imageUrl} alt="Project" className="w-full h-full object-cover" />
                   </div>
+                )}
+                
+                {/* Content Section */}
+                <div className="flex-1 space-y-4">
+                  {/* Title & Link */}
+                  <div className="flex items-start gap-4">
+                    <div className="mt-1 p-2.5 bg-black/5 dark:bg-white/5 rounded-xl text-text border border-border">
+                      <GitCommit className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-xl sm:text-2xl text-text leading-tight group-hover:text-text/80 transition-colors">
+                        {contributions[currentIndex].title}
+                      </h3>
+                      {contributions[currentIndex].url && (
+                        <a
+                          href={contributions[currentIndex].url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 mt-2 font-mono text-[12px] text-blue-500 hover:text-blue-400 transition-colors"
+                        >
+                          <Link2 className="w-3.5 h-3.5" />
+                          {contributions[currentIndex].url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Description */}
+                  <p className="text-base text-muted-2 leading-relaxed pt-2">
+                    {contributions[currentIndex].description}
+                  </p>
 
                   {/* Author Info */}
-                  <div className="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-1 mt-4 sm:mt-0 shrink-0 border-t sm:border-t-0 pt-4 sm:pt-0 border-border">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-black/10 dark:bg-white/10 flex items-center justify-center">
-                        <User className="w-3 h-3 text-text/60" />
-                      </div>
-                      <p className="font-mono text-xs text-text">{c.memberId?.name || "Unknown Member"}</p>
+                  <div className="flex items-center gap-3 pt-6 border-t border-border mt-4">
+                    <div className="w-8 h-8 rounded-full bg-black/10 dark:bg-white/10 flex items-center justify-center">
+                      <User className="w-4 h-4 text-text/60" />
                     </div>
-                    <p className="font-mono text-[10px] text-muted-2 ml-8 sm:ml-0">
-                      {new Date(c.createdAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric"
-                      })}
-                    </p>
+                    <div>
+                      <p className="font-mono text-xs font-semibold text-text">{contributions[currentIndex].memberId?.name || "Unknown Member"}</p>
+                      <p className="font-mono text-[10px] text-muted-2 mt-0.5">
+                        {new Date(contributions[currentIndex].createdAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric"
+                        })}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            ))}
+
+              {/* Dots indicator for multiple items */}
+              {contributions.length > 1 && (
+                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {contributions.map((_, idx) => (
+                    <div key={idx} className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${idx === currentIndex ? 'bg-text scale-125' : 'bg-border-2'}`} />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
