@@ -61,6 +61,7 @@ function RoleInput({ currentRole, onSave, onCancel }: {
     <div className="flex items-center gap-2 mt-0.5" onClick={(e) => e.stopPropagation()}>
       <input
         autoFocus
+        list="roles-list"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={(e) => {
@@ -70,6 +71,18 @@ function RoleInput({ currentRole, onSave, onCancel }: {
         placeholder="e.g. Core Member, Secretary..."
         className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:ring-1 ring-white/20 placeholder:text-white/20"
       />
+      <datalist id="roles-list">
+        <option value="President" />
+        <option value="Vice President" />
+        <option value="Secretary" />
+        <option value="Joint Secretary" />
+        <option value="Website Management" />
+        <option value="Technical Team" />
+        <option value="Event Management Head" />
+        <option value="Event Management" />
+        <option value="Social Media" />
+        <option value="Documentation" />
+      </datalist>
       <button
         onClick={() => onSave(value)}
         className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors"
@@ -188,24 +201,42 @@ function EditModal({ member, onSave, onClose }: {
             </div>
             <div className="space-y-1.5">
               <label className="font-mono text-[10px] uppercase tracking-widest text-white/40 ml-1">Year</label>
-              <select
+              <input
+                list="years-list-modal"
                 value={formData.year}
                 onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 font-mono text-sm text-white focus:outline-none focus:ring-1 ring-white/20 appearance-none shadow-inner"
-              >
-                {["1st Year", "2nd Year", "3rd Year", "4th Year"].map((year) => (
-                  <option key={year} value={year} className="bg-[#0a0a0a]">{year}</option>
-                ))}
-              </select>
+                placeholder="e.g. 3rd Year"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 font-mono text-sm text-white focus:outline-none focus:ring-1 ring-white/20"
+              />
+              <datalist id="years-list-modal">
+                <option value="1st Year" />
+                <option value="2nd Year" />
+                <option value="3rd Year" />
+                <option value="4th Year" />
+                <option value="Passed Out" />
+              </datalist>
             </div>
             <div className="sm:col-span-2 space-y-1.5">
               <label className="font-mono text-[10px] uppercase tracking-widest text-white/40 ml-1">Role</label>
               <input
+                list="roles-list-modal"
                 value={formData.role}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 placeholder="e.g. Core Member, Secretary..."
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 font-mono text-sm text-white focus:outline-none focus:ring-1 ring-white/20"
               />
+              <datalist id="roles-list-modal">
+                <option value="President" />
+                <option value="Vice President" />
+                <option value="Secretary" />
+                <option value="Joint Secretary" />
+                <option value="Website Management" />
+                <option value="Technical Team" />
+                <option value="Event Management Head" />
+                <option value="Event Management" />
+                <option value="Social Media" />
+                <option value="Documentation" />
+              </datalist>
             </div>
           </div>
 
