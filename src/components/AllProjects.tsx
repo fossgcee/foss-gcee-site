@@ -117,14 +117,14 @@ export default function AllProjects() {
                   </div>
                 )}
                 
-                <div className="flex flex-col flex-1">
+                <div className="flex flex-col flex-1 min-w-0">
                   {/* Title & Link */}
                   <div className="flex items-start gap-4 mb-4">
                     <div className="mt-1 p-2 bg-black/5 dark:bg-white/5 rounded-xl text-text border border-border shrink-0">
                       <GitCommit className="w-4 h-4" />
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-xl text-text leading-tight group-hover:text-text/80 transition-colors">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold text-xl text-text leading-tight group-hover:text-text/80 transition-colors truncate">
                         {c.title}
                       </h3>
                       {c.url && (
@@ -132,17 +132,17 @@ export default function AllProjects() {
                           href={c.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 mt-2 font-mono text-[11px] text-blue-500 hover:text-blue-400 transition-colors break-all"
+                          className="inline-flex items-center gap-1.5 mt-2 font-mono text-[11px] text-blue-500 hover:text-blue-400 transition-colors truncate max-w-full"
                         >
                           <Link2 className="w-3 h-3 shrink-0" />
-                          {c.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                          <span className="truncate">{c.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}</span>
                         </a>
                       )}
                     </div>
                   </div>
                   
                   {/* Description */}
-                  <p className="text-sm text-muted-2 leading-relaxed mb-6 flex-1">
+                  <p className="text-sm text-muted-2 leading-relaxed mb-6 flex-1 break-words">
                     {c.description}
                   </p>
 

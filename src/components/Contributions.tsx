@@ -192,7 +192,7 @@ export default function Contributions() {
                   )}
                   
                   {/* Content Section */}
-                  <div className="flex-1 space-y-4">
+                  <div className="flex-1 space-y-4 min-w-0">
                     <div className="flex items-start gap-4">
                       <div className="mt-1 p-2.5 bg-black/5 dark:bg-white/5 rounded-xl text-text border border-border shrink-0">
                         <GitCommit className="w-5 h-5" />

@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { ShieldCheck, Terminal, ArrowRight, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { loginAction } from "./actions";
 
 export default function AdminLogin() {
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -19,6 +21,8 @@ export default function AdminLogin() {
     if (result?.error) {
       setError(result.error);
       setLoading(false);
+    } else if (result?.success) {
+      router.push("/admin");
     }
   }
 

@@ -20,7 +20,7 @@ export async function loginAction(formData: FormData) {
       path: "/",
     });
     
-    redirect("/admin");
+    return { success: true };
   }
 
   if (!sessionSecret) {
