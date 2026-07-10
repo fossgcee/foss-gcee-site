@@ -191,12 +191,12 @@ export default function AllProjects() {
           >
             {/* Modal Image Header */}
             {selectedProject.imageUrl && (
-              <div className="w-full h-48 sm:h-64 relative shrink-0">
-                <img src={selectedProject.imageUrl} alt="" className="w-full h-full object-cover object-left" />
-                <div className="absolute inset-0 bg-gradient-to-t from-surface to-transparent" />
+              <div className="w-full relative shrink-0 bg-black/40 border-b border-white/5">
+                <img src={selectedProject.imageUrl} alt="" className="w-full max-h-[45vh] object-contain py-4" />
+                <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent pointer-events-none" />
                 <button 
                   onClick={() => setSelectedProject(null)}
-                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/80 transition-colors backdrop-blur-sm"
+                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/80 transition-colors backdrop-blur-sm z-20 border border-white/10"
                 >
                   ✕
                 </button>
