@@ -181,20 +181,26 @@ export default function Contributions() {
             {contributions.map((c) => (
               <div
                 key={c._id}
-                className="contrib-card group flex-none w-[85vw] md:w-[600px] lg:w-[700px] relative p-6 sm:p-8 rounded-[24px] bg-surface border border-border hover:border-text/30 transition-all duration-300 shadow-xl snap-center flex flex-col justify-between"
+                className="contrib-card group flex-none w-[85vw] md:w-[600px] lg:w-[700px] relative p-6 sm:p-8 rounded-[24px] bg-surface border border-border hover:border-text/30 transition-all duration-300 shadow-xl snap-center overflow-hidden flex flex-col justify-between min-h-[300px]"
               >
-                <div className="flex flex-col md:flex-row gap-8 items-start mb-6">
-                  {/* Image Section */}
-                  {c.imageUrl && (
-                    <div className="w-full md:w-2/5 aspect-video md:aspect-square rounded-xl overflow-hidden shrink-0 border border-border relative">
-                      <img src={c.imageUrl} alt="Project" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    </div>
-                  )}
-                  
+                {/* Background Image with Gradient Fade */}
+                {c.imageUrl && (
+                  <div className="absolute inset-0 z-0 pointer-events-none">
+                    <img 
+                      src={c.imageUrl} 
+                      alt="" 
+                      className="absolute inset-0 w-full h-full object-cover object-right opacity-60 sm:opacity-70 transition-transform duration-700 group-hover:scale-105" 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/90 sm:via-surface/70 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/30 to-transparent" />
+                  </div>
+                )}
+
+                <div className="relative z-10 flex flex-col h-full justify-between">
                   {/* Content Section */}
-                  <div className="flex-1 space-y-4 min-w-0">
+                  <div className="space-y-4 min-w-0 md:w-3/4">
                     <div className="flex items-start gap-4">
-                      <div className="mt-1 p-2.5 bg-black/5 dark:bg-white/5 rounded-xl text-text border border-border shrink-0">
+                      <div className="mt-1 p-2.5 bg-black/20 dark:bg-white/10 backdrop-blur-sm rounded-xl text-text border border-border shrink-0 shadow-lg">
                         <GitCommit className="w-5 h-5" />
                       </div>
                       <div className="min-w-0">
@@ -206,7 +212,7 @@ export default function Contributions() {
                             href={c.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 mt-2 font-mono text-[11px] sm:text-xs text-blue-500 hover:text-blue-400 transition-colors truncate max-w-full"
+                            className="inline-flex items-center gap-1.5 mt-2 font-mono text-[11px] sm:text-xs text-blue-400 hover:text-blue-300 transition-colors truncate max-w-full"
                           >
                             <Link2 className="w-3.5 h-3.5 shrink-0" />
                             <span className="truncate">{c.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}</span>
@@ -215,26 +221,26 @@ export default function Contributions() {
                       </div>
                     </div>
                     
-                    <p className="text-sm sm:text-base text-muted-2 leading-relaxed pt-2 line-clamp-4">
+                    <p className="text-sm sm:text-base text-muted-2 leading-relaxed pt-2 line-clamp-4 drop-shadow-sm">
                       {c.description}
                     </p>
                   </div>
-                </div>
 
-                {/* Author Info */}
-                <div className="flex items-center gap-3 pt-5 border-t border-border mt-auto">
-                  <div className="w-8 h-8 rounded-full bg-black/10 dark:bg-white/10 flex items-center justify-center shrink-0">
-                    <User className="w-4 h-4 text-text/60" />
-                  </div>
-                  <div>
-                    <p className="font-mono text-xs font-semibold text-text">{c.memberId?.name || "Unknown Member"}</p>
-                    <p className="font-mono text-[10px] text-muted-2 mt-0.5">
-                      {new Date(c.createdAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric"
-                      })}
-                    </p>
+                  {/* Author Info */}
+                  <div className="flex items-center gap-3 pt-5 border-t border-border/50 mt-8">
+                    <div className="w-8 h-8 rounded-full bg-black/20 dark:bg-white/10 backdrop-blur-sm flex items-center justify-center shrink-0 border border-border/50">
+                      <User className="w-4 h-4 text-text/80" />
+                    </div>
+                    <div>
+                      <p className="font-mono text-xs font-semibold text-text drop-shadow-sm">{c.memberId?.name || "Unknown Member"}</p>
+                      <p className="font-mono text-[10px] text-muted-2 mt-0.5 drop-shadow-sm">
+                        {new Date(c.createdAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric"
+                        })}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
