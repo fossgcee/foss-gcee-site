@@ -21,7 +21,7 @@ export interface IEvent extends mongoose.Document {
   description: string;
   agenda?: IAgendaItem[]; // Scheduled agenda items (for upcoming events)
   outcomes?: string; // Summary of results/takeaways (for completed events)
-  academicYear: string; // e.g. "2025 - 26"
+  academicYear: string; // e.g. "2026 - 27"
   startDate: string; // "YYYY-MM-DD"
   endDate: string; // "YYYY-MM-DD"
   startTime: string; // "HH:mm" (24h)

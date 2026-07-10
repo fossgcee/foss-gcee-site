@@ -11,7 +11,7 @@ export const membersData: Member[] = Array.from({ length: 10 }).map((_, i) => ({
   id: `placeholder-${i + 1}`,
   name: `Member Name ${i + 1}`,
   role: "Board Member",
-  year: "2025 - 26",
+  year: "2026 - 27",
   imageUrl: "", // Empty so it shows the placeholder SVG
   linkedInUrl: "https://linkedin.com/",
 }));

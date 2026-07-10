@@ -572,8 +572,9 @@ function BoardMembersEditor({
   };
   const addMember = () => {
     const id = `member-${Date.now()}`;
-    onChange({ ...data, members: [...data.members, { id, name: "", role: "", year: "2025 - 26", imageUrl: "", linkedInUrl: "" }] });
+    onChange({ ...data, members: [...data.members, { id, name: "", role: "", year: "2026 - 27", imageUrl: "", linkedInUrl: "" }] });
   };
+
   const removeMember = (i: number) => {
     onChange({ ...data, members: data.members.filter((_, idx) => idx !== i) });
   };
@@ -605,7 +606,7 @@ function BoardMembersEditor({
               <input className={inputCls} value={m.role} onChange={e => setMember(i, "role", e.target.value)} placeholder="President" />
             </Field>
             <Field label="Academic Year">
-              <input className={inputCls} value={m.year} onChange={e => setMember(i, "year", e.target.value)} placeholder="2025 - 26" />
+              <input className={inputCls} value={m.year} onChange={e => setMember(i, "year", e.target.value)} placeholder="2026 - 27" />
             </Field>
             <div className="sm:col-span-2">
               <Field label="Photo URL" hint="Paste any public image URL or a Google Drive share link — it'll be auto-converted">
