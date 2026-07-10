@@ -30,7 +30,7 @@ const defaultFooterData: FooterConfig = {
   quickLinks: [
     { label: "About", href: "/#about" },
     { label: "What We Do", href: "/#whatwedo" },
-    { label: "Projects", href: "/#contributions" },
+    { label: "Projects", href: "/projects" },
     { label: "Events", href: "/#community" },
     { label: "Join Us", href: "/#join" },
   ],
