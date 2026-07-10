@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Contribution from "@/models/Contribution";
-import Member from "@/models/Member";
+import Registration from "@/models/Registration";
 
 export async function DELETE(
   req: NextRequest,
@@ -16,7 +16,7 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: "Contribution not found" }, { status: 404 });
     }
     
-    const member = await Member.findById(contribution.memberId);
+    const member = await Registration.findById(contribution.memberId);
     if (member && member.contributionsCount > 0) {
       member.contributionsCount -= 1;
       await member.save();
@@ -47,15 +47,15 @@ export async function PUT(
     // Check if memberId changed
     if (body.memberId && body.memberId !== contribution.memberId.toString()) {
       // Decrement old member
-      const oldMember = await Member.findById(contribution.memberId);
+      const oldMember = await Registration.findById(contribution.memberId);
       if (oldMember && oldMember.contributionsCount > 0) {
         oldMember.contributionsCount -= 1;
         await oldMember.save();
       }
       // Increment new member
-      const newMember = await Member.findById(body.memberId);
+      const newMember = await Registration.findById(body.memberId);
       if (newMember) {
-        newMember.contributionsCount += 1;
+        newMember.contributionsCount = (newMember.contributionsCount || 0) + 1;
         await newMember.save();
       }
     }
