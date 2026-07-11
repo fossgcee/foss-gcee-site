@@ -914,9 +914,6 @@ function FooterEditor({
           <Field label="Contact Email">
             <input className={inputCls} value={data.email} onChange={e => onChange({ ...data, email: e.target.value })} placeholder="fossgcee@gmail.com" />
           </Field>
-          <Field label="Built By">
-            <input className={inputCls} value={data.builtBy} onChange={e => onChange({ ...data, builtBy: e.target.value })} placeholder="Name1, Name2 & Name3" />
-          </Field>
         </div>
       </div>
 

@@ -216,7 +216,7 @@ export default function MembersGallery() {
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                     sizes="(max-width: 768px) 85vw, (max-width: 1024px) 50vw, 33vw"
-                    unoptimized={image.src.startsWith("https://lh3.googleusercontent.com")}
+                    unoptimized={image.src.startsWith("http")}
                   />
                 </div>
                 {image.alt && (

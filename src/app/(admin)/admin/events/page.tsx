@@ -240,15 +240,17 @@ export default function AdminEventsManager() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/events", {
+      const res = await fetch(editingEvent ? `/api/admin/events?id=${editingEvent._id}` : "/api/admin/events", {
         method: editingEvent ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editingEvent ? { id: editingEvent._id, ...formData } : formData)
+        body: JSON.stringify(formData)
       });
       const d = await res.json();
       if (d.success) {
         setIsModalOpen(false);
         fetchEvents();
+      } else {
+        alert(d.error || "Failed to save event");
       }
     } finally {
       setLoading(false);
@@ -257,7 +259,7 @@ export default function AdminEventsManager() {
 
   const statusColors: Record<string, string> = {
     upcoming: "border-blue-500/20 bg-blue-500/10 text-blue-400",
-    completed: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
+    completed: "border-red-500/20 bg-red-500/10 text-red-500",
     draft: "border-amber-500/20 bg-amber-500/10 text-amber-400",
   };
 
@@ -701,15 +703,15 @@ export default function AdminEventsManager() {
 
                     {/* Gallery Link — shown when status is completed */}
                     {formData.status === "completed" && (
-                      <div className="space-y-3">
-                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Event Photos (Google Drive Link)</label>
-                        <p className="font-mono text-[9px] text-white/20 italic pl-1">
-                          Upload event photos to Google Drive and paste the share link below. The public page will show a button to open the gallery.
+                      <div className="flex flex-col gap-2 p-5 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Event Photos (Ente Album Link)</label>
+                        <p className="text-[9px] font-mono text-white/20 pl-1 -mt-1 uppercase">
+                          Paste the Ente album link below. The public page will show a button to open the gallery.
                         </p>
                         <input
                           type="url"
                           value={formData.galleryLink || ""}
-                          placeholder="https://drive.google.com/..."
+                          placeholder="https://albums.ente.com/..."
                           onChange={e => setFormData(prev => ({ ...prev, galleryLink: e.target.value }))}
                           className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 placeholder:text-white/10"
                         />

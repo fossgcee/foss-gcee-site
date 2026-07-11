@@ -169,18 +169,18 @@ export default function AdminEventContentPage() {
            />
         </div>
 
-        {/* Google Drive Gallery Link */}
-        <div className="space-y-6">
-           <div className="flex items-center gap-3 border-b border-white/5 pb-2">
-             <LinkIcon className="w-4 h-4 text-white/40" />
-             <h2 className="font-mono text-xs uppercase tracking-widest text-white/80">Event Photos (Google Drive)</h2>
-           </div>
-           <p className="text-[10px] font-mono text-white/30 leading-relaxed uppercase">Upload event photos to Google Drive and paste the share link below. The public page will show a button to open the gallery.</p>
-           <input
+        {/* Ente Gallery Link */}
+        <div className="mt-12 bg-surface-2 p-6 rounded-2xl border border-border-2">
+          <div className="mb-4">
+             <h2 className="font-mono text-xs uppercase tracking-widest text-white/80">Event Photos (Ente Album)</h2>
+             <div className="w-8 h-1 bg-[#1FA463] mt-2 mb-4" />
+           <p className="text-[10px] font-mono text-white/30 leading-relaxed uppercase">Paste the Ente album link below. The public page will show a button to open the gallery.</p>
+          </div>
+          <input
              type="url"
              value={event.galleryLink || ""}
              onChange={e => setEvent({ ...event, galleryLink: e.target.value })}
-             placeholder="https://drive.google.com/..."
+             placeholder="https://ente.io/..."
              className="w-full px-5 py-4 bg-white/[0.02] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all placeholder:text-white/10"
            />
         </div>

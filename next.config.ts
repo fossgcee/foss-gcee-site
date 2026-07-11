@@ -36,6 +36,15 @@ const nextConfig: NextConfig = {
 				protocol: "https",
 				hostname: "*.public.blob.vercel-storage.com",
 			},
+			// Ente Albums
+			{
+				protocol: "https",
+				hostname: "albums.ente.com",
+			},
+			{
+				protocol: "https",
+				hostname: "api.ente.com",
+			},
 		],
 		formats: ["image/avif", "image/webp"],
 		deviceSizes: [640, 750, 828, 1080, 1200],

@@ -32,6 +32,7 @@ const defaultFooterData: FooterConfig = {
     { label: "What We Do", href: "/#whatwedo" },
     { label: "Projects", href: "/projects" },
     { label: "Events", href: "/#community" },
+    { label: "Forum", href: "https://forum.fossunited.org/t/foss-club-government-college-of-engineering-erode/" },
     { label: "Join Us", href: "/#join" },
   ],
 };
@@ -154,7 +155,11 @@ export default function Footer() {
           className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-border"
         >
           <p className="font-mono text-xs text-muted text-center sm:text-left leading-relaxed">
-            &gt;_ Built by: <span className="text-text">{footerData.builtBy}</span><br />
+            {">_ Built by: "}
+            <a href="https://github.com/Premkumar291" target="_blank" rel="noopener noreferrer" className="text-text hover:underline underline-offset-2">Prem</a>,{" "}
+            <a href="https://github.com/Abez-B" target="_blank" rel="noopener noreferrer" className="text-text hover:underline underline-offset-2">Bharath</a> &amp;{" "}
+            <a href="https://github.com/codecrypt112" target="_blank" rel="noopener noreferrer" className="text-text hover:underline underline-offset-2">Vikash</a>
+            <br />
             <span className="sm:inline-block sm:mt-1 opacity-75">powered by open source</span>
           </p>
           <p className="font-mono text-xs text-muted-2 text-center sm:text-right">

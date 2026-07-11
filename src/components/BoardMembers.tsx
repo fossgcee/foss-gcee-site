@@ -168,7 +168,7 @@ export default function BoardMembers() {
                       fill
                       className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 768px) 85vw, (max-width: 1024px) 50vw, 33vw"
-                      unoptimized={member.imageUrl.startsWith("https://lh3.googleusercontent.com")}
+                      unoptimized={member.imageUrl.startsWith("http")}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-black/20 dark:text-white/20">

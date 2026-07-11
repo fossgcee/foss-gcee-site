@@ -203,7 +203,7 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-surface-2 border border-border-2 font-pixel text-xs uppercase tracking-tight text-text hover:scale-[1.02] transition-all"
           >
-            OPEN_GOOGLE_DRIVE_GALLERY <ExternalLink className="w-4 h-4" />
+            OPEN_ENTE_PHOTO_ALBUM <ExternalLink className="w-4 h-4" />
           </a>
         </section>
       )}

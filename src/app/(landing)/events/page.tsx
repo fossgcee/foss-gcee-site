@@ -238,7 +238,7 @@ export default function EventsPage() {
                  <div className="bg-bg border border-border rounded-xl p-4 transition-all duration-300 hover:border-text/30 hover:bg-surface shadow-sm h-full flex flex-col">
                     <div className="flex gap-2 mb-3">
                       <span className="text-[9px] uppercase font-mono bg-text text-bg px-2 py-0.5 rounded border border-text font-bold tracking-widest">{event.category}</span>
-                      <span className="text-[9px] uppercase font-mono border border-border text-muted-2 px-2 py-0.5 rounded tracking-widest text-[#ffeb3b]/80 border-[#ffeb3b]/20 bg-[#ffeb3b]/5">{event.status}</span>
+                      <span className="text-[9px] uppercase font-mono border border-border text-muted-2 px-2 py-0.5 rounded tracking-widest text-red-500 border-red-500/20 bg-red-500/5">{event.status}</span>
                     </div>
                     <div className="w-full aspect-[16/9] rounded-lg overflow-hidden bg-surface mb-4 relative border border-border/50">
                        {event.poster ? (
@@ -247,7 +247,7 @@ export default function EventsPage() {
                           <div className="w-full h-full flex items-center justify-center text-muted-2 bg-surface-2"><ImageIcon className="w-8 h-8 opacity-20" /></div>
                        )}
                     </div>
-                    <h3 className="font-pixel text-sm w-full text-text uppercase mb-3 line-clamp-2 leading-relaxed h-10 group-hover:text-[#ffeb3b] transition-colors">{event.title}</h3>
+                    <h3 className="font-pixel text-sm w-full text-text uppercase mb-3 line-clamp-2 leading-relaxed h-10 group-hover:text-red-500 transition-colors">{event.title}</h3>
                     <div className="mt-auto space-y-1.5 pt-4 border-t border-border">
                       <p className="text-[10px] font-mono text-muted flex items-center gap-2">
                          <Calendar className="w-3 h-3 text-text opacity-50" />

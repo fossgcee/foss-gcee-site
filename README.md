@@ -1,8 +1,18 @@
-# FOSSGCEE Website
+<div align="center">
+  <img src="public/foss_gcee_logo.png" alt="FOSSGCEE Logo" width="120" />
+  
+  # FOSSGCEE Website
 
-Official website of the **Free and Open Source Software Club** at Government College of Engineering, Erode.
+  Official website of the **Free and Open Source Software Club** at Government College of Engineering, Erode.
 
-🌐 **Live:** [fossgcee.netlify.app](https://fossgcee.vercel.app) &nbsp;|&nbsp; 📁 **Stack:** Next.js 16 · Tailwind CSS v4 · MongoDB · Nodemailer
+  [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+  [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+  [![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+  [![GSAP](https://img.shields.io/badge/GSAP-88CE02?style=for-the-badge&logo=greensock&logoColor=white)](https://gsap.com/)
+
+  🌐 **Live:** [fossgcee.vercel.app](https://fossgcee.vercel.app)
+
+</div>
 
 ---
 
@@ -305,7 +315,7 @@ If you are unsure where to start, open an issue and describe what you want to im
 
 ## Deploying
 
-The site is deployed on **Netlify** from the `main` branch automatically.
+The site is deployed on **Vercel** from the `main` branch automatically.
 
 ```bash
 # Manual build check before pushing
@@ -317,11 +327,11 @@ git commit -m "your message"
 git push
 ```
 
-Netlify auto-deploys within ~1–2 minutes.
+Vercel auto-deploys within ~1–2 minutes.
 
-> ⚠️ **Set environment variables in Netlify** (Site → Settings → Environment Variables) matching your `.env.local`. Without them, MongoDB and email will not work in production.
+> ⚠️ **Set environment variables in Vercel** (Site → Settings → Environment Variables) matching your `.env.local`. Without them, MongoDB and email will not work in production.
 
-> ⚠️ **Always run `npm run build` locally before pushing.** If it fails locally, it will fail on Netlify too.
+> ⚠️ **Always run `npm run build` locally before pushing.** If it fails locally, it will fail on Vercel too.
 
 ---
 
@@ -399,7 +409,7 @@ npm run dev
 
 - Confirm `DATABASE_URL` is set correctly in `.env.local`
 - Whitelist your IP in **MongoDB Atlas → Network Access**
-- In production (Netlify), add `0.0.0.0/0` to allow all IPs, or Netlify's IP ranges
+- In production (Vercel), add `0.0.0.0/0` to allow all IPs, or Vercel's IP ranges
 
 ### OTP emails not sending
 
