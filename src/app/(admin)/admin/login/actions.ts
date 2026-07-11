@@ -1,15 +1,42 @@
 "use server";
 
+import crypto from "crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createSessionToken } from "@/lib/session";
+import { rateLimit } from "@/lib/rateLimit";
+
+/**
+ * Constant-time string comparison using Node's crypto.timingSafeEqual.
+ * Prevents timing-based side-channel attacks on the admin password.
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a, "utf8");
+  const bufB = Buffer.from(b, "utf8");
+  // Buffers must be the same length for timingSafeEqual to work correctly.
+  // We compare lengths separately (non-timing-sensitive for different-length strings).
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
 
 export async function loginAction(formData: FormData) {
-  const password = formData.get("password");
-  const adminPassword = process.env.ADMIN_PASSWORD;
+  // Rate-limit login attempts per a fixed key so brute-force is blocked
+  // regardless of serverless cold-starts (5 attempts per 15 minutes server-wide).
+  const loginLimit = rateLimit("admin:login", 5, 15 * 60 * 1000);
+  if (!loginLimit.allowed) {
+    return { error: "RATE_LIMITED" };
+  }
+
+  const password = String(formData.get("password") ?? "");
+  const adminPassword = process.env.ADMIN_PASSWORD ?? "";
   const sessionSecret = process.env.ADMIN_SESSION_SECRET;
 
-  if (password === adminPassword && sessionSecret) {
+  if (!sessionSecret) {
+    return { error: "SERVER_CONFIG_ERROR" };
+  }
+
+  // Use constant-time comparison — never === for secrets.
+  if (adminPassword && timingSafeEqual(password, adminPassword)) {
     const cookieStore = await cookies();
     const token = await createSessionToken(sessionSecret, 1000 * 60 * 60 * 24);
     cookieStore.set("admin_session", token, {
@@ -19,12 +46,8 @@ export async function loginAction(formData: FormData) {
       maxAge: 60 * 60 * 24, // 1 day
       path: "/",
     });
-    
-    return { success: true };
-  }
 
-  if (!sessionSecret) {
-    return { error: "SERVER_CONFIG_ERROR" };
+    return { success: true };
   }
 
   return { error: "INVALID_PASSWORD" };

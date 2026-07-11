@@ -4,27 +4,7 @@ import Event from "@/models/Event";
 import Registration from "@/models/Registration";
 import { sendBulkEmail } from "@/lib/mailer";
 import { requireAdmin } from "@/lib/adminAuth";
-
-const getErrorMessage = (error: unknown) => {
-  if (error instanceof Error) return error.message;
-  if (typeof error === "string") return error;
-  return "Unknown error";
-};
-
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
-
-const getSiteUrl = () =>
-  (process.env.PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://fossgcee.in").replace(/\/$/, "");
-
-const getLogoUrl = () => `${getSiteUrl()}/foss_gcee_logo.png`;
-
-const escapeHtml = (value: string) =>
-  value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+import { emailRegex, getSiteUrl, getLogoUrl, escapeHtml, getErrorMessage } from "@/lib/utils";
 
 type AgendaItem = { time?: string; topic?: string };
 
@@ -215,7 +195,21 @@ export async function POST(request: Request) {
     await dbConnect();
     const body = await request.json();
 
-    const event = await Event.create(body);
+    // Whitelist only the fields the schema actually accepts.
+    // Never pass the raw request body directly to Mongoose (mass assignment).
+    const {
+      title, slug, description, agenda, outcomes, academicYear,
+      startDate, endDate, startTime, endTime, venue, category,
+      handledBy, organizers, poster, photos, galleryLink, status, isFeatured,
+    } = body;
+
+    const event = await Event.create({
+      title, slug, description, agenda, outcomes, academicYear,
+      startDate, endDate, startTime, endTime, venue, category,
+      handledBy, organizers, poster, photos, galleryLink,
+      status: status ?? "upcoming",
+      isFeatured: Boolean(isFeatured),
+    });
 
     // Auto-notify all approved members when a new non-draft event is created.
     if (event.status !== "draft") {
@@ -246,7 +240,7 @@ export async function POST(request: Request) {
     console.error("Create Event Error:", error);
     return NextResponse.json({
       success: false,
-      error: getErrorMessage(error),
+      error: "Failed to create event.",
     }, { status: 500 });
   }
 }

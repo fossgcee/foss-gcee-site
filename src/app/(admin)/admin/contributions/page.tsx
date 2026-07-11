@@ -158,7 +158,7 @@ function ContributionModal({
                     </div>
                   ))
                 ) : (
-                  <div className="px-4 py-3 font-mono text-xs text-white/40">No members found matching "{memberSearch}"</div>
+                  <div className="px-4 py-3 font-mono text-xs text-white/40">{`No members found matching "${memberSearch}"`}</div>
                 )}
               </div>
             )}

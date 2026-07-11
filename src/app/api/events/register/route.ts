@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Event from "@/models/Event";
 import { getClientIp, rateLimit } from "@/lib/rateLimit";
+import { sendEventRegistrationEmail } from "@/lib/mailer";
 
 const getErrorMessage = (error: unknown) => {
   if (error instanceof Error) return error.message;
@@ -59,13 +60,10 @@ export async function POST(request: Request) {
       }
     );
 
-    // Send confirmation email asynchronously
-    try {
-      const { sendEventRegistrationEmail } = await import("@/lib/mailer");
-      await sendEventRegistrationEmail(email, name, eventTitle || event.title);
-    } catch (err) {
+    // Send confirmation email asynchronously (fire-and-forget — don't block registration)
+    sendEventRegistrationEmail(email, name, eventTitle || event.title).catch((err) => {
       console.warn("Mail ignored but registration saved:", err);
-    }
+    });
 
     return NextResponse.json({
       success: true,

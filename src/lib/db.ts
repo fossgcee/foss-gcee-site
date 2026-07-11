@@ -1,9 +1,16 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.DATABASE_URL || process.env.MONGODB_URI;
+// Only read from MONGODB_URI — this is the canonical name validated by env.ts.
+const MONGODB_URI = process.env.MONGODB_URI;
 
+// Warn at import time rather than throwing, since this runs during build
+// when env vars may not yet be set (e.g. Vercel static page collection).
+// The actual connection error will surface at runtime when dbConnect() is called.
 if (!MONGODB_URI) {
-  throw new Error("Please define the DATABASE_URL environment variable inside .env.local");
+  console.warn(
+    "[WARNING] MONGODB_URI is not defined. " +
+    "Set it in .env.local (development) or your deployment environment."
+  );
 }
 
 type MongooseCache = {
@@ -22,12 +29,18 @@ async function dbConnect() {
     return cached.conn;
   }
 
+  if (!MONGODB_URI) {
+    throw new Error(
+      "MONGODB_URI is not configured. Set it in .env.local or your deployment environment."
+    );
+  }
+
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
       return mongoose;
     });
   }

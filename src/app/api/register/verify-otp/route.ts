@@ -49,7 +49,15 @@ export async function POST(request: Request) {
     }
 
     if (registration.otpLockedUntil && new Date() < registration.otpLockedUntil) {
-      return NextResponse.json({ success: false, error: "Too many attempts. Try again later." }, { status: 429 });
+      return NextResponse.json(
+        { success: false, error: "Too many attempts. Try again later." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": Math.ceil((registration.otpLockedUntil.getTime() - Date.now()) / 1000).toString(),
+          },
+        }
+      );
     }
 
     if (new Date() > registration.otpExpiresAt) {

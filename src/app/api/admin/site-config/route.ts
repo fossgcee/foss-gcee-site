@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import SiteConfig from "@/models/SiteConfig";
+import { requireAdmin } from "@/lib/adminAuth";
 
 // Default content fallbacks matching the static data files
 const defaults: Record<string, unknown> = {
@@ -99,22 +100,35 @@ export async function GET(req: NextRequest) {
     }
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
+    console.error("Fetch Admin SiteConfig Error:", error);
     return NextResponse.json(
-      { success: false, error: (error as Error).message },
+      { success: false, error: "Failed to load site configuration." },
       { status: 500 }
     );
   }
 }
 
 export async function PUT(req: NextRequest) {
+  // Auth guard: only authenticated admins may update site configuration.
+  const auth = await requireAdmin(req);
+  if (auth) return auth;
+
   try {
     await dbConnect();
     const body = await req.json();
     const { section, data } = body;
 
-    if (!section || !data) {
+    if (!section || typeof section !== "string" || !data) {
       return NextResponse.json(
         { success: false, error: "section and data are required" },
+        { status: 400 }
+      );
+    }
+
+    // Only allow known sections to prevent arbitrary key injection.
+    if (!Object.keys(defaults).includes(section)) {
+      return NextResponse.json(
+        { success: false, error: "Unknown section." },
         { status: 400 }
       );
     }
@@ -127,8 +141,9 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json({ success: true, data: config });
   } catch (error) {
+    console.error("Update SiteConfig Error:", error);
     return NextResponse.json(
-      { success: false, error: (error as Error).message },
+      { success: false, error: "Failed to update site configuration." },
       { status: 500 }
     );
   }

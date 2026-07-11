@@ -574,7 +574,8 @@ function BoardMembersEditor({
     if (!selectedYear && years.length > 0) {
       setSelectedYear(years[0]);
     }
-  }, [years, selectedYear]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [years.join(",")]);
 
   const setMember = (id: string, k: keyof BoardMember, v: string) => {
     onChange({
@@ -741,7 +742,8 @@ function GalleryEditor({
     if (!selectedYear && years.length > 0) {
       setSelectedYear(years[0]!);
     }
-  }, [years, selectedYear]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [years.join(",")]);
 
   const setImage = (id: string, k: keyof GalleryImage, v: string) => {
     onChange({

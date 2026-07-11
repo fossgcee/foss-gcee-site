@@ -2,12 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Registration from "@/models/Registration";
 import { requireAdmin } from "@/lib/adminAuth";
-
-const getErrorMessage = (error: unknown) => {
-  if (error instanceof Error) return error.message;
-  if (typeof error === "string") return error;
-  return "Unknown error";
-};
+import { escapeRegex } from "@/lib/utils";
 
 export async function GET(request: Request) {
   const auth = await requireAdmin(request);
@@ -24,11 +19,13 @@ export async function GET(request: Request) {
     const query: Record<string, unknown> = {};
 
     if (search) {
+      // Escape regex metacharacters to prevent ReDoS via crafted search strings.
+      const safeSearch = escapeRegex(search);
       query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } },
-        { department: { $regex: search, $options: "i" } },
-        { year: { $regex: search, $options: "i" } },
+        { name: { $regex: safeSearch, $options: "i" } },
+        { email: { $regex: safeSearch, $options: "i" } },
+        { department: { $regex: safeSearch, $options: "i" } },
+        { year: { $regex: safeSearch, $options: "i" } },
       ];
     }
 
@@ -45,7 +42,8 @@ export async function GET(request: Request) {
       data: registrations,
     });
   } catch (error: unknown) {
-    return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 500 });
+    console.error("Fetch Members Error:", error);
+    return NextResponse.json({ success: false, error: "Failed to fetch members." }, { status: 500 });
   }
 }
 
@@ -56,10 +54,12 @@ export async function DELETE(request: Request) {
   try {
     await dbConnect();
     const { id } = await request.json();
+    if (!id) return NextResponse.json({ success: false, error: "ID is required." }, { status: 400 });
     await Registration.findByIdAndDelete(id);
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
-    return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 500 });
+    console.error("Delete Member Error:", error);
+    return NextResponse.json({ success: false, error: "Failed to delete member." }, { status: 500 });
   }
 }
 
@@ -87,6 +87,7 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error: unknown) {
-    return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 500 });
+    console.error("Update Member Error:", error);
+    return NextResponse.json({ success: false, error: "Failed to update member." }, { status: 500 });
   }
 }

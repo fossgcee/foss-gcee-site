@@ -1,22 +1,24 @@
 import nodemailer from "nodemailer";
+import { getLogoUrl } from "@/lib/utils";
 
 export const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_APP_PASSWORD,
+    user: process.env.EMAIL_SERVER_USER || process.env.EMAIL_USER,
+    pass: process.env.EMAIL_SERVER_PASSWORD || process.env.EMAIL_APP_PASSWORD,
   },
 });
 
-const getSiteUrl = () => {
-  const raw = process.env.PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  return raw.replace(/\/$/, "");
-};
-
-const getLogoUrl = () => `${getSiteUrl()}/foss_gcee_logo.png`;
-
+/**
+ * Generates a cryptographically secure 6-digit OTP.
+ * Uses crypto.getRandomValues() instead of Math.random() to ensure
+ * unpredictability and resistance to prediction attacks.
+ */
 export function generateOtp(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  const array = new Uint32Array(1);
+  crypto.getRandomValues(array);
+  // Map the random uint32 into the range [100000, 999999]
+  return String(100000 + (array[0] % 900000));
 }
 
 /**
@@ -24,7 +26,7 @@ export function generateOtp(): string {
  */
 export async function sendOtpEmail(to: string, name: string, otp: string) {
   await transporter.sendMail({
-    from: `"FOSS Club GCE Erode" <${process.env.EMAIL_USER}>`,
+    from: `"FOSS Club GCE Erode" <${process.env.EMAIL_SERVER_USER || process.env.EMAIL_USER}>`,
     to,
     subject: "Your FOSSGCEE Verification Code",
     text: `Hi ${name},\n\nYour FOSSGCEE verification code is: ${otp}\n\nThis code expires in 10 minutes. If you did not initiate this, please ignore this email.\n\nFOSS Club · GCE Erode`,
@@ -74,7 +76,7 @@ export async function sendOtpEmail(to: string, name: string, otp: string) {
  */
 export async function sendEventRegistrationEmail(to: string, name: string, eventTitle: string) {
   await transporter.sendMail({
-    from: `"FOSS Club GCE Erode" <${process.env.EMAIL_USER}>`,
+    from: `"FOSS Club GCE Erode" <${process.env.EMAIL_SERVER_USER || process.env.EMAIL_USER}>`,
     to,
     subject: `Registration Confirmed: ${eventTitle}`,
     text: `Hi ${name},\n\nYour registration is confirmed for: ${eventTitle}.\nWe have received your registration. Stay tuned for further updates on WhatsApp.\n\nFOSS Club · GCE Erode`,

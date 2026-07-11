@@ -2,11 +2,6 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Event from "@/models/Event";
 
-const getErrorMessage = (error: unknown) => {
-  if (error instanceof Error) return error.message;
-  if (typeof error === "string") return error;
-  return "Unknown error";
-};
 
 /**
  * Returns today's date string in "YYYY-MM-DD" format using IST (UTC+5:30).
@@ -25,7 +20,9 @@ export async function GET() {
 
     const today = todayIST();
 
-    // Auto-archive: flip any "upcoming" event whose endDate is strictly before today
+    // Auto-archive: flip any "upcoming" event whose endDate is strictly before today.
+    // NOTE: For production scale, consider moving this to a Vercel Cron job
+    // (vercel.json crons) instead of running on every GET request.
     await Event.updateMany(
       { status: "upcoming", endDate: { $lt: today } },
       { $set: { status: "completed" } }
@@ -43,7 +40,7 @@ export async function GET() {
     console.error("Fetch Events Error:", error);
     return NextResponse.json({
       success: false,
-      error: getErrorMessage(error),
+      error: "Failed to load events.",
     }, { status: 500 });
   }
 }
