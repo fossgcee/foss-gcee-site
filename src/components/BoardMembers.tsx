@@ -111,8 +111,8 @@ export default function BoardMembers() {
 
         {/* Loading skeleton */}
         {loading && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8 w-full">
-            {[1, 2, 3, 4].map((i) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 w-full">
+            {Array.from({ length: 12 }).map((_, i) => (
               <div key={i} className="rounded-xl overflow-hidden bg-black/5 dark:bg-white/5 animate-pulse">
                 <div className="aspect-[4/5]" />
                 <div className="p-6">
@@ -151,9 +151,9 @@ export default function BoardMembers() {
         {!loading && filteredMembers.length > 0 && (
           <div
             ref={gridRef}
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6 w-full"
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 w-full"
           >
-            {filteredMembers.map((member) => (
+            {filteredMembers.slice(0, 12).map((member) => (
               <div
                 key={member.id}
                 className="flex flex-col rounded-xl overflow-hidden relative group transition-transform duration-300 hover:-translate-y-2 bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/8 shadow-sm dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)]"

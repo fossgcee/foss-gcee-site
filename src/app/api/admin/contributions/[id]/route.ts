@@ -71,6 +71,7 @@ export async function PUT(
           links: body.links !== undefined ? body.links : contribution.links,
           imageUrl: body.imageUrl !== undefined ? body.imageUrl : contribution.imageUrl,
           isFeatured: body.isFeatured !== undefined ? body.isFeatured : contribution.isFeatured,
+          order: body.order !== undefined ? Number(body.order) : contribution.order,
         }
       },
       { new: true }

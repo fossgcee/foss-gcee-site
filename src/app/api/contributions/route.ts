@@ -11,7 +11,7 @@ export async function GET() {
     await dbConnect();
     const contributions = await Contribution.find()
       .populate("memberId", "name department year")
-      .sort({ createdAt: -1 });
+      .sort({ order: 1, createdAt: -1 });
 
     return NextResponse.json({ success: true, data: contributions });
   } catch (error) {

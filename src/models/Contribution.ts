@@ -8,6 +8,7 @@ export interface IContribution extends mongoose.Document {
   links?: { label: string; url: string }[];
   imageUrl?: string;
   isFeatured?: boolean;
+  order?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,6 +44,10 @@ const ContributionSchema = new mongoose.Schema<IContribution>(
     isFeatured: {
       type: Boolean,
       default: false,
+    },
+    order: {
+      type: Number,
+      default: 0,
     },
   },
   {

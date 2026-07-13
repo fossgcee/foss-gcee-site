@@ -20,6 +20,8 @@ import {
   X,
   Wand2,
   CheckCircle2,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 
 // ──────────────────────────────────────────────────────────────────
@@ -597,6 +599,28 @@ function BoardMembersEditor({
     if (editingId === id) setEditingId(null);
   };
 
+  const moveMember = (id: string, direction: -1 | 1) => {
+    const members = [...data.members];
+    const index = members.findIndex(m => m.id === id);
+    if (index < 0) return;
+    
+    // Find next/prev member with the same year
+    const targetMembers = members.filter(m => m.year === selectedYear);
+    const targetIndex = targetMembers.findIndex(m => m.id === id);
+    
+    if (direction === -1 && targetIndex > 0) {
+      const swapId = targetMembers[targetIndex - 1].id;
+      const swapIndex = members.findIndex(m => m.id === swapId);
+      [members[index], members[swapIndex]] = [members[swapIndex], members[index]];
+      onChange({ ...data, members });
+    } else if (direction === 1 && targetIndex < targetMembers.length - 1) {
+      const swapId = targetMembers[targetIndex + 1].id;
+      const swapIndex = members.findIndex(m => m.id === swapId);
+      [members[index], members[swapIndex]] = [members[swapIndex], members[index]];
+      onChange({ ...data, members });
+    }
+  };
+
   const filteredMembers = data.members.filter(m => m.year === selectedYear);
   const editingMember = data.members.find(m => m.id === editingId);
 
@@ -627,8 +651,24 @@ function BoardMembersEditor({
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {filteredMembers.map((m) => (
+        {filteredMembers.map((m, idx) => (
           <div key={m.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center gap-4 transition-colors hover:bg-white/[0.04]">
+            <div className="flex flex-col gap-1 shrink-0">
+              <button 
+                onClick={() => moveMember(m.id, -1)} 
+                disabled={idx === 0}
+                className="p-1 rounded text-white/40 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent"
+              >
+                <ChevronUp className="w-3 h-3" />
+              </button>
+              <button 
+                onClick={() => moveMember(m.id, 1)} 
+                disabled={idx === filteredMembers.length - 1}
+                className="p-1 rounded text-white/40 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent"
+              >
+                <ChevronDown className="w-3 h-3" />
+              </button>
+            </div>
             <div className="w-12 h-12 rounded-lg bg-black/20 overflow-hidden shrink-0 flex items-center justify-center relative border border-white/5">
                {m.imageUrl ? (
                  <img src={m.imageUrl} alt={m.name} className="w-full h-full object-cover" />

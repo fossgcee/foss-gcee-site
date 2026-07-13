@@ -10,7 +10,7 @@ export async function GET(request: Request) {
 
   try {
     await dbConnect();
-    const contributions = await Contribution.find().populate("memberId", "name department year").sort({ createdAt: -1 });
+    const contributions = await Contribution.find().populate("memberId", "name department year").sort({ order: 1, createdAt: -1 });
     return NextResponse.json({ success: true, data: contributions, count: contributions.length });
   } catch (error) {
     console.error("Fetch Contributions Error:", error);
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     await dbConnect();
     const body = await req.json();
     // Whitelist allowed fields — never pass raw body to Mongoose.
-    const { memberId, title, description, url, links, imageUrl, isFeatured } = body;
+    const { memberId, title, description, url, links, imageUrl, isFeatured, order } = body;
     
     if (!memberId || !title || !description) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
       links,
       imageUrl: imageUrl ? String(imageUrl).trim() : undefined,
       isFeatured: Boolean(isFeatured),
+      order: Number(order) || 0,
     });
     
     member.contributionsCount = (member.contributionsCount || 0) + 1;

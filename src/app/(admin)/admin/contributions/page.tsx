@@ -19,6 +19,7 @@ interface Contribution {
   links?: { label: string; url: string }[];
   imageUrl?: string;
   isFeatured: boolean;
+  order?: number;
   createdAt: string;
 }
 
@@ -48,7 +49,7 @@ function ContributionModal({
 }: {
   members: Member[];
   initialData?: Contribution | null;
-  onSave: (data: { memberId: string; title: string; description: string; url: string; links: {label: string, url: string}[]; imageUrl: string; isFeatured: boolean }) => Promise<void>;
+  onSave: (data: { memberId: string; title: string; description: string; url: string; links: {label: string, url: string}[]; imageUrl: string; isFeatured: boolean; order: number }) => Promise<void>;
   onClose: () => void;
 }) {
   const [formData, setFormData] = useState({
@@ -59,6 +60,7 @@ function ContributionModal({
     links: initialData?.links || [],
     imageUrl: initialData?.imageUrl || "",
     isFeatured: initialData?.isFeatured || false,
+    order: initialData?.order || 0,
   });
   const [loading, setLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -296,6 +298,18 @@ function ContributionModal({
             </label>
           </div>
 
+          <div className="space-y-1.5">
+            <label className="font-mono text-[10px] uppercase tracking-widest text-white/40 ml-1">Order</label>
+            <input
+              type="number"
+              value={formData.order}
+              onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
+              placeholder="0"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 font-mono text-sm text-white focus:outline-none focus:ring-1 ring-white/20"
+            />
+            <p className="font-mono text-[9px] text-white/40 ml-1">Lower numbers appear first. Example: 1, 2, 3.</p>
+          </div>
+
           <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
             <button
               type="button"
@@ -367,7 +381,7 @@ export default function AdminContributionsPage() {
     setIsModalOpen(true);
   };
 
-  const handleSave = async (data: { memberId: string; title: string; description: string; url: string; links: {label: string, url: string}[]; imageUrl: string; isFeatured: boolean }) => {
+  const handleSave = async (data: { memberId: string; title: string; description: string; url: string; links: {label: string, url: string}[]; imageUrl: string; isFeatured: boolean; order: number }) => {
     const url = editingContribution ? `/api/admin/contributions/${editingContribution._id}` : "/api/admin/contributions";
     const method = editingContribution ? "PUT" : "POST";
     
@@ -437,10 +451,11 @@ export default function AdminContributionsPage() {
         {/* Table header */}
         <div
           className="grid gap-4 px-6 py-3 border-b border-white/5"
-          style={{ gridTemplateColumns: "1.5fr 2fr 1fr 80px", background: "rgba(255,255,255,0.02)" }}
+          style={{ gridTemplateColumns: "1.5fr 2fr 1fr 1fr 80px", background: "rgba(255,255,255,0.02)" }}
         >
           <span className="font-mono text-[10px] uppercase tracking-wider text-white/40">Member</span>
           <span className="font-mono text-[10px] uppercase tracking-wider text-white/40">Contribution</span>
+          <span className="font-mono text-[10px] uppercase tracking-wider text-white/40">Order</span>
           <span className="font-mono text-[10px] uppercase tracking-wider text-white/40">Date</span>
           <span className="font-mono text-[10px] uppercase tracking-wider text-white/40 text-right">Actions</span>
         </div>
@@ -463,7 +478,7 @@ export default function AdminContributionsPage() {
           <div
             key={c._id}
             className="grid gap-4 px-6 py-4 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors items-center"
-            style={{ gridTemplateColumns: "1.5fr 2fr 1fr 80px" }}
+            style={{ gridTemplateColumns: "1.5fr 2fr 1fr 1fr 80px" }}
           >
             {/* Member */}
             <div className="flex items-center gap-3 min-w-0">
@@ -488,6 +503,11 @@ export default function AdminContributionsPage() {
               </div>
               <p className="font-mono text-[11px] text-white/50 line-clamp-1">{c.description}</p>
             </div>
+
+            {/* Order */}
+            <span className="font-mono text-xs text-white/60">
+              {c.order || 0}
+            </span>
 
             {/* Date */}
             <span className="font-mono text-xs text-white/60">
