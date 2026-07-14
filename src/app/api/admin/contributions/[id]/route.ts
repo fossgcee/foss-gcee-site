@@ -2,11 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Contribution from "@/models/Contribution";
 import Registration from "@/models/Registration";
+import { requireAdmin } from "@/lib/adminAuth";
 
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAdmin(req);
+  if (auth) return auth;
+
   try {
     await dbConnect();
     const { id } = await params;
@@ -34,6 +38,9 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAdmin(req);
+  if (auth) return auth;
+
   try {
     await dbConnect();
     const { id } = await params;

@@ -11,12 +11,11 @@ import { rateLimit } from "@/lib/rateLimit";
  * Prevents timing-based side-channel attacks on the admin password.
  */
 function timingSafeEqual(a: string, b: string): boolean {
-  const bufA = Buffer.from(a, "utf8");
-  const bufB = Buffer.from(b, "utf8");
-  // Buffers must be the same length for timingSafeEqual to work correctly.
-  // We compare lengths separately (non-timing-sensitive for different-length strings).
-  if (bufA.length !== bufB.length) return false;
-  return crypto.timingSafeEqual(bufA, bufB);
+  // Hash both strings to a constant length using SHA-256.
+  // This ensures timingSafeEqual compares equal-length buffers and does not leak the secret length.
+  const hashA = crypto.createHmac("sha256", "constant-salt").update(a).digest();
+  const hashB = crypto.createHmac("sha256", "constant-salt").update(b).digest();
+  return crypto.timingSafeEqual(hashA, hashB);
 }
 
 export async function loginAction(formData: FormData) {

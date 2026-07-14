@@ -151,8 +151,6 @@ const EventSchema = new mongoose.Schema<IEvent>(
 // Compound index: virtually every query filters by status and sorts by startDate.
 // Without this, MongoDB does a full collection scan on every /api/events request.
 EventSchema.index({ status: 1, startDate: -1 });
-// Index for slug lookups (used in event registration and public event page)
-EventSchema.index({ slug: 1 }); // slug already has unique:true but explicit index improves lookup
 
 export default mongoose.models.Event ||
   mongoose.model<IEvent>("Event", EventSchema);
