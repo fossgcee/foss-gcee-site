@@ -13,7 +13,8 @@ import {
   Menu,
   X,
   GitCommit,
-  PanelTop
+  PanelTop,
+  BookOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +26,7 @@ const menuItems = [
   { icon: Users, label: "Members", href: "/admin/members" },
   { icon: Calendar, label: "Events", href: "/admin/events" },
   { icon: GitCommit, label: "Contributions", href: "/admin/contributions" },
+  { icon: BookOpen, label: "Blogs", href: "/admin/blogs" },
 ];
 
 export default function AdminSidebar() {
