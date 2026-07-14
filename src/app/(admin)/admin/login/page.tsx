@@ -79,7 +79,13 @@ export default function AdminLogin() {
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3 animate-shake">
               <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
-              <p className="font-mono text-[10px] text-red-500 uppercase tracking-wider font-bold">Error: Access Denied. Check credentials.</p>
+              <p className="font-mono text-[10px] text-red-500 uppercase tracking-wider font-bold">
+                {error === "SERVER_CONFIG_ERROR"
+                  ? "Error: Server config error. Missing session secret."
+                  : error === "RATE_LIMITED"
+                  ? "Error: Rate limited. Please try again later."
+                  : "Error: Access Denied. Check credentials."}
+              </p>
             </div>
           )}
         </form>
