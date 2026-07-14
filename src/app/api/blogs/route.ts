@@ -3,6 +3,8 @@ import dbConnect from "@/lib/db";
 import BlogPost from "@/models/BlogPost";
 import BlogCategory from "@/models/BlogCategory";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     await dbConnect();
