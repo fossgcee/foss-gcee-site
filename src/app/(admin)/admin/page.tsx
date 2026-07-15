@@ -12,6 +12,7 @@ import {
   GitCommit,
   PanelTop,
   TrendingUp,
+  BookOpen,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -26,6 +27,7 @@ interface SiteStats {
   contributionsCount: number;
   boardMembersCount: number;
   galleryCount: number;
+  blogsCount: number;
 }
 
 export default function AdminDashboard() {
@@ -35,6 +37,7 @@ export default function AdminDashboard() {
     contributionsCount: 0,
     boardMembersCount: 0,
     galleryCount: 0,
+    blogsCount: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -45,7 +48,8 @@ export default function AdminDashboard() {
       fetch("/api/admin/contributions").then(r => r.json()).catch(() => ({ success: false, data: [] })),
       fetch("/api/admin/site-config?section=boardmembers").then(r => r.json()).catch(() => ({ success: false, data: { members: [] } })),
       fetch("/api/admin/site-config?section=gallery").then(r => r.json()).catch(() => ({ success: false, data: { images: [] } })),
-    ]).then(([membersData, eventsData, contribData, boardData, galleryData]) => {
+      fetch("/api/admin/blogs").then(r => r.json()).catch(() => ({ success: false, data: [] })),
+    ]).then(([membersData, eventsData, contribData, boardData, galleryData, blogsData]) => {
       if (membersData.success) {
         const verified = membersData.data.filter((m: { otpVerified: boolean }) => m.otpVerified).length;
         setStats({ total: membersData.count, verified, pending: membersData.count - verified });
@@ -55,6 +59,7 @@ export default function AdminDashboard() {
         contributionsCount: contribData.success ? contribData.count : 0,
         boardMembersCount: boardData.success ? (boardData.data?.members?.length || 0) : 0,
         galleryCount: galleryData.success ? (galleryData.data?.images?.length || 0) : 0,
+        blogsCount: blogsData.success ? blogsData.data.length : 0,
       });
     }).finally(() => setLoading(false));
   }, []);
@@ -68,15 +73,15 @@ export default function AdminDashboard() {
   const cmsStatCards = [
     { label: "Events", value: siteStats.eventsCount, icon: Calendar, color: "text-violet-400", bg: "bg-violet-500/10 border-violet-500/20", href: "/admin/events" },
     { label: "Contributions", value: siteStats.contributionsCount, icon: GitCommit, color: "text-cyan-400", bg: "bg-cyan-500/10 border-cyan-500/20", href: "/admin/contributions" },
+    { label: "Blogs", value: siteStats.blogsCount, icon: BookOpen, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", href: "/admin/blogs" },
     { label: "Board Members", value: siteStats.boardMembersCount, icon: TrendingUp, color: "text-rose-400", bg: "bg-rose-500/10 border-rose-500/20", href: "/admin/site-cms" },
-    { label: "Gallery Photos", value: siteStats.galleryCount, icon: PanelTop, color: "text-indigo-400", bg: "bg-indigo-500/10 border-indigo-500/20", href: "/admin/site-cms" },
   ];
 
   const quickLinks = [
     { href: "/admin/members", label: "VIEW_ALL_MEMBERS", desc: "Search, filter and manage registrations", icon: Users },
     { href: "/admin/site-cms", label: "SITE_CMS", desc: "Edit hero, about, members, gallery, footer", icon: PanelTop },
     { href: "/admin/events", label: "EVENTS_MANAGER", desc: "Create and edit events", icon: Calendar },
-    { href: "/admin/contributions", label: "CONTRIBUTIONS", desc: "Track member contributions", icon: GitCommit },
+    { href: "/admin/blogs", label: "BLOGS_MANAGER", desc: "Write and publish blogs", icon: BookOpen },
   ];
 
   return (

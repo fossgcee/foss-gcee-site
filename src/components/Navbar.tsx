@@ -12,6 +12,7 @@ const links = [
   { label: "Members", href: "/members" },
   { label: "Projects", href: "/projects" },
   { label: "Events", href: "/events" },
+  { label: "Blog", href: "/blog" },
   { label: "Forum", href: "https://forum.fossunited.org/t/foss-club-government-college-of-engineering-erode/" },
   { label: "Join Us", href: "/#join" },
 ];

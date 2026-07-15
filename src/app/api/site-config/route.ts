@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import SiteConfig from "@/models/SiteConfig";
 
+export const dynamic = "force-dynamic";
+
 // Public read-only endpoint for site config sections.
 // Only allows reading specific public sections — never admin-only data.
 const PUBLIC_SECTIONS = ["boardmembers", "gallery", "hero", "about", "whatwedo", "footer"] as const;

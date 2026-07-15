@@ -21,9 +21,11 @@ function timingSafeEqual(a: string, b: string): boolean {
 export async function loginAction(formData: FormData) {
   // Rate-limit login attempts per a fixed key so brute-force is blocked
   // regardless of serverless cold-starts (5 attempts per 15 minutes server-wide).
-  const loginLimit = rateLimit("admin:login", 5, 15 * 60 * 1000);
-  if (!loginLimit.allowed) {
-    return { error: "RATE_LIMITED" };
+  if (process.env.NODE_ENV === "production") {
+    const loginLimit = rateLimit("admin:login", 5, 15 * 60 * 1000);
+    if (!loginLimit.allowed) {
+      return { error: "RATE_LIMITED" };
+    }
   }
 
   const password = String(formData.get("password") ?? "");

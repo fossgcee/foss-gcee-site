@@ -14,6 +14,8 @@ function todayIST(): string {
   return ist.toISOString().slice(0, 10); // "YYYY-MM-DD"
 }
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     await dbConnect();
