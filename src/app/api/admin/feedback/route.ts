@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Feedback from "@/models/Feedback";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin } from "@/lib/adminAuth";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    await requireAdmin();
+    const authError = await requireAdmin(req);
+    if (authError) return authError;
+    
     await dbConnect();
     
     // Sort by newest first
@@ -20,7 +22,9 @@ export async function GET() {
 
 export async function DELETE(req: Request) {
   try {
-    await requireAdmin();
+    const authError = await requireAdmin(req);
+    if (authError) return authError;
+
     await dbConnect();
 
     const { searchParams } = new URL(req.url);
