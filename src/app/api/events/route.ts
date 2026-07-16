@@ -22,13 +22,6 @@ export async function GET() {
 
     const today = todayIST();
 
-    // Auto-archive: flip any "upcoming" event whose endDate is strictly before today.
-    // Skip events where admin has manually overridden the status.
-    await Event.updateMany(
-      { status: "upcoming", endDate: { $lt: today }, manualStatus: { $ne: true } },
-      { $set: { status: "completed" } }
-    );
-
     // Fetch all non-draft events, newest first
     const events = await Event.find({ status: { $ne: "draft" } }).sort({ startDate: -1 });
 
