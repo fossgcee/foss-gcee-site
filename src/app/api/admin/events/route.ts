@@ -273,7 +273,14 @@ export async function PUT(request: Request) {
         registrations?: { email?: string }[];
       }>();
 
-    const event = await Event.findByIdAndUpdate(id, body, { new: true });
+    const updatePayload: Record<string, unknown> = { ...body };
+    // When admin explicitly sets a status, lock it from auto-archive
+    if (Object.prototype.hasOwnProperty.call(body, "status")) {
+      updatePayload.manualStatus = true;
+    }
+
+    const event = await Event.findByIdAndUpdate(id, updatePayload, { new: true });
+
 
     if (!event) {
       return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });

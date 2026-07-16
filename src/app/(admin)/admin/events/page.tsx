@@ -20,8 +20,11 @@ import {
   Users,
   Download,
   Mail,
+  MailOpen,
   Phone,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Send,
+  MessageSquare
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
@@ -83,6 +86,14 @@ export default function AdminEventsManager() {
   const [emailMessage, setEmailMessage] = useState("");
   const [emailStatus, setEmailStatus] = useState<string | null>(null);
   const [isEmailing, setIsEmailing] = useState(false);
+
+  // Mail Attendees modal state
+  const [isMailAttendeesOpen, setIsMailAttendeesOpen] = useState(false);
+  const [mailAttendeesEvent, setMailAttendeesEvent] = useState<EventData | null>(null);
+  const [mailGalleryLink, setMailGalleryLink] = useState("");
+  const [mailCustomMessage, setMailCustomMessage] = useState("");
+  const [mailAttendeesStatus, setMailAttendeesStatus] = useState<string | null>(null);
+  const [isMailingSending, setIsMailingSending] = useState(false);
   
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -401,6 +412,21 @@ export default function AdminEventsManager() {
                     <Link href={`/events/${event.slug}`} target="_blank" className="p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all"><ExternalLink className="w-4 h-4" /></Link>
                     <Link href={`/admin/events/${event._id}`} className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white hover:bg-white/10 transition-all text-[10px] font-pixel"><ImageIcon className="w-4 h-4" /> CONTENT</Link>
                     <button onClick={() => handleEdit(event)} className="p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all"><Edit3 className="w-4 h-4" /></button>
+                    {event.status === "completed" && (
+                      <button
+                        onClick={() => {
+                          setMailAttendeesEvent(event);
+                          setMailGalleryLink(event.galleryLink || "");
+                          setMailCustomMessage("");
+                          setMailAttendeesStatus(null);
+                          setIsMailAttendeesOpen(true);
+                        }}
+                        className="p-2.5 rounded-xl border border-amber-500/20 bg-amber-500/5 text-amber-400/60 hover:text-amber-400 hover:border-amber-500/40 transition-all"
+                        title="Mail Attendees"
+                      >
+                        <MailOpen className="w-4 h-4" />
+                      </button>
+                    )}
                     <button 
                       onClick={() => handleDelete(event._id!)} 
                       disabled={isDeleting === event._id}
@@ -779,6 +805,115 @@ export default function AdminEventsManager() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* ── Mail Attendees Modal ─────────────────────────────── */}
+      <AnimatePresence>
+        {isMailAttendeesOpen && mailAttendeesEvent && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setIsMailAttendeesOpen(false)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-lg bg-[#0f0f0f] border border-amber-500/20 rounded-[28px] shadow-2xl overflow-hidden"
+            >
+              {/* Header */}
+              <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                    <MailOpen className="w-5 h-5 text-amber-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-pixel text-sm text-white">MAIL ATTENDEES</h3>
+                    <p className="font-mono text-[10px] text-white/30 mt-0.5 truncate max-w-[240px]">{mailAttendeesEvent.title}</p>
+                  </div>
+                </div>
+                <button onClick={() => setIsMailAttendeesOpen(false)} className="p-2 rounded-xl hover:bg-white/5 text-white/30 hover:text-white transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-5">
+                <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/15 font-mono text-[11px] text-amber-400/80 flex items-start gap-2">
+                  <MessageSquare className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>This will send a thank-you email with your feedback link and photo album to all <strong>{mailAttendeesEvent.registrationsCount}</strong> registered attendees.</span>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest">Gallery / Photo Album Link</label>
+                  <input
+                    type="url"
+                    placeholder="https://photos.google.com/... (optional)"
+                    value={mailGalleryLink}
+                    onChange={(e) => setMailGalleryLink(e.target.value)}
+                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest">Custom Message (Optional)</label>
+                  <textarea
+                    rows={3}
+                    placeholder="e.g. It was wonderful having you with us! Thank you for your active participation..."
+                    value={mailCustomMessage}
+                    onChange={(e) => setMailCustomMessage(e.target.value)}
+                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all resize-none"
+                  />
+                </div>
+
+                {mailAttendeesStatus && (
+                  <div className={`p-3 rounded-xl font-mono text-xs ${mailAttendeesStatus.startsWith("✓") ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400" : "bg-red-500/10 border border-red-500/20 text-red-400"}`}>
+                    {mailAttendeesStatus}
+                  </div>
+                )}
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    disabled={isMailingSending || mailAttendeesEvent.registrationsCount === 0}
+                    onClick={async () => {
+                      setIsMailingSending(true);
+                      setMailAttendeesStatus(null);
+                      try {
+                        const res = await fetch("/api/admin/events/mail-attendees", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            eventId: mailAttendeesEvent._id,
+                            galleryLink: mailGalleryLink,
+                            customMessage: mailCustomMessage,
+                          }),
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                          setMailAttendeesStatus(`✓ ${data.message}`);
+                        } else {
+                          setMailAttendeesStatus(`✗ ${data.error}`);
+                        }
+                      } catch {
+                        setMailAttendeesStatus("✗ Failed to send emails. Check your network.");
+                      } finally {
+                        setIsMailingSending(false);
+                      }
+                    }}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-amber-500 text-black font-pixel text-[11px] hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  >
+                    {isMailingSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    {isMailingSending ? "SENDING..." : "SEND EMAILS"}
+                  </button>
+                  <button onClick={() => setIsMailAttendeesOpen(false)} className="px-6 py-3 rounded-xl bg-white/5 text-white/40 font-pixel text-[11px] hover:bg-white/10 hover:text-white transition-all">
+                    CANCEL
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+

@@ -35,6 +35,7 @@ export interface IEvent extends mongoose.Document {
   galleryLink?: string; // External gallery link (e.g. Google Drive)
 
   status: "upcoming" | "completed" | "draft";
+  manualStatus?: boolean; // if true, auto-archive will not override status
   isFeatured?: boolean;
   registrationsCount: number;
   registrations: IRegistrationEntry[]; // Added internal registrations array
@@ -122,6 +123,10 @@ const EventSchema = new mongoose.Schema<IEvent>(
       type: String,
       enum: ["upcoming", "completed", "draft"],
       default: "upcoming",
+    },
+    manualStatus: {
+      type: Boolean,
+      default: false,
     },
     isFeatured: {
       type: Boolean,

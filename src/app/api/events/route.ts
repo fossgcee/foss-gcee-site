@@ -23,10 +23,9 @@ export async function GET() {
     const today = todayIST();
 
     // Auto-archive: flip any "upcoming" event whose endDate is strictly before today.
-    // NOTE: For production scale, consider moving this to a Vercel Cron job
-    // (vercel.json crons) instead of running on every GET request.
+    // Skip events where admin has manually overridden the status.
     await Event.updateMany(
-      { status: "upcoming", endDate: { $lt: today } },
+      { status: "upcoming", endDate: { $lt: today }, manualStatus: { $ne: true } },
       { $set: { status: "completed" } }
     );
 
