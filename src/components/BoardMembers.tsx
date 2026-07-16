@@ -227,11 +227,11 @@ export default function BoardMembers() {
             <h2 className="text-2xl font-bold mb-8 text-center text-black dark:text-white opacity-80">
               Staff Advisors
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 w-full">
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-6 w-full">
               {filteredAdvisors.slice(0, 4).map((member) => (
                 <div
                   key={member.id}
-                  className="flex flex-col rounded-xl overflow-hidden relative group transition-transform duration-300 hover:-translate-y-2 bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/8 shadow-sm dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+                  className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-1rem)] md:w-[calc(25%-1.125rem)] flex flex-col rounded-xl overflow-hidden relative group transition-transform duration-300 hover:-translate-y-2 bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/8 shadow-sm dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
                 >
                   <div className="relative w-full aspect-[4/5] bg-black/5 dark:bg-[#111] overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 dark:from-black/60 via-transparent to-transparent z-10 opacity-60" />
