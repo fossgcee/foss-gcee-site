@@ -36,7 +36,8 @@ export default function AdminSidebar() {
 
   // Close drawer on route change
   useEffect(() => {
-    setIsOpen(false);
+    const t = setTimeout(() => setIsOpen(false), 0);
+    return () => clearTimeout(t);
   }, [pathname]);
 
   // Prevent body scroll when drawer open

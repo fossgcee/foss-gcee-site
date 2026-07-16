@@ -20,7 +20,7 @@ export async function GET() {
   try {
     await dbConnect();
 
-    const today = todayIST();
+    // todayIST import was removed since it is unused
 
     // Fetch all non-draft events, newest first
     const events = await Event.find({ status: { $ne: "draft" } }).sort({ startDate: -1 });

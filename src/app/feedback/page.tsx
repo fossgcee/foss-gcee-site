@@ -42,7 +42,7 @@ function FeedbackForm() {
           // Pre-select if URL has an event slug or title matching
           if (initialEventSlug) {
             const matchedEvent = completedEvents.find(
-              (e: any) => e.slug === initialEventSlug || e.title === initialEventSlug
+              (e: EventItem & { slug?: string }) => e.slug === initialEventSlug || e.title === initialEventSlug
             );
             if (matchedEvent) {
               setFormData((prev) => ({ ...prev, eventName: matchedEvent.title }));
@@ -56,7 +56,7 @@ function FeedbackForm() {
       }
     };
     fetchEvents();
-  }, []);
+  }, [initialEventSlug]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,7 +110,7 @@ function FeedbackForm() {
         <div className="text-center space-y-4">
           <h1 className="font-pixel tracking-tight whitespace-nowrap text-[clamp(1rem,5vw,3rem)]">EVENT_FEEDBACK</h1>
           <p className="font-mono text-sm text-white/60 max-w-md mx-auto">
-            We'd love to hear your thoughts on our recent event. Your feedback is highly appreciated!
+            We&apos;d love to hear your thoughts on our recent event. Your feedback is highly appreciated!
           </p>
         </div>
 
