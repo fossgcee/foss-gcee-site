@@ -87,7 +87,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8 py-10">
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-pixel text-white">DASHBOARD_OVERVIEW</h1>
+        <h1 className="font-pixel text-white whitespace-nowrap text-[clamp(1.1rem,4vw,1.875rem)]">DASHBOARD_OVERVIEW</h1>
         <p className="font-mono text-xs text-white/40">FOSS Club GCE Erode — Administration Console</p>
       </div>
 

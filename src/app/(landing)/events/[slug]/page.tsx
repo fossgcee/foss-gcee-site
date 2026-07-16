@@ -27,6 +27,7 @@ type EventDetails = {
   handledBy: string;
   poster?: string;
   status: "upcoming" | "completed" | "draft";
+  manualStatus?: boolean;
   agenda?: AgendaItem[];
   outcomes?: string;
   galleryLink?: string;
@@ -72,8 +73,8 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
   await dbConnect();
   const event = await Event.findOne({ slug }).lean<EventDetails>();
   if (!event) notFound();
-  const today = todayIST();
-  const isPast = event.status === "completed" || (event.endDate && event.endDate < today);
+  // Rely purely on DB status — admin may have manually overridden it
+  const isPast = event.status === "completed";
 
   const agenda: AgendaItem[] = event.agenda ?? [];
   const galleryLink: string = event.galleryLink ?? "";
@@ -94,7 +95,7 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
       {/* FOSS CIT Style Hero Layout */}
       <div className="max-w-4xl mx-auto px-6 mb-16 flex flex-col items-center">
          
-         <h1 className="text-3xl sm:text-5xl md:text-6xl font-pixel text-center mb-10 px-4 text-text uppercase">
+         <h1 className="text-3xl sm:text-5xl md:text-6xl font-pixel text-center mb-10 px-4 text-text uppercase text-balance leading-tight">
             {event.title}
          </h1>
 

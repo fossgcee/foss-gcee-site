@@ -29,7 +29,7 @@ export default async function BlogDetailPage({ params }: Props) {
   if (!post) {
     return (
       <div className="min-h-screen bg-bg flex flex-col items-center justify-center space-y-4">
-        <h1 className="font-pixel text-xl text-text">404_POST_NOT_FOUND</h1>
+        <h1 className="font-pixel text-xl text-text whitespace-nowrap">404_POST_NOT_FOUND</h1>
         <Link href="/blog" className="font-mono text-xs text-muted-2 hover:text-text border-b border-dashed border-muted-2">Return to Blog</Link>
       </div>
     );
@@ -53,7 +53,7 @@ export default async function BlogDetailPage({ params }: Props) {
               <Tag className="w-2.5 h-2.5" /> {post.category?.name || "BLOG"}
             </span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-pixel text-text leading-tight uppercase">{post.title}</h1>
+          <h1 className="text-3xl sm:text-4xl font-pixel text-text leading-tight uppercase text-balance">{post.title}</h1>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-xs text-muted-2 border-t border-b border-border py-3">
             <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4 opacity-50" /> {new Date(post.publishedAt || post.createdAt).toLocaleDateString()}</span>
             <span className="flex items-center gap-1.5"><User className="w-4 h-4 opacity-50" /> By {post.author}</span>

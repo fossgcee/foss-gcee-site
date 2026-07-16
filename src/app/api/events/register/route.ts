@@ -33,6 +33,9 @@ export async function POST(request: Request) {
     if (!event) {
       return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });
     }
+    if (event.status === "completed") {
+      return NextResponse.json({ success: false, error: "Registrations are closed. This event has already concluded." }, { status: 400 });
+    }
 
     // Check for duplicate registration
     const registrations = (event.registrations || []) as Array<{ email: string }>;

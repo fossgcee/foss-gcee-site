@@ -321,7 +321,7 @@ export default function AdminEventsManager() {
       {/* Header section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-pixel text-white">EVENTS_MANAGER</h1>
+          <h1 className="font-pixel text-white whitespace-nowrap text-[clamp(1.1rem,4vw,1.875rem)]">EVENTS_MANAGER</h1>
           <p className="font-mono text-xs text-white/40 italic">Manage scheduled activities and historical records</p>
         </div>
 

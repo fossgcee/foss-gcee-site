@@ -41,7 +41,7 @@ export default function AdminLogin() {
             <ShieldCheck className="w-10 h-10 text-black" />
           </div>
           <div className="text-center">
-            <h1 className="text-2xl font-pixel text-white mb-2">ADMIN_PORTAL_AUTH</h1>
+            <h1 className="font-pixel text-white mb-2 whitespace-nowrap text-[clamp(0.85rem,4.5vw,1.5rem)]">ADMIN_PORTAL_AUTH</h1>
             <p className="font-mono text-[10px] text-white/40 tracking-widest uppercase">Verification Required for Root Access</p>
           </div>
         </div>

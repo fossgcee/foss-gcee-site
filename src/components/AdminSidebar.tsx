@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  Users, 
-  Calendar, 
-  Settings, 
+import {
+  LayoutDashboard,
+  Users,
+  Calendar,
   LogOut,
   ShieldCheck,
   Menu,
@@ -15,10 +14,10 @@ import {
   GitCommit,
   PanelTop,
   BookOpen,
-  MessageSquare
+  MessageSquare,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 import { logoutAction } from "@/app/(admin)/admin/login/actions";
 
 const menuItems = [
@@ -35,31 +34,103 @@ export default function AdminSidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
+  // Close drawer on route change
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
+  // Prevent body scroll when drawer open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [isOpen]);
+
+  const currentPage = menuItems.find((m) => m.href === pathname)?.label ?? "Admin";
+
   return (
     <>
-      {/* Mobile Toggle */}
-      <div className="lg:hidden fixed bottom-6 right-6 z-[60]">
-        <button 
+      {/* ── Mobile Top Bar ──────────────────────────────────── */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-[60] h-14 flex items-center justify-between px-4 bg-[#0a0a0a]/95 backdrop-blur-md border-b border-white/8">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center shrink-0">
+            <ShieldCheck className="w-4 h-4 text-black" />
+          </div>
+          <span className="font-pixel text-[10px] tracking-wider text-white whitespace-nowrap">
+            {currentPage.toUpperCase()}
+          </span>
+        </div>
+        <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-14 h-14 rounded-2xl bg-white text-black flex items-center justify-center shadow-2xl active:scale-95 transition-all"
+          className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white active:scale-95 transition-all"
+          aria-label="Toggle menu"
         >
-          {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {isOpen ? <X className="w-4.5 h-4.5" /> : <Menu className="w-4.5 h-4.5" />}
         </button>
       </div>
 
-      {/* Sidebar Overlay */}
+      {/* ── Mobile Drawer Backdrop ───────────────────────────── */}
       {isOpen && (
-        <div 
+        <div
           onClick={() => setIsOpen(false)}
-          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[50]"
+          className="lg:hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[55]"
         />
       )}
 
-      <aside className={cn(
-        "fixed lg:sticky top-0 left-0 z-[50] h-screen bg-[#0a0a0a] border-r border-white/10 flex flex-col transition-all duration-500 ease-in-out",
-        "w-64",
-        isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      {/* ── Mobile Drawer (slides in from left) ─────────────── */}
+      <div className={cn(
+        "lg:hidden fixed top-14 left-0 bottom-0 z-[56] w-72 bg-[#0a0a0a] border-r border-white/10 flex flex-col transition-transform duration-300 ease-in-out",
+        isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
+        {/* Nav */}
+        <nav className="flex-1 p-3 flex flex-col gap-1 overflow-y-auto">
+          {menuItems.map((item) => {
+            const isActive = pathname === item.href;
+            const isHighlight = "highlight" in item && item.highlight;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-mono text-sm group",
+                  isActive
+                    ? "bg-white text-black"
+                    : isHighlight
+                    ? "text-white bg-white/[0.06] border border-white/10 hover:bg-white/[0.10]"
+                    : "text-white/60 hover:text-white hover:bg-white/5"
+                )}
+              >
+                <item.icon className={cn("w-4.5 h-4.5 shrink-0", isActive ? "text-black" : isHighlight ? "text-white" : "text-white/40 group-hover:text-white")} />
+                <span className="flex-1">{item.label}</span>
+                {isActive && <ChevronRight className="w-3.5 h-3.5 opacity-50" />}
+                {isHighlight && !isActive && (
+                  <span className="px-1.5 py-0.5 rounded text-[8px] bg-white/10 text-white/60 font-pixel">CMS</span>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Logout */}
+        <div className="p-3 border-t border-white/5">
+          <button
+            onClick={async () => {
+              if (confirm("Logout from admin panel?")) await logoutAction();
+            }}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-400/10 transition-all font-mono text-sm w-full text-left bg-red-500/5 border border-red-500/10"
+          >
+            <LogOut className="w-4.5 h-4.5" />
+            Logout Session
+          </button>
+        </div>
+      </div>
+
+      {/* ── Desktop Sidebar ─────────────────────────────────── */}
+      <aside className="hidden lg:flex flex-col w-64 shrink-0 min-h-screen sticky top-0 bg-[#0a0a0a] border-r border-white/10">
+        {/* Logo */}
         <div className="p-6 flex items-center gap-3 border-b border-white/5">
           <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
             <ShieldCheck className="w-5 h-5 text-black" />
@@ -67,6 +138,7 @@ export default function AdminSidebar() {
           <span className="font-pixel text-[10px] tracking-wider text-white">ADMIN PANEL</span>
         </div>
 
+        {/* Nav */}
         <nav className="flex-1 p-4 flex flex-col gap-1">
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
@@ -75,7 +147,6 @@ export default function AdminSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setIsOpen(false)}
                 className={cn(
                   "flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 font-mono text-xs group",
                   isActive
@@ -95,8 +166,9 @@ export default function AdminSidebar() {
           })}
         </nav>
 
+        {/* Logout */}
         <div className="p-4 border-t border-white/5">
-          <button 
+          <button
             onClick={async () => {
               if (confirm("Logout from admin panel?")) await logoutAction();
             }}

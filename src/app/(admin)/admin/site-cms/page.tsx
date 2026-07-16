@@ -1160,7 +1160,7 @@ export default function SiteCMSPage() {
     return (
       <div className="space-y-8 py-10">
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-pixel text-white">SITE_CMS</h1>
+          <h1 className="font-pixel text-white whitespace-nowrap text-[clamp(1.1rem,4vw,1.875rem)]">SITE_CMS</h1>
           <p className="font-mono text-xs text-white/40">Loading site content…</p>
         </div>
         <div className="space-y-3">
@@ -1179,7 +1179,7 @@ export default function SiteCMSPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-pixel text-white">SITE_CMS</h1>
+          <h1 className="font-pixel text-white whitespace-nowrap text-[clamp(1.1rem,4vw,1.875rem)]">SITE_CMS</h1>
           <p className="font-mono text-xs text-white/40">
             Edit every section of the public website — changes go live immediately on save
           </p>

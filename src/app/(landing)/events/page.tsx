@@ -79,11 +79,7 @@ export default function EventsPage() {
     return ist.toISOString().slice(0, 10);
   })();
 
-  const isPastEvent = (e: PublicEvent) => {
-    if (e.status === "completed") return true;
-    if (e.endDate && e.endDate < todayStr) return true;
-    return false;
-  };
+  const isPastEvent = (e: PublicEvent) => e.status === "completed";
 
   const upcomingEvents = events.filter(e => e.status !== "draft" && !isPastEvent(e)).reverse();
   const pastEvents = events.filter(e => e.status !== "draft" && isPastEvent(e));

@@ -108,7 +108,7 @@ function FeedbackForm() {
     <div className="min-h-screen pt-32 pb-24 px-4 sm:px-6 bg-bg flex items-center justify-center text-white">
       <div className="max-w-xl w-full space-y-8">
         <div className="text-center space-y-4">
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-pixel tracking-tight">EVENT_FEEDBACK</h1>
+          <h1 className="font-pixel tracking-tight whitespace-nowrap text-[clamp(1rem,5vw,3rem)]">EVENT_FEEDBACK</h1>
           <p className="font-mono text-sm text-white/60 max-w-md mx-auto">
             We'd love to hear your thoughts on our recent event. Your feedback is highly appreciated!
           </p>

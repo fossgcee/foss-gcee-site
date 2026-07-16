@@ -410,7 +410,7 @@ export default function AdminContributionsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-pixel text-white">CONTRIBUTIONS_CMS</h1>
+          <h1 className="font-pixel text-white whitespace-nowrap text-[clamp(1rem,3.8vw,1.875rem)]">CONTRIBUTIONS_CMS</h1>
           <p className="font-mono text-xs text-white/40">Manage and track member contributions</p>
         </div>
         <div className="flex gap-2">
