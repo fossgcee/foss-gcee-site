@@ -165,7 +165,6 @@ function MemberCard({ m, onApprove, onDelete, onEdit, onRole, actionLoading, del
   actionLoading: string | null;
   deleting: string | null;
 }) {
-  const [expanded, setExpanded] = useState(false);
   const deptShort = m.department.replace("Computer Science & Engineering", "CSE").replace("Information Technology", "IT").replace("Electronics & Communication Engineering", "ECE").replace("Electrical & Electronics Engineering", "EEE").replace("Mechanical Engineering", "Mech").replace("Civil Engineering", "Civil").replace("Artificial Intelligence & Data Science", "AI&DS");
 
   return (
@@ -187,28 +186,33 @@ function MemberCard({ m, onApprove, onDelete, onEdit, onRole, actionLoading, del
         {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
+            <div className="min-w-0 flex items-center gap-2">
               <p className="font-mono text-sm text-white truncate leading-tight">{m.name}</p>
-              {m.role && <p className="font-mono text-[10px] text-blue-400/80 truncate">{m.role}</p>}
+              <VerifiedBadge verified={m.otpVerified} />
             </div>
-            <VerifiedBadge verified={m.otpVerified} />
           </div>
-          <p className="font-mono text-[11px] text-white/40 truncate mt-1">{m.email}</p>
-          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-            <span className="font-mono text-[10px] text-white/30 bg-white/5 px-2 py-0.5 rounded-lg">{deptShort}</span>
-            <span className="font-mono text-[10px] text-white/30 bg-white/5 px-2 py-0.5 rounded-lg">{m.year}</span>
+          <div className="font-mono text-[10px] text-white/40 flex items-center gap-3 mt-1.5 flex-wrap">
+            <a href={`mailto:${m.email}`} className="hover:text-white transition-colors flex items-center gap-1"><Mail className="w-3 h-3"/> {m.email}</a>
+            <a href={`tel:${m.phone}`} className="hover:text-emerald-400 transition-colors flex items-center gap-1"><Phone className="w-3 h-3"/> {m.phone}</a>
+            <a href={m.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors flex items-center gap-1"><Link2 className="w-3 h-3"/> LinkedIn</a>
+          </div>
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            <span className="font-mono text-[9px] text-white/50 bg-white/5 px-1.5 py-0.5 rounded-md border border-white/5">{deptShort}</span>
+            <span className="font-mono text-[9px] text-white/50 bg-white/5 px-1.5 py-0.5 rounded-md border border-white/5">Year {m.year}</span>
+            {m.role && <span className="font-mono text-[9px] text-blue-400/80 bg-blue-500/10 px-1.5 py-0.5 rounded-md border border-blue-500/20">{m.role}</span>}
+            <span className="font-mono text-[9px] text-white/30 px-1.5 py-0.5">{new Date(m.createdAt).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' })}</span>
           </div>
         </div>
       </div>
 
       {/* Actions Row */}
-      <div className="px-4 pb-3 flex items-center gap-2 border-t border-white/5 pt-3">
+      <div className="px-4 pb-3 flex items-center justify-end gap-2 border-t border-white/5 pt-3">
         {/* Approve */}
         <button
           onClick={onApprove}
           disabled={actionLoading === m._id + "-approve"}
           title={m.approved ? "Revoke approval" : "Approve"}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl font-mono text-[10px] transition-all ${m.approved ? "bg-blue-500/15 text-blue-400 border border-blue-500/20" : "bg-white/5 text-white/40 hover:text-white hover:bg-white/10 border border-white/8"} disabled:opacity-30`}
+          className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl font-mono text-[10px] transition-all ${m.approved ? "bg-blue-500/15 text-blue-400 border border-blue-500/20" : "bg-white/5 text-white/40 hover:text-white hover:bg-white/10 border border-white/8"} disabled:opacity-30`}
         >
           {actionLoading === m._id + "-approve" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />}
           {m.approved ? "Approved" : "Approve"}
@@ -218,13 +222,14 @@ function MemberCard({ m, onApprove, onDelete, onEdit, onRole, actionLoading, del
         <button
           onClick={onRole}
           title="Assign role"
-          className={`p-2.5 rounded-xl transition-all ${m.role ? "bg-purple-500/15 text-purple-400 border border-purple-500/20" : "bg-white/5 text-white/30 hover:bg-white/10 hover:text-white border border-white/8"}`}
+          className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl transition-all font-mono text-[10px] ${m.role ? "bg-purple-500/15 text-purple-400 border border-purple-500/20" : "bg-white/5 text-white/30 hover:bg-white/10 hover:text-white border border-white/8"}`}
         >
-          <Tag className="w-4 h-4" />
+          <Tag className="w-3.5 h-3.5" />
+          Role
         </button>
 
         {/* Edit */}
-        <button onClick={onEdit} title="Edit" className="p-2.5 rounded-xl bg-white/5 text-white/30 hover:bg-white/10 hover:text-white border border-white/8 transition-all">
+        <button onClick={onEdit} title="Edit" className="p-1.5 rounded-xl bg-white/5 text-white/30 hover:bg-white/10 hover:text-white border border-white/8 transition-all">
           <Edit2 className="w-4 h-4" />
         </button>
 
@@ -233,43 +238,11 @@ function MemberCard({ m, onApprove, onDelete, onEdit, onRole, actionLoading, del
           onClick={onDelete}
           disabled={deleting === m._id}
           title="Delete"
-          className="p-2.5 rounded-xl text-red-500/40 hover:text-red-400 hover:bg-red-500/10 border border-white/8 hover:border-red-500/20 transition-all disabled:opacity-30"
+          className="p-1.5 rounded-xl text-red-500/40 hover:text-red-400 hover:bg-red-500/10 border border-white/8 hover:border-red-500/20 transition-all disabled:opacity-30"
         >
           {deleting === m._id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
         </button>
-
-        {/* Expand */}
-        <button onClick={() => setExpanded(!expanded)} className="p-2.5 rounded-xl bg-white/5 text-white/20 hover:text-white border border-white/8 transition-all ml-auto">
-          <ChevronDown className={`w-4 h-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
-        </button>
       </div>
-
-      {/* Expanded Details */}
-      {expanded && (
-        <div className="px-4 pb-4 pt-1 border-t border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white/[0.01]">
-          <a href={`tel:${m.phone}`} className="flex items-center gap-2 group">
-            <Phone className="w-4 h-4 text-white/20 shrink-0" />
-            <div className="min-w-0">
-              <p className="font-mono text-[9px] text-white/25 uppercase tracking-widest">Phone</p>
-              <p className="font-mono text-xs text-white/70 group-hover:text-white transition-colors">{m.phone}</p>
-            </div>
-          </a>
-          <a href={m.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 group">
-            <Link2 className="w-4 h-4 text-white/20 shrink-0" />
-            <div className="min-w-0">
-              <p className="font-mono text-[9px] text-white/25 uppercase tracking-widest">LinkedIn</p>
-              <p className="font-mono text-xs text-blue-400 group-hover:text-blue-300 truncate transition-colors">{m.linkedin.replace("https://", "")}</p>
-            </div>
-          </a>
-          <div className="flex items-center gap-2">
-            <Mail className="w-4 h-4 text-white/20 shrink-0" />
-            <div>
-              <p className="font-mono text-[9px] text-white/25 uppercase tracking-widest">Registered</p>
-              <p className="font-mono text-xs text-white/60">{new Date(m.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
