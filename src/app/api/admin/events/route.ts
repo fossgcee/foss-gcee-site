@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import dbConnect from "@/lib/db";
 import Event from "@/models/Event";
 import Registration from "@/models/Registration";
@@ -231,6 +232,10 @@ export async function POST(request: Request) {
       }
     }
 
+    revalidatePath("/events");
+    revalidatePath(`/events/${event.slug}`);
+    revalidatePath(`/`);
+
     return NextResponse.json({
       success: true,
       message: "Event created successfully",
@@ -322,6 +327,10 @@ export async function PUT(request: Request) {
       }
     }
 
+    revalidatePath("/events");
+    revalidatePath(`/events/${event.slug}`);
+    revalidatePath(`/`);
+
     return NextResponse.json({
       success: true,
       message: "Event updated successfully",
@@ -354,6 +363,9 @@ export async function DELETE(request: Request) {
     if (!event) {
       return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });
     }
+
+    revalidatePath("/events");
+    revalidatePath(`/`);
 
     return NextResponse.json({
       success: true,
