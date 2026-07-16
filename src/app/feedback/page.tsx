@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Send, CheckCircle, AlertCircle } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 interface EventItem {
   _id: string;
@@ -9,7 +10,10 @@ interface EventItem {
   status: string;
 }
 
-export default function FeedbackPage() {
+function FeedbackForm() {
+  const searchParams = useSearchParams();
+  const initialEventSlug = searchParams.get("event") || "";
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -32,6 +36,16 @@ export default function FeedbackPage() {
         if (json.success) {
           const completedEvents = json.data.filter((e: EventItem) => e.status === "completed");
           setEvents(completedEvents);
+
+          // Pre-select if URL has an event slug or title matching
+          if (initialEventSlug) {
+            const matchedEvent = completedEvents.find(
+              (e: any) => e.slug === initialEventSlug || e.title === initialEventSlug
+            );
+            if (matchedEvent) {
+              setFormData((prev) => ({ ...prev, eventName: matchedEvent.title }));
+            }
+          }
         }
       } catch (err) {
         console.error("Failed to fetch events");
@@ -220,5 +234,13 @@ export default function FeedbackPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function FeedbackPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-bg text-white pt-32 pb-24 text-center font-mono">Loading...</div>}>
+      <FeedbackForm />
+    </Suspense>
   );
 }

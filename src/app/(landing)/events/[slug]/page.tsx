@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import dbConnect from "@/lib/db";
 import Event from "@/models/Event";
-import { ArrowLeft, CheckCircle2, ListChecks, Award, ExternalLink } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ListChecks, Award, ExternalLink, MessageSquare } from "lucide-react";
 import EventRegisterButton from "@/components/EventRegisterButton";
 
 type AgendaItem = { time: string; topic: string };
@@ -215,6 +215,31 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
             <CheckCircle2 className="w-8 h-8 mx-auto mb-3 text-muted-2" />
             <p className="font-pixel text-[10px] text-muted uppercase tracking-widest">Event Completed</p>
             <p className="font-mono text-xs text-muted-2 mt-1">Outcomes and gallery link will be posted soon.</p>
+          </div>
+        </section>
+      )}
+
+      {/* Feedback Link for Past Events */}
+      {isPast && (
+        <section className="max-w-4xl mx-auto px-6 py-10">
+          <div className="p-8 rounded-2xl bg-surface-2 border border-border-2 text-center flex flex-col items-center justify-center space-y-5">
+            <div className="w-12 h-12 rounded-full bg-bg border border-border flex items-center justify-center">
+              <MessageSquare className="w-5 h-5 text-muted" />
+            </div>
+            <div>
+              <h2 className="font-pixel text-sm text-text uppercase tracking-tight">
+                Submit Your Feedback
+              </h2>
+              <p className="font-mono text-xs text-muted-2 mt-2 max-w-sm mx-auto">
+                Did you attend this event? Help us improve future missions by sharing your thoughts.
+              </p>
+            </div>
+            <Link
+              href={`/feedback?event=${event.slug}`}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-[14px] bg-text text-bg font-pixel text-[10px] hover:scale-[1.03] active:scale-[0.98] transition-all uppercase tracking-widest shadow-xl"
+            >
+              PROVIDE_FEEDBACK
+            </Link>
           </div>
         </section>
       )}
