@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Registration from "@/models/Registration";
+import OtpSession from "@/models/OtpSession";
 import { generateOtp, sendOtpEmail } from "@/lib/mailer";
 import { getClientIp, rateLimit } from "@/lib/rateLimit";
 
@@ -40,16 +41,21 @@ export async function POST(request: Request) {
       );
     }
 
-    const existingByPhone = await Registration.findOne({ phone: normalizedPhone }).select("email");
+    // Only block if the phone is already used in a VERIFIED registration
+    const existingByPhone = await Registration.findOne({ phone: normalizedPhone, otpVerified: true }).select("email");
     if (existingByPhone && existingByPhone.email?.toLowerCase() !== normalizedEmail) {
       return NextResponse.json({ success: false, error: "This mobile number is already registered." }, { status: 400 });
+    }
+
+    const existingByEmail = await Registration.findOne({ email: normalizedEmail, otpVerified: true }).select("email");
+    if (existingByEmail) {
+      return NextResponse.json({ success: false, error: "This email is already registered." }, { status: 400 });
     }
 
     const otp = generateOtp();
     const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // Upsert: allow re-registration if not yet verified
-    await Registration.findOneAndUpdate(
+    await OtpSession.findOneAndUpdate(
       { email: normalizedEmail },
       {
         $set: {
@@ -61,16 +67,11 @@ export async function POST(request: Request) {
           department,
           otp,
           otpExpiresAt,
-          otpVerified: false,
           otpAttempts: 0,
           otpLockedUntil: null,
         },
-        $setOnInsert: {
-          role: "Member",
-          approved: false,
-        },
       },
-      { upsert: true, new: true, select: "+otp +otpExpiresAt", setDefaultsOnInsert: true }
+      { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
     await sendOtpEmail(normalizedEmail, name, otp);

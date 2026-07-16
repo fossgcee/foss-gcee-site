@@ -25,16 +25,19 @@ export function generateOtp(): string {
  * Sends an OTP email to the user without any attachments.
  */
 export async function sendOtpEmail(to: string, name: string, otp: string) {
+  const fromEmail = process.env.EMAIL_SERVER_USER || process.env.EMAIL_USER;
   await transporter.sendMail({
-    from: `"FOSS Club GCE Erode" <${process.env.EMAIL_SERVER_USER || process.env.EMAIL_USER}>`,
+    from: `"FOSS Club GCE Erode" <${fromEmail}>`,
+    replyTo: fromEmail,
     to,
-    subject: "Your FOSSGCEE Verification Code",
+    subject: "Your Verification Code",
     text: `Hi ${name},\n\nYour FOSSGCEE verification code is: ${otp}\n\nThis code expires in 10 minutes. If you did not initiate this, please ignore this email.\n\nFOSS Club · GCE Erode`,
     html: `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="UTF-8" />
+        <title>Verification Code</title>
       </head>
       <body style="margin: 0; padding: 0; background-color: #080808; font-family: 'Inter', system-ui, -apple-system, sans-serif;">
         <div style="max-width: 600px; margin: 40px auto; background-color: #0f0f0f; border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; overflow: hidden; box-shadow: 0 24px 48px rgba(0,0,0,0.45);">
@@ -45,7 +48,7 @@ export async function sendOtpEmail(to: string, name: string, otp: string) {
             </div>
             <h1 style="color: #ffffff; margin: 18px 0 0; font-size: 24px; font-weight: 700; letter-spacing: -0.02em;">Verify your email</h1>
             <p style="color: rgba(255,255,255,0.55); margin: 12px 0 0; font-size: 14px; line-height: 1.7;">
-              Hello ${name}, use the one‑time password below to complete your registration.
+              Hello ${name}, use the verification code below to complete your registration.
             </p>
           </div>
           
