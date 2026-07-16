@@ -7,6 +7,8 @@ interface FeedbackItem {
   _id: string;
   name?: string;
   email?: string;
+  year?: number;
+  department?: string;
   eventName: string;
   rating: number;
   comments?: string;
@@ -135,7 +137,14 @@ export default function AdminFeedbackPage() {
 
               <div className="pt-4 border-t border-white/5 flex items-center justify-between">
                 <div>
-                  <p className="font-mono text-xs text-white">{f.name || "Anonymous"}</p>
+                  <p className="font-mono text-xs text-white">
+                    {f.name || "Anonymous"}
+                    {f.department && f.year && (
+                      <span className="text-white/40 ml-1 uppercase text-[10px]">
+                        ({f.department} · Year {f.year})
+                      </span>
+                    )}
+                  </p>
                   <p className="font-mono text-[10px] text-white/40">{f.email || "No email"}</p>
                 </div>
                 <button

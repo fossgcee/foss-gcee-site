@@ -17,6 +17,8 @@ function FeedbackForm() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    year: "1",
+    department: "",
     eventName: "",
     rating: 5,
     comments: "",
@@ -91,7 +93,7 @@ function FeedbackForm() {
           <button
             onClick={() => {
               setSuccess(false);
-              setFormData({ name: "", email: "", eventName: "", rating: 5, comments: "" });
+              setFormData({ name: "", email: "", year: "1", department: "", eventName: "", rating: 5, comments: "" });
             }}
             className="px-6 py-3 bg-white text-black font-mono text-sm font-bold rounded-xl hover:bg-white/90 transition-all"
           >
@@ -106,7 +108,7 @@ function FeedbackForm() {
     <div className="min-h-screen pt-32 pb-24 px-4 sm:px-6 bg-bg flex items-center justify-center text-white">
       <div className="max-w-xl w-full space-y-8">
         <div className="text-center space-y-4">
-          <h1 className="text-4xl md:text-5xl font-pixel">EVENT_FEEDBACK</h1>
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-pixel tracking-tight">EVENT_FEEDBACK</h1>
           <p className="font-mono text-sm text-white/60 max-w-md mx-auto">
             We'd love to hear your thoughts on our recent event. Your feedback is highly appreciated!
           </p>
@@ -141,6 +143,59 @@ function FeedbackForm() {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="font-mono text-[10px] uppercase tracking-widest text-white/40 ml-1">Year *</label>
+                  <div className="relative">
+                    <select
+                      required
+                      className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-4 py-3 font-mono text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/20 transition-all appearance-none cursor-pointer"
+                      value={formData.year}
+                      onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                      style={{ backgroundImage: "none" }}
+                    >
+                      <option value="1" className="bg-[#111]">1st Year</option>
+                      <option value="2" className="bg-[#111]">2nd Year</option>
+                      <option value="3" className="bg-[#111]">3rd Year</option>
+                      <option value="4" className="bg-[#111]">4th Year</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white/40">
+                      <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="font-mono text-[10px] uppercase tracking-widest text-white/40 ml-1">Department *</label>
+                  <div className="relative">
+                    <select
+                      required
+                      className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-4 py-3 font-mono text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/20 transition-all appearance-none cursor-pointer"
+                      value={formData.department}
+                      onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                      style={{ backgroundImage: "none" }}
+                    >
+                      <option value="" disabled className="bg-[#111] text-white/50">Select Dept</option>
+                      <option value="CSE" className="bg-[#111]">CSE</option>
+                      <option value="IT" className="bg-[#111]">IT</option>
+                      <option value="ECE" className="bg-[#111]">ECE</option>
+                      <option value="EEE" className="bg-[#111]">EEE</option>
+                      <option value="MECH" className="bg-[#111]">Mechanical</option>
+                      <option value="CIVIL" className="bg-[#111]">Civil</option>
+                      <option value="AUTO" className="bg-[#111]">Automobile</option>
+                      <option value="AIDS" className="bg-[#111]">AI & DS</option>
+                      <option value="OTHER" className="bg-[#111]">Other</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white/40">
+                      <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               </div>
 
