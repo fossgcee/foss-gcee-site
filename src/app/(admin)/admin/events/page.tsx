@@ -96,6 +96,7 @@ export default function AdminEventsManager() {
   const [isMailingSending, setIsMailingSending] = useState(false);
   
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [isDeletingReg, setIsDeletingReg] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [posterUploadError, setPosterUploadError] = useState<string | null>(null);
   
@@ -212,6 +213,27 @@ export default function AdminEventsManager() {
       if (d.success) fetchEvents();
     } finally {
       setIsDeleting(null);
+    }
+  };
+
+  const handleDeleteRegistration = async (email: string) => {
+    if (!selectedEventReg || !confirm(`Remove ${email} from this event?`)) return;
+    setIsDeletingReg(email);
+    try {
+      const params = new URLSearchParams({
+        eventSlug: selectedEventReg.slug,
+        email: email
+      });
+      const res = await fetch(`/api/admin/events/registrations?${params}`, { method: "DELETE" });
+      const d = await res.json();
+      if (d.success) {
+        setRegistrations(prev => prev.filter(r => r.email !== email));
+        setEvents(prev => prev.map(e => e._id === selectedEventReg._id ? { ...e, registrationsCount: Math.max(0, e.registrationsCount - 1) } : e));
+      } else {
+        alert(d.error || "Failed to remove participant");
+      }
+    } finally {
+      setIsDeletingReg(null);
     }
   };
 
@@ -504,9 +526,19 @@ export default function AdminEventsManager() {
                                     <a href={`mailto:${reg.email}`} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[9px] font-mono text-white/60 hover:text-white hover:bg-white/10 transition-all">
                                        <Mail className="w-3 h-3" /> {reg.email}
                                     </a>
-                                    <a href={`https://wa.me/${reg.mobile}`} target="_blank" className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10 text-[9px] font-mono text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 transition-all">
-                                       <Phone className="w-3 h-3" /> {reg.mobile}
-                                    </a>
+                                    <div className="flex items-center gap-2">
+                                      <a href={`https://wa.me/${reg.mobile}`} target="_blank" className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10 text-[9px] font-mono text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 transition-all">
+                                         <Phone className="w-3 h-3" /> {reg.mobile}
+                                      </a>
+                                      <button 
+                                        onClick={() => handleDeleteRegistration(reg.email)}
+                                        disabled={isDeletingReg === reg.email}
+                                        className="p-1.5 rounded-lg border border-red-500/20 bg-red-500/5 text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 flex items-center justify-center"
+                                        title="Remove participant"
+                                      >
+                                        {isDeletingReg === reg.email ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                                      </button>
+                                    </div>
                                  </div>
                               </div>
                            ))}
