@@ -14,7 +14,8 @@ import {
   X,
   GitCommit,
   PanelTop,
-  BookOpen
+  BookOpen,
+  MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,7 @@ const menuItems = [
   { icon: Calendar, label: "Events", href: "/admin/events" },
   { icon: GitCommit, label: "Contributions", href: "/admin/contributions" },
   { icon: BookOpen, label: "Blogs", href: "/admin/blogs" },
+  { icon: MessageSquare, label: "Feedback", href: "/admin/feedback" },
 ];
 
 export default function AdminSidebar() {
