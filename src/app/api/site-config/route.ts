@@ -10,7 +10,7 @@ const PUBLIC_SECTIONS = ["boardmembers", "gallery", "hero", "about", "whatwedo",
 type PublicSection = typeof PUBLIC_SECTIONS[number];
 
 const defaults: Record<PublicSection, unknown> = {
-  boardmembers: { members: [] },
+  boardmembers: { members: [], staffAdvisors: [] },
   gallery: { images: [] },
   hero: {
     badge: "Free & Open Source Software Club — GCE Erode",

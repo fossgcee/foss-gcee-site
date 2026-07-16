@@ -204,7 +204,7 @@ interface SiteData {
   };
   about: { stats: Stat[]; cards: Card[] };
   whatwedo: { activities: Activity[] };
-  boardmembers: { members: BoardMember[] };
+  boardmembers: { members: BoardMember[]; staffAdvisors?: BoardMember[] };
   gallery: { images: GalleryImage[] };
   footer: {
     about: string;
@@ -569,8 +569,10 @@ function BoardMembersEditor({
 }) {
   const [selectedYear, setSelectedYear] = useState<string>("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingType, setEditingType] = useState<"member" | "advisor" | null>(null);
 
-  const years = Array.from(new Set(data.members.map(m => m.year))).sort((a, b) => b.localeCompare(a));
+  const staffAdvisors = data.staffAdvisors || [];
+  const years = Array.from(new Set([...data.members.map(m => m.year), ...staffAdvisors.map(a => a.year)])).sort((a, b) => b.localeCompare(a));
   
   useEffect(() => {
     if (!selectedYear && years.length > 0) {
@@ -579,50 +581,71 @@ function BoardMembersEditor({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [years.join(",")]);
 
-  const setMember = (id: string, k: keyof BoardMember, v: string) => {
-    onChange({
-      ...data,
-      members: data.members.map(m => m.id === id ? { ...m, [k]: v } : m)
-    });
+  const setPerson = (id: string, k: keyof BoardMember, v: string, type: "member" | "advisor") => {
+    if (type === "member") {
+      onChange({
+        ...data,
+        members: data.members.map(m => m.id === id ? { ...m, [k]: v } : m)
+      });
+    } else {
+      onChange({
+        ...data,
+        staffAdvisors: staffAdvisors.map(m => m.id === id ? { ...m, [k]: v } : m)
+      });
+    }
   };
 
-  const addMember = () => {
-    const id = `member-${Date.now()}`;
+  const addPerson = (type: "member" | "advisor") => {
+    const id = `${type}-${Date.now()}`;
     const newYear = selectedYear || "2026 - 27";
-    onChange({ ...data, members: [...data.members, { id, name: "", role: "", year: newYear, imageUrl: "", linkedInUrl: "" }] });
+    if (type === "member") {
+      onChange({ ...data, members: [...data.members, { id, name: "", role: "", year: newYear, imageUrl: "", linkedInUrl: "" }] });
+    } else {
+      onChange({ ...data, staffAdvisors: [...staffAdvisors, { id, name: "", role: "", year: newYear, imageUrl: "", linkedInUrl: "" }] });
+    }
     if (!selectedYear) setSelectedYear(newYear);
     setEditingId(id);
+    setEditingType(type);
   };
 
-  const removeMember = (id: string) => {
-    onChange({ ...data, members: data.members.filter(m => m.id !== id) });
-    if (editingId === id) setEditingId(null);
+  const removePerson = (id: string, type: "member" | "advisor") => {
+    if (type === "member") {
+      onChange({ ...data, members: data.members.filter(m => m.id !== id) });
+    } else {
+      onChange({ ...data, staffAdvisors: staffAdvisors.filter(m => m.id !== id) });
+    }
+    if (editingId === id) {
+      setEditingId(null);
+      setEditingType(null);
+    }
   };
 
-  const moveMember = (id: string, direction: -1 | 1) => {
-    const members = [...data.members];
-    const index = members.findIndex(m => m.id === id);
+  const movePerson = (id: string, direction: -1 | 1, type: "member" | "advisor") => {
+    const list = type === "member" ? [...data.members] : [...staffAdvisors];
+    const index = list.findIndex(m => m.id === id);
     if (index < 0) return;
     
-    // Find next/prev member with the same year
-    const targetMembers = members.filter(m => m.year === selectedYear);
+    const targetMembers = list.filter(m => m.year === selectedYear);
     const targetIndex = targetMembers.findIndex(m => m.id === id);
     
     if (direction === -1 && targetIndex > 0) {
       const swapId = targetMembers[targetIndex - 1].id;
-      const swapIndex = members.findIndex(m => m.id === swapId);
-      [members[index], members[swapIndex]] = [members[swapIndex], members[index]];
-      onChange({ ...data, members });
+      const swapIndex = list.findIndex(m => m.id === swapId);
+      [list[index], list[swapIndex]] = [list[swapIndex], list[index]];
+      if (type === "member") onChange({ ...data, members: list });
+      else onChange({ ...data, staffAdvisors: list });
     } else if (direction === 1 && targetIndex < targetMembers.length - 1) {
       const swapId = targetMembers[targetIndex + 1].id;
-      const swapIndex = members.findIndex(m => m.id === swapId);
-      [members[index], members[swapIndex]] = [members[swapIndex], members[index]];
-      onChange({ ...data, members });
+      const swapIndex = list.findIndex(m => m.id === swapId);
+      [list[index], list[swapIndex]] = [list[swapIndex], list[index]];
+      if (type === "member") onChange({ ...data, members: list });
+      else onChange({ ...data, staffAdvisors: list });
     }
   };
 
   const filteredMembers = data.members.filter(m => m.year === selectedYear);
-  const editingMember = data.members.find(m => m.id === editingId);
+  const filteredAdvisors = staffAdvisors.filter(m => m.year === selectedYear);
+  const editingPerson = editingType === "member" ? data.members.find(m => m.id === editingId) : staffAdvisors.find(m => m.id === editingId);
 
   return (
     <div className="space-y-4 mt-4 relative">
@@ -644,90 +667,149 @@ function BoardMembersEditor({
         </div>
       )}
 
-      {filteredMembers.length === 0 && (
-        <p className="font-mono text-xs text-white/30 text-center py-8 border border-dashed border-white/10 rounded-2xl">
-          No board members for {selectedYear || "this year"}. Add one below.
-        </p>
-      )}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {filteredMembers.map((m, idx) => (
-          <div key={m.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center gap-4 transition-colors hover:bg-white/[0.04]">
-            <div className="flex flex-col gap-1 shrink-0">
-              <button 
-                onClick={() => moveMember(m.id, -1)} 
-                disabled={idx === 0}
-                className="p-1 rounded text-white/40 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent"
+      {/* Staff Advisors Section */}
+      <div className="pt-2">
+        <h3 className="font-mono text-[10px] uppercase tracking-widest text-white/40 mb-3">Staff Advisors</h3>
+        {filteredAdvisors.length === 0 && (
+          <p className="font-mono text-xs text-white/30 text-center py-4 border border-dashed border-white/10 rounded-2xl mb-4">
+            No staff advisors for {selectedYear || "this year"}. Add one below.
+          </p>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+          {filteredAdvisors.map((m, idx) => (
+            <div key={m.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center gap-4 transition-colors hover:bg-white/[0.04]">
+              <div className="flex flex-col gap-1 shrink-0">
+                <button 
+                  onClick={() => movePerson(m.id, -1, "advisor")} 
+                  disabled={idx === 0}
+                  className="p-1 rounded text-white/40 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent"
+                >
+                  <ChevronUp className="w-3 h-3" />
+                </button>
+                <button 
+                  onClick={() => movePerson(m.id, 1, "advisor")} 
+                  disabled={idx === filteredAdvisors.length - 1}
+                  className="p-1 rounded text-white/40 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent"
+                >
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+              </div>
+              <div className="w-12 h-12 rounded-lg bg-black/20 overflow-hidden shrink-0 flex items-center justify-center relative border border-white/5">
+                 {m.imageUrl ? (
+                   <img src={m.imageUrl} alt={m.name} className="w-full h-full object-cover" />
+                 ) : (
+                   <Users className="w-5 h-5 text-white/20" />
+                 )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-mono text-sm text-white truncate font-bold">{m.name || "Unnamed Advisor"}</p>
+                <p className="font-mono text-xs text-white/50 truncate">{m.role || "No role specified"}</p>
+              </div>
+              <button
+                onClick={() => { setEditingId(m.id); setEditingType("advisor"); }}
+                className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white font-mono text-xs transition-colors shrink-0 border border-white/5 hover:border-white/20 shadow-sm"
               >
-                <ChevronUp className="w-3 h-3" />
-              </button>
-              <button 
-                onClick={() => moveMember(m.id, 1)} 
-                disabled={idx === filteredMembers.length - 1}
-                className="p-1 rounded text-white/40 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent"
-              >
-                <ChevronDown className="w-3 h-3" />
+                Edit
               </button>
             </div>
-            <div className="w-12 h-12 rounded-lg bg-black/20 overflow-hidden shrink-0 flex items-center justify-center relative border border-white/5">
-               {m.imageUrl ? (
-                 <img src={m.imageUrl} alt={m.name} className="w-full h-full object-cover" />
-               ) : (
-                 <Users className="w-5 h-5 text-white/20" />
-               )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-mono text-sm text-white truncate font-bold">{m.name || "Unnamed Member"}</p>
-              <p className="font-mono text-xs text-white/50 truncate">{m.role || "No role specified"}</p>
-            </div>
-            <button
-              onClick={() => setEditingId(m.id)}
-              className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white font-mono text-xs transition-colors shrink-0 border border-white/5 hover:border-white/20 shadow-sm"
-            >
-              Edit
-            </button>
-          </div>
-        ))}
+          ))}
+        </div>
+        <button
+          onClick={() => addPerson("advisor")}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/10 font-mono text-xs text-white/40 hover:text-white hover:border-white/30 transition-all bg-white/[0.01] hover:bg-white/[0.03]"
+        >
+          <Plus className="w-4 h-4" /> Add Staff Advisor
+        </button>
       </div>
 
-      <button
-        onClick={addMember}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/10 font-mono text-xs text-white/40 hover:text-white hover:border-white/30 transition-all bg-white/[0.01] hover:bg-white/[0.03]"
-      >
-        <Plus className="w-4 h-4" /> Add Board Member
-      </button>
+      <div className="my-6 border-b border-white/10" />
+
+      {/* Board Members Section */}
+      <div>
+        <h3 className="font-mono text-[10px] uppercase tracking-widest text-white/40 mb-3">Board Members</h3>
+        {filteredMembers.length === 0 && (
+          <p className="font-mono text-xs text-white/30 text-center py-8 border border-dashed border-white/10 rounded-2xl mb-4">
+            No board members for {selectedYear || "this year"}. Add one below.
+          </p>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+          {filteredMembers.map((m, idx) => (
+            <div key={m.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center gap-4 transition-colors hover:bg-white/[0.04]">
+              <div className="flex flex-col gap-1 shrink-0">
+                <button 
+                  onClick={() => movePerson(m.id, -1, "member")} 
+                  disabled={idx === 0}
+                  className="p-1 rounded text-white/40 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent"
+                >
+                  <ChevronUp className="w-3 h-3" />
+                </button>
+                <button 
+                  onClick={() => movePerson(m.id, 1, "member")} 
+                  disabled={idx === filteredMembers.length - 1}
+                  className="p-1 rounded text-white/40 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent"
+                >
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+              </div>
+              <div className="w-12 h-12 rounded-lg bg-black/20 overflow-hidden shrink-0 flex items-center justify-center relative border border-white/5">
+                 {m.imageUrl ? (
+                   <img src={m.imageUrl} alt={m.name} className="w-full h-full object-cover" />
+                 ) : (
+                   <Users className="w-5 h-5 text-white/20" />
+                 )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-mono text-sm text-white truncate font-bold">{m.name || "Unnamed Member"}</p>
+                <p className="font-mono text-xs text-white/50 truncate">{m.role || "No role specified"}</p>
+              </div>
+              <button
+                onClick={() => { setEditingId(m.id); setEditingType("member"); }}
+                className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white font-mono text-xs transition-colors shrink-0 border border-white/5 hover:border-white/20 shadow-sm"
+              >
+                Edit
+              </button>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={() => addPerson("member")}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/10 font-mono text-xs text-white/40 hover:text-white hover:border-white/30 transition-all bg-white/[0.01] hover:bg-white/[0.03]"
+        >
+          <Plus className="w-4 h-4" /> Add Board Member
+        </button>
+      </div>
       
       <SaveBar onSave={onSave} saving={saving} saved={saved} error={error} />
 
       {/* MODAL */}
-      {editingMember && (
+      {editingPerson && editingType && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="w-full max-w-xl bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
             <div className="px-5 py-4 border-b border-white/5 flex justify-between items-center shrink-0">
-              <h2 className="font-mono text-sm text-white font-bold">Edit Member</h2>
-              <button onClick={() => setEditingId(null)} className="p-1.5 text-white/40 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-lg">
+              <h2 className="font-mono text-sm text-white font-bold">Edit {editingType === "member" ? "Member" : "Staff Advisor"}</h2>
+              <button onClick={() => { setEditingId(null); setEditingType(null); }} className="p-1.5 text-white/40 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-lg">
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="p-5 space-y-4 overflow-y-auto">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Full Name">
-                  <input className={inputCls} value={editingMember.name} onChange={e => setMember(editingMember.id, "name", e.target.value)} placeholder="John Doe" />
+                  <input className={inputCls} value={editingPerson.name} onChange={e => setPerson(editingPerson.id, "name", e.target.value, editingType)} placeholder="John Doe" />
                 </Field>
                 <Field label="Role">
-                  <input className={inputCls} value={editingMember.role} onChange={e => setMember(editingMember.id, "role", e.target.value)} placeholder="President" />
+                  <input className={inputCls} value={editingPerson.role} onChange={e => setPerson(editingPerson.id, "role", e.target.value, editingType)} placeholder={editingType === "member" ? "President" : "Staff Advisor"} />
                 </Field>
                 <Field label="Academic Year">
-                  <input className={inputCls} value={editingMember.year} onChange={e => setMember(editingMember.id, "year", e.target.value)} placeholder="2026 - 27" />
+                  <input className={inputCls} value={editingPerson.year} onChange={e => setPerson(editingPerson.id, "year", e.target.value, editingType)} placeholder="2026 - 27" />
                 </Field>
                 <Field label="LinkedIn URL">
-                  <input className={inputCls} value={editingMember.linkedInUrl || ""} onChange={e => setMember(editingMember.id, "linkedInUrl", e.target.value)} placeholder="https://linkedin.com/in/..." />
+                  <input className={inputCls} value={editingPerson.linkedInUrl || ""} onChange={e => setPerson(editingPerson.id, "linkedInUrl", e.target.value, editingType)} placeholder="https://linkedin.com/in/..." />
                 </Field>
                 <div className="sm:col-span-2">
                   <Field label="Photo URL" hint="Paste any public image URL or a Google Drive share link">
                     <ImageUrlInput
-                      value={editingMember.imageUrl}
-                      onChange={url => setMember(editingMember.id, "imageUrl", url)}
+                      value={editingPerson.imageUrl}
+                      onChange={url => setPerson(editingPerson.id, "imageUrl", url, editingType)}
                       placeholder="/members/photo.jpg or paste a Google Drive link"
                     />
                   </Field>
@@ -736,13 +818,13 @@ function BoardMembersEditor({
             </div>
             <div className="px-5 py-4 border-t border-white/5 bg-black/20 flex justify-between items-center shrink-0">
                <button
-                  onClick={() => removeMember(editingMember.id)}
+                  onClick={() => removePerson(editingPerson.id, editingType)}
                   className="px-4 py-2 rounded-xl text-red-500 hover:bg-red-500/10 font-mono text-xs transition-colors font-semibold"
                 >
                   Delete
                 </button>
                <button
-                  onClick={() => setEditingId(null)}
+                  onClick={() => { setEditingId(null); setEditingType(null); }}
                   className="px-6 py-2 rounded-xl bg-white text-black font-mono text-xs font-bold hover:bg-white/90 transition-colors shadow-lg"
                 >
                   Done

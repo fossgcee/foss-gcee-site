@@ -20,8 +20,9 @@ interface CMSMember {
   linkedInUrl?: string;
 }
 
-function getYears(members: CMSMember[]): string[] {
-  return Array.from(new Set(members.map((m) => m.year.trim())))
+function getYears(members: CMSMember[], advisors: CMSMember[] = []): string[] {
+  const years = [...members.map(m => m.year.trim()), ...advisors.map(a => a.year.trim())];
+  return Array.from(new Set(years))
     .filter(Boolean)
     .sort((a, b) => b.localeCompare(a));
 }
@@ -31,6 +32,7 @@ export default function BoardMembers() {
   const gridRef = useRef<HTMLDivElement>(null);
 
   const [allMembers, setAllMembers] = useState<CMSMember[]>([]);
+  const [allAdvisors, setAllAdvisors] = useState<CMSMember[]>([]);
   const [selectedYear, setSelectedYear] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
@@ -42,8 +44,18 @@ export default function BoardMembers() {
 
       let members: CMSMember[] = [];
 
-      if (json.success && Array.isArray(json.data?.members) && json.data.members.length > 0) {
-        members = json.data.members;
+      if (json.success && json.data) {
+        if (Array.isArray(json.data.members) && json.data.members.length > 0) {
+          members = json.data.members;
+        } else {
+          members = membersData as CMSMember[];
+        }
+        
+        if (Array.isArray(json.data.staffAdvisors)) {
+          setAllAdvisors(json.data.staffAdvisors);
+        } else {
+          setAllAdvisors([]);
+        }
       } else {
         // Fall back to static data
         members = membersData as CMSMember[];
@@ -52,7 +64,7 @@ export default function BoardMembers() {
       setAllMembers(members);
 
       // Set the first year immediately — no separate effect needed
-      const years = getYears(members);
+      const years = getYears(members, json.data?.staffAdvisors || []);
       if (years.length > 0) {
         setSelectedYear(years[0]);
       }
@@ -60,6 +72,7 @@ export default function BoardMembers() {
       // On error fall back to static data
       const members = membersData as CMSMember[];
       setAllMembers(members);
+      setAllAdvisors([]);
       const years = getYears(members);
       if (years.length > 0) setSelectedYear(years[0]);
     } finally {
@@ -71,8 +84,9 @@ export default function BoardMembers() {
     fetchCMS();
   }, [fetchCMS]);
 
-  const years = getYears(allMembers);
+  const years = getYears(allMembers, allAdvisors);
   const filteredMembers = allMembers.filter((m) => m.year.trim() === selectedYear);
+  const filteredAdvisors = allAdvisors.filter((m) => m.year.trim() === selectedYear);
 
   useGSAP(() => {
     gsap.from(".board-header", {
@@ -207,8 +221,66 @@ export default function BoardMembers() {
           </div>
         )}
 
+        {/* Staff Advisors */}
+        {!loading && filteredAdvisors.length > 0 && (
+          <div className="mt-16 w-full">
+            <h2 className="text-2xl font-bold mb-8 text-center text-black dark:text-white opacity-80">
+              Staff Advisors
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 w-full">
+              {filteredAdvisors.slice(0, 4).map((member) => (
+                <div
+                  key={member.id}
+                  className="flex flex-col rounded-xl overflow-hidden relative group transition-transform duration-300 hover:-translate-y-2 bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/8 shadow-sm dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+                >
+                  <div className="relative w-full aspect-[4/5] bg-black/5 dark:bg-[#111] overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 dark:from-black/60 via-transparent to-transparent z-10 opacity-60" />
+                    {member.imageUrl ? (
+                      <Image
+                        src={member.imageUrl}
+                        alt={member.name}
+                        fill
+                        className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                        sizes="(max-width: 768px) 85vw, (max-width: 1024px) 50vw, 33vw"
+                        unoptimized={member.imageUrl.startsWith("http")}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-black/20 dark:text-white/20">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4 sm:p-5 text-center relative z-20 flex-grow flex flex-col items-center justify-start">
+                    <h3 className="text-sm sm:text-base font-bold tracking-wide uppercase mb-1 text-black dark:text-white">
+                      {member.name}
+                    </h3>
+                    <p className="text-[10px] sm:text-xs text-black/60 dark:text-white/60 font-medium leading-snug">
+                      {member.role}
+                    </p>
+                    {member.linkedInUrl && (
+                      <a
+                        href={member.linkedInUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-auto pt-3 text-black/30 dark:text-white/30 hover:text-[#0077b5] transition-colors"
+                        aria-label={`LinkedIn profile for ${member.name}`}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                        </svg>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Empty state */}
-        {!loading && filteredMembers.length === 0 && (
+        {!loading && filteredMembers.length === 0 && filteredAdvisors.length === 0 && (
           <div className="text-center py-20 text-black/40 dark:text-white/40">
             <p className="font-mono text-sm">No members found for {selectedYear || "this year"}.</p>
             <p className="font-mono text-xs mt-2 opacity-60">Add board members via the Admin CMS.</p>
