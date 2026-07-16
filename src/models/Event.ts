@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 export interface IRegistrationEntry {
   name: string;
-  regNo: string;
+  department: string;
   college: string;
   year: number;
   mobile: string;
@@ -134,7 +134,7 @@ const EventSchema = new mongoose.Schema<IEvent>(
     registrations: [
       {
         name: { type: String, required: true },
-        regNo: { type: String, required: true },
+        department: { type: String, required: true },
         college: { type: String, required: true },
         year: { type: Number, required: true },
         mobile: { type: String, required: true },

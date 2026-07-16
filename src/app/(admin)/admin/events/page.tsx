@@ -59,7 +59,7 @@ interface EventData {
 interface MemberRegistration {
   _id: string;
   name: string;
-  regNo: string;
+  department: string;
   college: string;
   year: number;
   mobile: string;
@@ -470,7 +470,7 @@ export default function AdminEventsManager() {
                                           <h5 className="font-pixel text-sm text-white uppercase">{reg.name}</h5>
                                           <span className="px-1.5 py-0.5 rounded bg-white/5 text-[8px] font-mono text-white/30">{new Date(reg.registeredAt).toLocaleDateString()}</span>
                                        </div>
-                                       <p className="font-mono text-[10px] text-white/30 uppercase">{reg.regNo} · YEAR {reg.year}</p>
+                                       <p className="font-mono text-[10px] text-white/30 uppercase">{reg.department} · YEAR {reg.year}</p>
                                     </div>
                                     <p className="font-mono text-[9px] text-white/40 italic uppercase">{reg.college}</p>
                                  </div>

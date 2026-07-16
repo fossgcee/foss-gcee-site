@@ -23,9 +23,9 @@ export async function POST(request: Request) {
 
     await dbConnect();
     const body = await request.json();
-    const { name, regNo, college, year, mobile, email, eventSlug, eventTitle } = body;
+    const { name, department, college, year, mobile, email, eventSlug, eventTitle } = body;
 
-    if (!name || !regNo || !college || !year || !mobile || !email || !eventSlug) {
+    if (!name || !department || !college || !year || !mobile || !email || !eventSlug) {
       return NextResponse.json({ success: false, error: "Required fields are missing" }, { status: 400 });
     }
 
@@ -35,15 +35,15 @@ export async function POST(request: Request) {
     }
 
     // Check for duplicate registration
-    const registrations = (event.registrations || []) as Array<{ email: string; regNo: string }>;
-    const isDuplicate = registrations.some((r) => r.email === email || r.regNo === regNo);
+    const registrations = (event.registrations || []) as Array<{ email: string }>;
+    const isDuplicate = registrations.some((r) => r.email === email);
     if (isDuplicate) {
       return NextResponse.json({ success: false, error: "You are already registered for this event" }, { status: 400 });
     }
 
     const regEntry = {
       name,
-      regNo,
+      department,
       college,
       year: parseInt(year),
       mobile,

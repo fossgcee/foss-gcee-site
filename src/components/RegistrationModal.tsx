@@ -14,7 +14,7 @@ interface RegistrationModalProps {
 export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSlug }: RegistrationModalProps) {
   const [formData, setFormData] = useState({
     name: "",
-    regNo: "",
+    department: "",
     college: "Government College of Engineering, Erode",
     year: "1",
     mobile: "",
@@ -46,7 +46,7 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
       if (d.success) {
         setIsSuccess(true);
         // Reset form
-        setFormData({ name: "", regNo: "", college: "Government College of Engineering, Erode", year: "1", mobile: "", email: "" });
+        setFormData({ name: "", department: "", college: "Government College of Engineering, Erode", year: "1", mobile: "", email: "" });
       }
     } catch (error) {
       console.error("Registration failed:", error);
@@ -131,22 +131,30 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      {/* Register Number */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Department */}
                       <div className="space-y-2">
                         <label className="flex items-center gap-2 text-[10px] font-mono text-white/40 uppercase tracking-widest pl-1">
-                          <Hash className="w-3 h-3" /> Reg No
+                          <Hash className="w-3 h-3" /> Department
                         </label>
-                        <input
+                        <select
                           required
-                          type="text"
-                          name="regNo"
-                          placeholder="College Reg No"
-                          inputMode="numeric"
-                          className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl font-mono text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.07] transition-all"
-                          value={formData.regNo}
+                          name="department"
+                          className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-white/20 focus:bg-white/[0.07] transition-all appearance-none"
+                          value={formData.department}
                           onChange={handleChange}
-                        />
+                        >
+                          <option value="" disabled className="bg-[#111] text-white/50">Select Dept</option>
+                          <option value="CSE" className="bg-[#111]">CSE</option>
+                          <option value="IT" className="bg-[#111]">IT</option>
+                          <option value="ECE" className="bg-[#111]">ECE</option>
+                          <option value="EEE" className="bg-[#111]">EEE</option>
+                          <option value="MECH" className="bg-[#111]">Mechanical</option>
+                          <option value="CIVIL" className="bg-[#111]">Civil</option>
+                          <option value="AUTO" className="bg-[#111]">Automobile</option>
+                          <option value="AIDS" className="bg-[#111]">AI & DS</option>
+                          <option value="OTHER" className="bg-[#111]">Other</option>
+                        </select>
                       </div>
 
                       {/* Year */}
