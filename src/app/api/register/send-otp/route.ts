@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Registration from "@/models/Registration";
-import OtpSession from "@/models/OtpSession";
-import { generateOtp, sendOtpEmail } from "@/lib/mailer";
 import { getClientIp, rateLimit } from "@/lib/rateLimit";
 
 const getErrorMessage = (error: unknown) => {
@@ -36,12 +34,12 @@ export async function POST(request: Request) {
     const emailLimit = rateLimit(`otp:email:${normalizedEmail}`, 3, 10 * 60 * 1000);
     if (!emailLimit.allowed) {
       return NextResponse.json(
-        { success: false, error: "Too many OTP requests. Please wait a bit." },
+        { success: false, error: "Too many registration requests. Please wait a bit." },
         { status: 429, headers: { "Retry-After": Math.ceil((emailLimit.reset - Date.now()) / 1000).toString() } }
       );
     }
 
-    // Only block if the phone is already used in a VERIFIED registration
+    // Check if phone or email is already registered
     const existingByPhone = await Registration.findOne({ phone: normalizedPhone, otpVerified: true }).select("email");
     if (existingByPhone && existingByPhone.email?.toLowerCase() !== normalizedEmail) {
       return NextResponse.json({ success: false, error: "This mobile number is already registered." }, { status: 400 });
@@ -52,10 +50,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "This email is already registered." }, { status: 400 });
     }
 
-    const otp = generateOtp();
-    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-    await OtpSession.findOneAndUpdate(
+    // Save directly with otpVerified: true
+    await Registration.findOneAndUpdate(
       { email: normalizedEmail },
       {
         $set: {
@@ -65,20 +61,17 @@ export async function POST(request: Request) {
           phone: normalizedPhone,
           year,
           department,
-          otp,
-          otpExpiresAt,
-          otpAttempts: 0,
-          otpLockedUntil: null,
+          otpVerified: true,
+          approved: false,
+          role: "Member",
         },
       },
-      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }
     );
 
-    await sendOtpEmail(normalizedEmail, name, otp);
-
-    return NextResponse.json({ success: true, message: "OTP sent to your email." });
+    return NextResponse.json({ success: true, message: "Registration complete!" });
   } catch (error: unknown) {
-    console.error("Send OTP error:", error);
+    console.error("Direct registration error:", error);
     return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }
