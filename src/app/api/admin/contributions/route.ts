@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import Contribution from "@/models/Contribution";
-import Registration from "@/models/Registration";
+import { getContributions, addContribution } from "@/services/contribution";
+import { supabase } from "@/lib/supabase";
 import { requireAdmin } from "@/lib/adminAuth";
 
 export async function GET(request: Request) {
@@ -9,8 +8,7 @@ export async function GET(request: Request) {
   if (auth) return auth;
 
   try {
-    await dbConnect();
-    const contributions = await Contribution.find().populate("memberId", "name department year").sort({ order: 1, createdAt: -1 });
+    const contributions = await getContributions();
     return NextResponse.json({ success: true, data: contributions, count: contributions.length });
   } catch (error) {
     console.error("Fetch Contributions Error:", error);
@@ -23,7 +21,6 @@ export async function POST(req: NextRequest) {
   if (auth) return auth;
 
   try {
-    await dbConnect();
     const body = await req.json();
     // Whitelist allowed fields — never pass raw body to Mongoose.
     const { memberId, title, description, url, links, imageUrl, isFeatured, order } = body;
@@ -32,12 +29,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
     
-    const member = await Registration.findById(memberId);
-    if (!member) {
+    const { data: member, error: memberErr } = await supabase
+      .from("registrations")
+      .select("*")
+      .eq("id", memberId)
+      .maybeSingle();
+      
+    if (memberErr || !member) {
       return NextResponse.json({ success: false, error: "Member not found" }, { status: 404 });
     }
     
-    const contribution = await Contribution.create({
+    const contribution = await addContribution({
       memberId,
       title: String(title).trim(),
       description: String(description).trim(),
@@ -47,9 +49,6 @@ export async function POST(req: NextRequest) {
       isFeatured: Boolean(isFeatured),
       order: Number(order) || 0,
     });
-    
-    member.contributionsCount = (member.contributionsCount || 0) + 1;
-    await member.save();
     
     return NextResponse.json({ success: true, data: contribution }, { status: 201 });
   } catch (error) {

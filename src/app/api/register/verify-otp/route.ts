@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import Registration from "@/models/Registration";
-import OtpSession from "@/models/OtpSession";
+import { supabase } from "@/lib/supabase";
 import { getClientIp, rateLimit } from "@/lib/rateLimit";
 
 const getErrorMessage = (error: unknown) => {
@@ -21,7 +19,6 @@ export async function POST(request: Request) {
       );
     }
 
-    await dbConnect();
     const { email, otp } = await request.json();
 
     if (!email || !otp) {
@@ -38,64 +35,92 @@ export async function POST(request: Request) {
       );
     }
 
-    const session = await OtpSession.findOne({ email: normalizedEmail });
+    const { data: session, error: sessionErr } = await supabase
+      .from("otp_sessions")
+      .select("*")
+      .eq("email", normalizedEmail)
+      .maybeSingle();
+
+    if (sessionErr) throw sessionErr;
 
     if (!session) {
       return NextResponse.json({ success: false, error: "No OTP was issued or session expired. Please restart registration." }, { status: 400 });
     }
 
-    if (session.otpLockedUntil && new Date() < session.otpLockedUntil) {
+    if (session.otp_locked_until && new Date() < new Date(session.otp_locked_until)) {
       return NextResponse.json(
         { success: false, error: "Too many attempts. Try again later." },
         {
           status: 429,
           headers: {
-            "Retry-After": Math.ceil((session.otpLockedUntil.getTime() - Date.now()) / 1000).toString(),
+            "Retry-After": Math.ceil((new Date(session.otp_locked_until).getTime() - Date.now()) / 1000).toString(),
           },
         }
       );
     }
 
-    if (new Date() > session.otpExpiresAt) {
+    if (new Date() > new Date(session.otp_expires_at)) {
       return NextResponse.json({ success: false, error: "OTP has expired. Please request a new one." }, { status: 400 });
     }
 
     if (session.otp !== otp.trim()) {
-      session.otpAttempts = (session.otpAttempts || 0) + 1;
-      if (session.otpAttempts >= 5) {
-        session.otpLockedUntil = new Date(Date.now() + 15 * 60 * 1000);
+      const attempts = (session.otp_attempts || 0) + 1;
+      let lockedUntil = session.otp_locked_until;
+      if (attempts >= 5) {
+        lockedUntil = new Date(Date.now() + 15 * 60 * 1000).toISOString();
       }
-      await session.save();
+
+      const { error: updateSessionErr } = await supabase
+        .from("otp_sessions")
+        .update({
+          otp_attempts: attempts,
+          otp_locked_until: lockedUntil
+        })
+        .eq("email", normalizedEmail);
+
+      if (updateSessionErr) throw updateSessionErr;
+
       return NextResponse.json({ success: false, error: "Invalid OTP. Please try again." }, { status: 400 });
     }
 
     // Mark as verified & insert/update in Registration
-    await Registration.findOneAndUpdate(
-      { email: normalizedEmail },
-      {
-        $set: {
-          name: session.name,
-          email: session.email,
-          linkedin: session.linkedin,
-          phone: session.phone,
-          year: session.year,
-          department: session.department,
-          otpVerified: true,
-          otp: undefined,
-          otpExpiresAt: undefined,
-          otpAttempts: 0,
-          otpLockedUntil: null,
-        },
-        $setOnInsert: {
-          role: "Member",
-          approved: false,
-        }
-      },
-      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
-    );
+    const { data: existingReg, error: regFetchErr } = await supabase
+      .from("registrations")
+      .select("*")
+      .eq("email", normalizedEmail)
+      .maybeSingle();
+
+    if (regFetchErr) throw regFetchErr;
+
+    const payload: any = {
+      email: normalizedEmail,
+      name: session.name,
+      linkedin: session.linkedin,
+      phone: session.phone,
+      year: session.year,
+      department: session.department,
+      otp_verified: true,
+      updated_at: new Date().toISOString()
+    };
+
+    if (!existingReg) {
+      payload.role = "Member";
+      payload.approved = false;
+    }
+
+    const { error: upsertErr } = await supabase
+      .from("registrations")
+      .upsert(payload, { onConflict: "email" });
+
+    if (upsertErr) throw upsertErr;
 
     // Delete the OTP session as it's no longer needed
-    await OtpSession.deleteOne({ email: normalizedEmail });
+    const { error: deleteSessionErr } = await supabase
+      .from("otp_sessions")
+      .delete()
+      .eq("email", normalizedEmail);
+
+    if (deleteSessionErr) throw deleteSessionErr;
 
     return NextResponse.json({ success: true, message: "Email verified! Registration complete." });
   } catch (error: unknown) {

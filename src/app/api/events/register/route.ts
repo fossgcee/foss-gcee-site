@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import Event from "@/models/Event";
+import { addEventRegistration } from "@/services/event";
+import { supabase } from "@/lib/supabase";
 import { getClientIp, rateLimit } from "@/lib/rateLimit";
 import { sendEventRegistrationEmail } from "@/lib/mailer";
 
@@ -21,7 +21,6 @@ export async function POST(request: Request) {
       );
     }
 
-    await dbConnect();
     const body = await request.json();
     const { name, department, college, year, mobile, email, eventSlug, eventTitle } = body;
 
@@ -29,8 +28,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "Required fields are missing" }, { status: 400 });
     }
 
-    const event = await Event.findOne({ slug: eventSlug.toLowerCase() });
-    if (!event) {
+    const { data: event, error: eventErr } = await supabase
+      .from("events")
+      .select("*")
+      .eq("slug", eventSlug.toLowerCase())
+      .maybeSingle();
+
+    if (eventErr || !event) {
       return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });
     }
     if (event.status === "completed") {
@@ -38,30 +42,25 @@ export async function POST(request: Request) {
     }
 
     // Check for duplicate registration
-    const registrations = (event.registrations || []) as Array<{ email: string }>;
-    const isDuplicate = registrations.some((r) => r.email === email);
-    if (isDuplicate) {
+    const { data: existingReg, error: regErr } = await supabase
+      .from("event_registrations")
+      .select("id")
+      .eq("event_id", event.id)
+      .eq("email", email.toLowerCase().trim())
+      .maybeSingle();
+
+    if (existingReg && !regErr) {
       return NextResponse.json({ success: false, error: "You are already registered for this event" }, { status: 400 });
     }
 
-    const regEntry = {
+    await addEventRegistration(event.id, {
       name,
       department,
       college,
       year: parseInt(year),
       mobile,
       email,
-      registeredAt: new Date(),
-    };
-
-    // Use push within updateOne to ensure it goes into the correct document
-    await Event.updateOne(
-      { slug: eventSlug.toLowerCase() },
-      { 
-        $push: { registrations: regEntry },
-        $inc: { registrationsCount: 1 }
-      }
-    );
+    });
 
     // Send confirmation email asynchronously (fire-and-forget — don't block registration)
     sendEventRegistrationEmail(email, name, eventTitle || event.title).catch((err) => {

@@ -1,12 +1,7 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import Event from "@/models/Event";
+import { getEventRegistrations } from "@/services/event";
+import { supabase } from "@/lib/supabase";
 import { requireAdmin } from "@/lib/adminAuth";
-
-type RegistrationSummary = {
-  registeredAt?: string | Date;
-  email: string;
-};
 
 const getErrorMessage = (error: unknown) => {
   if (error instanceof Error) return error.message;
@@ -26,26 +21,22 @@ export async function GET(request: Request) {
       return NextResponse.json({ success: false, error: "Event slug is required" }, { status: 400 });
     }
 
-    await dbConnect();
-    
-    // Explicitly grab the registrations array from the document
-    const event = await Event.findOne({ slug: eventSlug.toLowerCase() })
-      .select("registrations")
-      .lean<{ registrations?: RegistrationSummary[] }>(); // Use lean for faster, direct data access
+    const { data: event, error: eventErr } = await supabase
+      .from("events")
+      .select("id")
+      .eq("slug", eventSlug.toLowerCase())
+      .maybeSingle();
 
-    if (!event) {
+    if (eventErr || !event) {
       return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });
     }
 
-    // Sort registrations newest to oldest
-    const sortedRegs = (event.registrations || []).sort((a, b) => 
-      new Date(b.registeredAt ?? 0).getTime() - new Date(a.registeredAt ?? 0).getTime()
-    );
+    const regs = await getEventRegistrations(event.id);
 
     return NextResponse.json({
       success: true,
-      count: sortedRegs.length,
-      data: sortedRegs,
+      count: regs.length,
+      data: regs,
     });
   } catch (error: unknown) {
     console.error("Fetch Event Registrations Error:", error);
@@ -69,28 +60,23 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: false, error: "Event slug and email are required" }, { status: 400 });
     }
 
-    await dbConnect();
-    
-    // Use $pull to remove the registration and $inc to decrement the count
-    const result = await Event.findOneAndUpdate(
-      { slug: eventSlug.toLowerCase() },
-      { 
-        $pull: { registrations: { email } },
-        $inc: { registrationsCount: -1 }
-      },
-      { returnDocument: 'after' }
-    );
+    const { data: event, error: eventErr } = await supabase
+      .from("events")
+      .select("id")
+      .eq("slug", eventSlug.toLowerCase())
+      .maybeSingle();
 
-    if (!result) {
+    if (eventErr || !event) {
       return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });
     }
 
-    // Since we decremented unconditionally above, we should ideally only decrement if a pull actually happened.
-    // However, since emails are unique per event registration, this works fine for simplicity as long as the email exists.
-    // To be perfectly safe, we'll fix the count if it goes below 0.
-    if (result.registrationsCount < 0) {
-      await Event.updateOne({ slug: eventSlug.toLowerCase() }, { $set: { registrationsCount: 0 } });
-    }
+    const { error: delErr } = await supabase
+      .from("event_registrations")
+      .delete()
+      .eq("event_id", event.id)
+      .eq("email", email.toLowerCase().trim());
+
+    if (delErr) throw delErr;
 
     return NextResponse.json({
       success: true,

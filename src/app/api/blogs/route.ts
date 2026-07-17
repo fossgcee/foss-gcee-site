@@ -1,32 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import BlogPost from "@/models/BlogPost";
-import BlogCategory from "@/models/BlogCategory";
+import { getBlogPosts } from "@/services/blog";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
-    await dbConnect();
     const { searchParams } = new URL(req.url);
     const categorySlug = searchParams.get("category");
 
-    let query: any = { status: "published" };
+    const posts = await getBlogPosts({ status: "published" });
 
+    let filteredPosts = posts;
     if (categorySlug) {
-      const category = await BlogCategory.findOne({ slug: categorySlug });
-      if (category) {
-        query.category = category._id;
-      } else {
-        return NextResponse.json({ success: true, data: [] });
-      }
+      filteredPosts = posts.filter(p => p.category && p.category.slug === categorySlug);
     }
 
-    const posts = await BlogPost.find(query)
-      .populate("category")
-      .sort({ publishedAt: -1 });
-
-    return NextResponse.json({ success: true, data: posts });
+    return NextResponse.json({ success: true, data: filteredPosts });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }

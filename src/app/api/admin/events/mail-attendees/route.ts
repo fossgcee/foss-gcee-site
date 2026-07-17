@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import Event from "@/models/Event";
+import { supabase } from "@/lib/supabase";
+import { getEventRegistrations } from "@/services/event";
 import { sendBulkEmail } from "@/lib/mailer";
 import { requireAdmin } from "@/lib/adminAuth";
 import { emailRegex, getSiteUrl, getLogoUrl, escapeHtml, getErrorMessage } from "@/lib/utils";
@@ -10,7 +10,6 @@ export async function POST(request: Request) {
   if (auth) return auth;
 
   try {
-    await dbConnect();
     const body = await request.json();
     const { eventId, galleryLink, customMessage } = body;
 
@@ -18,19 +17,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "eventId is required" }, { status: 400 });
     }
 
-    const event = await Event.findById(eventId).lean<{
-      title: string;
-      slug: string;
-      startDate: string;
-      galleryLink?: string;
-      registrations?: { name?: string; email?: string }[];
-    }>();
+    const { data: event, error: eventErr } = await supabase
+      .from("events")
+      .select("*")
+      .eq("id", eventId)
+      .maybeSingle();
 
-    if (!event) {
+    if (eventErr || !event) {
       return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });
     }
 
-    const registrations = event.registrations || [];
+    const registrations = await getEventRegistrations(event.id);
     const recipients = Array.from(
       new Set(
         registrations
@@ -47,7 +44,7 @@ export async function POST(request: Request) {
     const feedbackUrl = `${getSiteUrl()}/feedback?event=${event.slug}`;
     const eventUrl = `${getSiteUrl()}/events/${event.slug}`;
     const logoUrl = getLogoUrl();
-    const albumLink = galleryLink || event.galleryLink || "";
+    const albumLink = galleryLink || event.gallery_link || "";
     const safeMessage = customMessage ? escapeHtml(customMessage) : "";
 
     const subject = `Thank You for Attending: ${event.title}`;
@@ -79,13 +76,13 @@ export async function POST(request: Request) {
               <h1 style="color:#ffffff;margin:18px 0 0;font-size:26px;font-weight:700;letter-spacing:-0.02em;">Thank You! 🎉</h1>
               <p style="color:rgba(255,255,255,0.55);margin:10px 0 0;font-size:14px;line-height:1.7;">${safeTitle}</p>
             </div>
-
+ 
             <!-- Body -->
             <div style="padding:36px 40px;">
               <p style="color:rgba(255,255,255,0.7);font-size:14px;line-height:1.8;margin:0 0 24px;">
                 ${safeMessage || "It was wonderful having you with us. We hope you found the event insightful, inspiring, and a great experience overall!"}
               </p>
-
+ 
               ${albumLink ? `
               <!-- Gallery Button -->
               <div style="margin-bottom:20px;padding:18px 20px;border-radius:16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);">
@@ -93,17 +90,17 @@ export async function POST(request: Request) {
                 <p style="color:rgba(255,255,255,0.6);font-size:13px;margin:0 0 14px;">The memories from this event are now live! Relive the moments:</p>
                 <a href="${escapeHtml(albumLink)}" style="display:inline-block;padding:10px 18px;border-radius:10px;background:#ffffff;color:#000000;font-size:12px;font-weight:700;text-decoration:none;letter-spacing:0.05em;text-transform:uppercase;">View Photo Album →</a>
               </div>` : ""}
-
+ 
               <!-- Feedback Button -->
               <div style="padding:18px 20px;border-radius:16px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);">
                 <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(165,180,252,0.6);margin-bottom:10px;">📝 &nbsp;Your Feedback Matters</div>
                 <p style="color:rgba(255,255,255,0.6);font-size:13px;margin:0 0 14px;">Help us make the next event even better. It only takes 2 minutes!</p>
                 <a href="${feedbackUrl}" style="display:inline-block;padding:10px 18px;border-radius:10px;background:#6366f1;color:#ffffff;font-size:12px;font-weight:700;text-decoration:none;letter-spacing:0.05em;text-transform:uppercase;">Submit Feedback →</a>
               </div>
-
+ 
               <a href="${eventUrl}" style="display:inline-block;margin-top:22px;color:rgba(255,255,255,0.35);font-size:12px;text-decoration:none;">View event page →</a>
             </div>
-
+ 
             <!-- Footer -->
             <div style="padding:22px 40px;background:rgba(255,255,255,0.01);border-top:1px solid rgba(255,255,255,0.05);text-align:center;color:rgba(255,255,255,0.2);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;">
               FOSS Club · Government College of Engineering, Erode

@@ -2,8 +2,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Calendar, User, Tag } from "lucide-react";
-import dbConnect from "@/lib/db";
-import BlogPost from "@/models/BlogPost";
+import { getBlogPostBySlug } from "@/services/blog";
 import { marked } from "marked";
 
 interface Props {
@@ -12,21 +11,28 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  await dbConnect();
-  const post = await BlogPost.findOne({ slug, status: "published" });
-  if (!post) return { title: "Blog Post Not Found" };
-  return {
-    title: `${post.title} | FOSS Club GCE Erode`,
-    description: post.excerpt || "FOSS GCE Erode Blog Post",
-  };
+  try {
+    const post = await getBlogPostBySlug(slug);
+    if (!post || post.status !== "published") return { title: "Blog Post Not Found" };
+    return {
+      title: `${post.title} | FOSS Club GCE Erode`,
+      description: post.excerpt || "FOSS GCE Erode Blog Post",
+    };
+  } catch (e) {
+    return { title: "Blog Post Not Found" };
+  }
 }
 
 export default async function BlogDetailPage({ params }: Props) {
   const { slug } = await params;
-  await dbConnect();
-  const post = await BlogPost.findOne({ slug, status: "published" }).populate("category");
+  let post = null;
+  try {
+    post = await getBlogPostBySlug(slug);
+  } catch (e) {
+    console.error(e);
+  }
 
-  if (!post) {
+  if (!post || post.status !== "published") {
     return (
       <div className="min-h-screen bg-bg flex flex-col items-center justify-center space-y-4">
         <h1 className="font-pixel text-xl text-text whitespace-nowrap">404_POST_NOT_FOUND</h1>

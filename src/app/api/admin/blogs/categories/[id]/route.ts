@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import BlogCategory from "@/models/BlogCategory";
+import { updateBlogCategory, deleteBlogCategory } from "@/services/blog";
+import { supabase } from "@/lib/supabase";
 import { requireAdmin } from "@/lib/adminAuth";
 
 export async function PUT(
@@ -11,7 +11,6 @@ export async function PUT(
   if (auth) return auth;
 
   try {
-    await dbConnect();
     const { id } = await params;
     const body = await req.json();
     const { name } = body;
@@ -23,14 +22,17 @@ export async function PUT(
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
-    const updated = await BlogCategory.findByIdAndUpdate(
-      id,
-      { name, slug },
-      { returnDocument: 'after' }
-    );
-    if (!updated) {
+    const { data: existing, error: fetchErr } = await supabase
+      .from("blog_categories")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (fetchErr || !existing) {
       return NextResponse.json({ success: false, error: "Category not found" }, { status: 404 });
     }
+
+    const updated = await updateBlogCategory(id, name, slug);
     return NextResponse.json({ success: true, data: updated });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
@@ -45,13 +47,19 @@ export async function DELETE(
   if (auth) return auth;
 
   try {
-    await dbConnect();
     const { id } = await params;
-    const deleted = await BlogCategory.findByIdAndDelete(id);
-    if (!deleted) {
+    const { data: existing, error: fetchErr } = await supabase
+      .from("blog_categories")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (fetchErr || !existing) {
       return NextResponse.json({ success: false, error: "Category not found" }, { status: 404 });
     }
-    return NextResponse.json({ success: true, data: deleted });
+
+    await deleteBlogCategory(id);
+    return NextResponse.json({ success: true, data: existing });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }

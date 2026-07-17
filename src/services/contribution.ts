@@ -8,20 +8,29 @@ export async function getContributions() {
     .order("created_at", { ascending: false });
   if (error) throw error;
 
-  return data.map(item => ({
-    _id: item.id,
-    memberId: item.member_id,
-    title: item.title,
-    description: item.description,
-    url: item.url,
-    links: item.links,
-    imageUrl: item.image_url,
-    isFeatured: item.is_featured,
-    order: item.order,
-    createdAt: item.created_at,
-    updatedAt: item.updated_at,
-    memberIdPopulated: item.member
-  }));
+  return data.map(item => {
+    const memberObj = item.member ? {
+      _id: item.member_id,
+      name: (item.member as any).name,
+      department: (item.member as any).department,
+      year: String((item.member as any).year)
+    } : null;
+
+    return {
+      _id: item.id,
+      memberId: memberObj || { _id: item.member_id, name: "Unknown Member", department: "", year: "" },
+      title: item.title,
+      description: item.description,
+      url: item.url,
+      links: item.links,
+      imageUrl: item.image_url,
+      isFeatured: item.is_featured,
+      order: item.order,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at,
+      memberIdPopulated: item.member
+    };
+  });
 }
 
 export async function addContribution(contrib: any) {

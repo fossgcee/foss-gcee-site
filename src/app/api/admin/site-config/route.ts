@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import SiteConfig from "@/models/SiteConfig";
+import { getSiteConfig, updateSiteConfig } from "@/services/siteConfig";
+import { supabase } from "@/lib/supabase";
 import { requireAdmin } from "@/lib/adminAuth";
 
 // Default content fallbacks matching the static data files
@@ -81,21 +81,26 @@ const defaults: Record<string, unknown> = {
 
 export async function GET(req: NextRequest) {
   try {
-    await dbConnect();
     const { searchParams } = new URL(req.url);
     const section = searchParams.get("section");
 
     if (section) {
-      const config = await SiteConfig.findOne({ section });
-      const data = config ? config.data : defaults[section] || {};
-      return NextResponse.json({ success: true, data, section, fromDb: !!config });
+      const data = await getSiteConfig(section);
+      return NextResponse.json({
+        success: true,
+        data: data || defaults[section] || {},
+        section,
+        fromDb: !!data
+      });
     }
 
     // Return all sections
-    const configs = await SiteConfig.find({});
+    const { data: configs, error } = await supabase.from("site_configs").select("*");
+    if (error) throw error;
+
     const result: Record<string, unknown> = {};
     for (const key of Object.keys(defaults)) {
-      const found = configs.find((c) => c.section === key);
+      const found = configs?.find((c) => c.section === key);
       result[key] = found ? found.data : defaults[key];
     }
     return NextResponse.json({ success: true, data: result });
@@ -114,7 +119,6 @@ export async function PUT(req: NextRequest) {
   if (auth) return auth;
 
   try {
-    await dbConnect();
     const body = await req.json();
     const { section, data } = body;
 
@@ -133,13 +137,9 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const config = await SiteConfig.findOneAndUpdate(
-      { section },
-      { section, data },
-      { upsert: true, returnDocument: 'after' }
-    );
+    const updated = await updateSiteConfig(section, data);
 
-    return NextResponse.json({ success: true, data: config });
+    return NextResponse.json({ success: true, data: { section, data: updated } });
   } catch (error) {
     console.error("Update SiteConfig Error:", error);
     return NextResponse.json(

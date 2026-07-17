@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 
-export async function addFeedback(fb: any) {
+export async function createFeedback(fb: any) {
   const { data, error } = await supabase
     .from("feedbacks")
     .insert({
@@ -18,6 +18,8 @@ export async function addFeedback(fb: any) {
   return data;
 }
 
+export const addFeedback = createFeedback;
+
 export async function getFeedbacks() {
   const { data, error } = await supabase.from("feedbacks").select("*").order("created_at", { ascending: false });
   if (error) throw error;
@@ -29,4 +31,9 @@ export async function getFeedbacks() {
     createdAt: item.created_at,
     updatedAt: item.updated_at
   }));
+}
+
+export async function deleteFeedback(id: string) {
+  const { error } = await supabase.from("feedbacks").delete().eq("id", id);
+  if (error) throw error;
 }
