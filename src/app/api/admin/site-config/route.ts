@@ -136,7 +136,7 @@ export async function PUT(req: NextRequest) {
     const config = await SiteConfig.findOneAndUpdate(
       { section },
       { section, data },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     return NextResponse.json({ success: true, data: config });

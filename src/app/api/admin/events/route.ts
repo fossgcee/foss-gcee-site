@@ -284,7 +284,7 @@ export async function PUT(request: Request) {
       updatePayload.manualStatus = true;
     }
 
-    const event = await Event.findByIdAndUpdate(id, updatePayload, { new: true });
+    const event = await Event.findByIdAndUpdate(id, updatePayload, { returnDocument: 'after' });
 
 
     if (!event) {

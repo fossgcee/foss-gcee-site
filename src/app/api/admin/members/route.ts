@@ -82,7 +82,7 @@ export async function PATCH(request: Request) {
     if (typeof year === "string") update.year = year.trim();
     if (typeof department === "string") update.department = department.trim();
 
-    const updated = await Registration.findByIdAndUpdate(id, update, { new: true });
+    const updated = await Registration.findByIdAndUpdate(id, update, { returnDocument: 'after' });
     if (!updated) return NextResponse.json({ success: false, error: "Record not found" }, { status: 404 });
 
     return NextResponse.json({ success: true, data: updated });

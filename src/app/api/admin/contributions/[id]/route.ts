@@ -81,7 +81,7 @@ export async function PUT(
           order: body.order !== undefined ? Number(body.order) : contribution.order,
         }
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     return NextResponse.json({ success: true, data: updated });

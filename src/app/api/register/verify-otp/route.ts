@@ -91,7 +91,7 @@ export async function POST(request: Request) {
           approved: false,
         }
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     );
 
     // Delete the OTP session as it's no longer needed

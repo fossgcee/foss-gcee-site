@@ -48,7 +48,7 @@ export async function PUT(
       updateObj.publishedAt = null;
     }
 
-    const updated = await BlogPost.findByIdAndUpdate(id, updateObj, { new: true });
+    const updated = await BlogPost.findByIdAndUpdate(id, updateObj, { returnDocument: 'after' });
     return NextResponse.json({ success: true, data: updated });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });

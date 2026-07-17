@@ -71,7 +71,7 @@ export async function POST(request: Request) {
           otpLockedUntil: null,
         },
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     );
 
     await sendOtpEmail(normalizedEmail, name, otp);

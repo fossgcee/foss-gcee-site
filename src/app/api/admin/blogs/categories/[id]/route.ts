@@ -26,7 +26,7 @@ export async function PUT(
     const updated = await BlogCategory.findByIdAndUpdate(
       id,
       { name, slug },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!updated) {
       return NextResponse.json({ success: false, error: "Category not found" }, { status: 404 });

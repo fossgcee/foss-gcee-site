@@ -78,7 +78,7 @@ export async function DELETE(request: Request) {
         $pull: { registrations: { email } },
         $inc: { registrationsCount: -1 }
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!result) {
