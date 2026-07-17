@@ -20,7 +20,7 @@ const DEPARTMENTS = [
 
 const YEARS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 
-type Step = "form" | "otp" | "success";
+type Step = "form" | "success";
 
 interface FormData {
   name: string;
@@ -119,25 +119,10 @@ export default function RegistrationPortal() {
   const [step, setStep] = useState<Step>("form");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [resendTimer, setResendTimer] = useState(0);
-  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const resendIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const [form, setForm] = useState<FormData>({
     name: "", email: "", linkedin: "", phone: "+91 ", year: "", department: "",
   });
-
-  const startResendTimer = () => {
-    setResendTimer(60);
-    if (resendIntervalRef.current) clearInterval(resendIntervalRef.current);
-    resendIntervalRef.current = setInterval(() => {
-      setResendTimer((t) => {
-        if (t <= 1) { clearInterval(resendIntervalRef.current!); return 0; }
-        return t - 1;
-      });
-    }, 1000);
-  };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -154,77 +139,9 @@ export default function RegistrationPortal() {
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
-      setStep("otp");
-      startResendTimer();
-    } catch (err: unknown) {
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleOtpChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return;
-    const next = [...otp];
-    next[index] = value.slice(-1);
-    setOtp(next);
-    if (value && index < 5) otpRefs.current[index + 1]?.focus();
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      otpRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handleOtpPaste = (e: React.ClipboardEvent) => {
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    if (pasted.length === 6) {
-      setOtp(pasted.split(""));
-      otpRefs.current[5]?.focus();
-    }
-    e.preventDefault();
-  };
-
-  const handleOtpSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const code = otp.join("");
-    if (code.length < 6) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/register/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email, otp: code }),
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error);
       setStep("success");
     } catch (err: unknown) {
-      setError(getErrorMessage(err) || "Verification failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResend = async () => {
-    if (resendTimer > 0) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/register/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error);
-      setOtp(["", "", "", "", "", ""]);
-      otpRefs.current[0]?.focus();
-      startResendTimer();
-    } catch (err: unknown) {
-      setError(getErrorMessage(err) || "Failed to resend OTP.");
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -297,30 +214,14 @@ export default function RegistrationPortal() {
         {/* Header */}
         <div className="mb-10 space-y-2 text-center">
           <p className="font-mono text-[10px] text-black/40 dark:text-white/30 tracking-[0.3em] uppercase">
-            {step === "form" ? "Step 1 of 2 — Registration Details" : "Step 2 of 2 — Email Verification"}
+            Registration Details
           </p>
           <h1 className="text-[1.35rem] sm:text-3xl font-pixel text-black dark:text-white leading-tight break-all sm:break-normal">
-            {step === "form" ? "JOIN_FOSS_CLUB" : "VERIFY_EMAIL"}
+            JOIN_FOSS_CLUB
           </h1>
           <p className="font-mono text-xs text-black/50 dark:text-white/40 mt-1">
-            {step === "form"
-              ? "Fill in your details to request membership."
-              : <>OTP sent to <span className="text-black dark:text-white font-semibold">{form.email}</span>. Check your inbox.</>
-            }
+            Fill in your details to request membership.
           </p>
-        </div>
-
-        {/* Progress indicator */}
-        <div className="flex gap-2 mb-10">
-          {["form", "otp"].map((s, i) => {
-            const filled = (step === "otp" && i === 0) || (step === "otp" && i === 1) || (step === "form" && i === 0);
-            return (
-              <div
-                key={s}
-                className={`h-1 flex-1 rounded-full transition-all duration-500 ${filled ? "bg-black dark:bg-white" : "bg-black/10 dark:bg-white/10"}`}
-              />
-            );
-          })}
         </div>
 
         {/* Card */}
@@ -360,71 +261,8 @@ export default function RegistrationPortal() {
                 disabled={loading}
                 className="w-full h-14 rounded-2xl bg-black dark:bg-white text-white dark:text-black font-pixel text-[11px] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed mt-2"
               >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>SEND_OTP <ArrowRight className="w-4 h-4" /></>}
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>REGISTER <ArrowRight className="w-4 h-4" /></>}
               </button>
-            </form>
-          )}
-
-          {/* ——— STEP 2: OTP ——— */}
-          {step === "otp" && (
-            <form onSubmit={handleOtpSubmit} className="space-y-8">
-              <div className="space-y-4 text-center">
-                <p className="font-mono text-[10px] sm:text-xs text-black/50 dark:text-white/40">Enter the 6-digit code we sent to your inbox</p>
-                <div className="flex gap-2 sm:gap-3 justify-center" onPaste={handleOtpPaste}>
-                  {otp.map((digit, i) => (
-                    <input
-                      key={i}
-                      ref={(el) => { otpRefs.current[i] = el; }}
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={1}
-                      value={digit}
-                      onChange={(e) => handleOtpChange(i, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                      className={`w-10 sm:w-12 h-12 sm:h-14 text-center text-xl sm:text-2xl font-pixel text-black dark:text-white bg-black/[0.04] dark:bg-white/[0.04] border rounded-xl focus:outline-none focus:ring-2 ring-black/20 dark:ring-white/30 transition-all caret-transparent ${digit
-                          ? "border-black/40 dark:border-white/40"
-                          : "border-black/10 dark:border-white/10"
-                        }`}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {error && (
-                <div className="flex gap-3 items-start p-4 rounded-xl border border-red-500/20 bg-red-500/10">
-                  <span className="text-red-600 dark:text-red-400 font-mono text-[11px] leading-relaxed">{error}</span>
-                </div>
-              )}
-
-              <div className="space-y-3">
-                <button
-                  type="submit"
-                  disabled={loading || otp.join("").length < 6}
-                  className="w-full h-14 rounded-2xl bg-black dark:bg-white text-white dark:text-black font-pixel text-[11px] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>VERIFY_OTP <CheckCircle2 className="w-4 h-4" /></>}
-                </button>
-
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={handleResend}
-                    disabled={loading || resendTimer > 0}
-                    className="flex-1 h-11 rounded-xl border border-black/10 dark:border-white/10 text-black/60 dark:text-white/60 font-mono text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-30 hover:bg-black/5 dark:hover:bg-white/5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    {resendTimer > 0 ? `Resend in ${resendTimer}s` : "Resend OTP"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setStep("form"); setError(null); setOtp(["", "", "", "", "", ""]); }}
-                    className="flex-1 h-11 rounded-xl border border-black/10 dark:border-white/10 text-black/60 dark:text-white/60 font-mono text-xs flex items-center justify-center gap-2 transition-all hover:bg-black/5 dark:hover:bg-white/5"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    Edit Details
-                  </button>
-                </div>
-              </div>
             </form>
           )}
         </div>
