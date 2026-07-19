@@ -100,8 +100,15 @@ export const setupBotCommands = (bot: Bot) => {
   // /projects command - Fetches open source projects
   bot.command("projects", async (ctx) => {
     try {
-      const allProjects = await getContributions();
-      const projects = allProjects.slice(0, 6);
+      let projects: any[] = [];
+      try {
+        const allProjects = await getContributions();
+        projects = (allProjects || []).slice(0, 6);
+      } catch (dbErr) {
+        console.error("Failed to fetch from getContributions, falling back to raw query:", dbErr);
+        const { data } = await supabase.from("contributions").select("*").limit(6);
+        projects = data || [];
+      }
 
       if (!projects || projects.length === 0) {
         await ctx.reply("💻 *No projects listed yet.* Be the first student to showcase your open-source project!", { parse_mode: "Markdown" });
@@ -114,20 +121,29 @@ export const setupBotCommands = (bot: Bot) => {
       const keyboard = new InlineKeyboard();
       projects.forEach((p: any, idx: number) => {
         const authorName = typeof p.memberId === "object" && p.memberId?.name ? p.memberId.name : "GCE Erode Student";
-        msg += `${idx + 1}. *${p.title}*\n`;
-        msg += `   👤 Author: ${authorName}\n`;
-        msg += `   📝 _${p.description ? p.description.slice(0, 90) : "Open Source Project"}...\n\n`;
+        const cleanTitle = (p.title || "Untitled Project").replace(/[*_`]/g, "");
+        const cleanDesc = (p.description || "Open Source Project").replace(/[*_`]/g, "");
+        const cleanAuthor = authorName.replace(/[*_`]/g, "");
+
+        msg += `${idx + 1}. *${cleanTitle}*\n`;
+        msg += `   👤 Author: ${cleanAuthor}\n`;
+        msg += `   📝 _${cleanDesc.slice(0, 90)}${cleanDesc.length > 90 ? "..." : ""}_\n\n`;
 
         if (p.url) {
-          keyboard.url(`🔗 ${p.title}`, p.url).row();
+          keyboard.url(`🔗 ${cleanTitle.slice(0, 20)}`, p.url).row();
         }
       });
 
       keyboard.url("🌐 View All Projects Archive", `${siteUrl}/projects`);
 
-      await ctx.reply(msg, { parse_mode: "Markdown", reply_markup: keyboard });
+      try {
+        await ctx.reply(msg, { parse_mode: "Markdown", reply_markup: keyboard });
+      } catch (tgErr) {
+        console.error("Telegram markdown send error, falling back to plain text:", tgErr);
+        await ctx.reply(msg.replace(/[*_`]/g, ""), { reply_markup: keyboard });
+      }
     } catch (err) {
-      console.error("Projects command error:", err);
+      console.error("Projects command fatal error:", err);
       await ctx.reply("Failed to fetch projects. Please try again later.");
     }
   });
