@@ -234,12 +234,14 @@ export const setupBotCommands = (bot: Bot) => {
       if (member.is_bot) continue;
 
       const keyboard = new InlineKeyboard()
-        .url("📝 Complete Club Profile", `${siteUrl}/join`)
+        .url("🤖 Start Bot (DM)", "https://t.me/fossgceebot")
+        .url("📝 Club Registration", `${siteUrl}/join`)
+        .row()
         .url("🌐 Visit Website", siteUrl);
 
       const welcomeText = `Welcome *${member.first_name}* to FOSS GCEE! 🎉\n\n` +
         `We are thrilled to have you in the open-source community at GCE Erode.\n\n` +
-        `*Quick Start:* Please complete your member registration on our website to receive workshop updates & certificates!`;
+        `👉 Tap *🤖 Start Bot (DM)* below to message @fossgceebot directly and receive workshop updates, project showcases, & event certificates!`;
 
       await ctx.reply(welcomeText, { parse_mode: "Markdown", reply_markup: keyboard });
     }
