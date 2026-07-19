@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import BlogCategory from "@/models/BlogCategory";
+import { getBlogCategories, addBlogCategory } from "@/services/blog";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    await dbConnect();
-    let categories = await BlogCategory.find({}).sort({ name: 1 });
+    let categories = await getBlogCategories();
     if (categories.length === 0) {
       const defaultCategories = [
         { name: "Newsletters", slug: "newsletters" },
@@ -15,8 +13,10 @@ export async function GET() {
         { name: "Guides", slug: "guides" },
         { name: "Updates", slug: "updates" }
       ];
-      await BlogCategory.insertMany(defaultCategories);
-      categories = await BlogCategory.find({}).sort({ name: 1 });
+      for (const cat of defaultCategories) {
+        await addBlogCategory(cat.name, cat.slug);
+      }
+      categories = await getBlogCategories();
     }
     return NextResponse.json({ success: true, data: categories });
   } catch (err: any) {

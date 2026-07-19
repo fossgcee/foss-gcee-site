@@ -1,34 +1,20 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import Event from "@/models/Event";
-
-
-/**
- * Returns today's date string in "YYYY-MM-DD" format using IST (UTC+5:30).
- * This avoids UTC-midnight off-by-one errors for Indian users.
- */
-function todayIST(): string {
-  const now = new Date();
-  // Shift to IST (+5:30 = +330 min)
-  const ist = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
-  return ist.toISOString().slice(0, 10); // "YYYY-MM-DD"
-}
+import { getEvents } from "@/services/event";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    await dbConnect();
+    // Fetch all events, newest first
+    const events = await getEvents();
 
-    // todayIST import was removed since it is unused
-
-    // Fetch all non-draft events, newest first
-    const events = await Event.find({ status: { $ne: "draft" } }).sort({ startDate: -1 });
+    // Filter out draft status
+    const nonDraftEvents = events.filter(e => e.status !== "draft");
 
     return NextResponse.json({
       success: true,
-      count: events.length,
-      data: events,
+      count: nonDraftEvents.length,
+      data: nonDraftEvents,
     });
   } catch (error: unknown) {
     console.error("Fetch Events Error:", error);

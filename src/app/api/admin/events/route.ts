@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import dbConnect from "@/lib/db";
-import Event from "@/models/Event";
-import Registration from "@/models/Registration";
+import { supabase } from "@/lib/supabase";
+import { getEvents, addEvent, updateEvent, deleteEvent, getEventRegistrations } from "@/services/event";
 import { sendBulkEmail } from "@/lib/mailer";
 import { requireAdmin } from "@/lib/adminAuth";
 import { emailRegex, getSiteUrl, getLogoUrl, escapeHtml, getErrorMessage } from "@/lib/utils";
@@ -14,6 +13,23 @@ const normalizeAgenda = (agenda?: AgendaItem[]) =>
     time: (item.time || "").trim(),
     topic: (item.topic || "").trim(),
   })).filter((item) => item.time || item.topic);
+
+const mapEvent = (item: any) => ({
+  ...item,
+  _id: item.id,
+  academicYear: item.academic_year,
+  startDate: item.start_date,
+  endDate: item.end_date,
+  startTime: item.start_time,
+  endTime: item.end_time,
+  handledBy: item.handled_by,
+  galleryLink: item.gallery_link,
+  manualStatus: item.manual_status,
+  isFeatured: item.is_featured,
+  registrationsCount: item.registrations_count,
+  createdAt: item.created_at,
+  updatedAt: item.updated_at
+});
 
 const buildAgendaUpdateEmail = (event: {
   title: string;
@@ -161,18 +177,21 @@ export async function GET(request: Request) {
   if (auth) return auth;
 
   try {
-    await dbConnect();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
     if (id) {
-       const event = await Event.findById(id);
+       const { data: event, error } = await supabase
+         .from("events")
+         .select("*")
+         .eq("id", id)
+         .maybeSingle();
+       if (error) throw error;
        if (!event) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
-       return NextResponse.json({ success: true, data: event });
+       return NextResponse.json({ success: true, data: mapEvent(event) });
     }
 
-    // Return all events including drafts for admin
-    const events = await Event.find({}).sort({ startDate: -1 });
+    const events = await getEvents();
 
     return NextResponse.json({
       success: true,
@@ -193,18 +212,15 @@ export async function POST(request: Request) {
   if (auth) return auth;
 
   try {
-    await dbConnect();
     const body = await request.json();
 
-    // Whitelist only the fields the schema actually accepts.
-    // Never pass the raw request body directly to Mongoose (mass assignment).
     const {
       title, slug, description, agenda, outcomes, academicYear,
       startDate, endDate, startTime, endTime, venue, category,
       handledBy, organizers, poster, photos, galleryLink, status, isFeatured,
     } = body;
 
-    const event = await Event.create({
+    const eventRaw = await addEvent({
       title, slug, description, agenda, outcomes, academicYear,
       startDate, endDate, startTime, endTime, venue, category,
       handledBy, organizers, poster, photos, galleryLink,
@@ -212,11 +228,17 @@ export async function POST(request: Request) {
       isFeatured: Boolean(isFeatured),
     });
 
-    // Auto-notify all approved members when a new non-draft event is created.
+    const event = mapEvent(eventRaw);
+
     if (event.status !== "draft") {
       try {
-        const members = await Registration.find({ approved: true, otpVerified: true }).select("email").lean<{ email: string }[]>();
-        const recipients = Array.from(new Set(members.map((m) => m.email.trim().toLowerCase()))).filter((email) => emailRegex.test(email));
+        const { data: members } = await supabase
+          .from("registrations")
+          .select("email")
+          .eq("approved", true)
+          .eq("otp_verified", true);
+        
+        const recipients = Array.from(new Set((members || []).map((m) => m.email.trim().toLowerCase()))).filter((email) => emailRegex.test(email));
 
         if (recipients.length > 0) {
           const emailContent = buildEventEmail(event);
@@ -255,7 +277,6 @@ export async function PUT(request: Request) {
   if (auth) return auth;
 
   try {
-    await dbConnect();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     const body = await request.json();
@@ -264,66 +285,60 @@ export async function PUT(request: Request) {
       return NextResponse.json({ success: false, error: "Event ID is required" }, { status: 400 });
     }
 
-    const existing = await Event.findById(id)
-      .select("title slug startDate endDate startTime endTime venue agenda registrations")
-      .lean<{
-        title: string;
-        slug: string;
-        startDate: string;
-        endDate: string;
-        startTime: string;
-        endTime: string;
-        venue: string;
-        agenda?: AgendaItem[];
-        registrations?: { email?: string }[];
-      }>();
+    const { data: existing, error: existingErr } = await supabase
+      .from("events")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (existingErr || !existing) {
+      return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });
+    }
 
     const updatePayload: Record<string, unknown> = { ...body };
-    // When admin explicitly sets a status, lock it from auto-archive
     if (Object.prototype.hasOwnProperty.call(body, "status")) {
       updatePayload.manualStatus = true;
     }
 
-    const event = await Event.findByIdAndUpdate(id, updatePayload, { returnDocument: 'after' });
-
-
-    if (!event) {
-      return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });
-    }
+    const updatedRaw = await updateEvent(id, updatePayload);
+    const event = mapEvent(updatedRaw);
 
     const agendaChanged = existing && Object.prototype.hasOwnProperty.call(body, "agenda")
       ? JSON.stringify(normalizeAgenda(existing.agenda)) !== JSON.stringify(normalizeAgenda(body.agenda))
       : false;
 
-    if (agendaChanged && existing?.registrations?.length) {
-      try {
-        const recipients = Array.from(
-          new Set(
-            existing.registrations
-              .map((reg) => String(reg.email || "").trim().toLowerCase())
-          )
-        ).filter((email) => emailRegex.test(email));
+    if (agendaChanged) {
+      const registrations = await getEventRegistrations(id);
+      if (registrations.length) {
+        try {
+          const recipients = Array.from(
+            new Set(
+              registrations
+                .map((reg) => String(reg.email || "").trim().toLowerCase())
+            )
+          ).filter((email) => emailRegex.test(email));
 
-        if (recipients.length > 0) {
-          const agendaEmail = buildAgendaUpdateEmail({
-            title: event.title,
-            slug: event.slug,
-            startDate: event.startDate,
-            endDate: event.endDate,
-            startTime: event.startTime,
-            endTime: event.endTime,
-            venue: event.venue,
-            agenda: body.agenda,
-          });
-          await sendBulkEmail({
-            subject: agendaEmail.subject,
-            text: agendaEmail.text,
-            html: agendaEmail.html,
-            bcc: recipients,
-          });
+          if (recipients.length > 0) {
+            const agendaEmail = buildAgendaUpdateEmail({
+              title: event.title,
+              slug: event.slug,
+              startDate: event.startDate,
+              endDate: event.endDate,
+              startTime: event.startTime,
+              endTime: event.endTime,
+              venue: event.venue,
+              agenda: body.agenda,
+            });
+            await sendBulkEmail({
+              subject: agendaEmail.subject,
+              text: agendaEmail.text,
+              html: agendaEmail.html,
+              bcc: recipients,
+            });
+          }
+        } catch (notifyError) {
+          console.warn("Agenda updated, but notification failed:", notifyError);
         }
-      } catch (notifyError) {
-        console.warn("Agenda updated, but notification failed:", notifyError);
       }
     }
 
@@ -350,7 +365,6 @@ export async function DELETE(request: Request) {
   if (auth) return auth;
 
   try {
-    await dbConnect();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -358,11 +372,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: false, error: "Event ID is required" }, { status: 400 });
     }
 
-    const event = await Event.findByIdAndDelete(id);
-
-    if (!event) {
-      return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });
-    }
+    await deleteEvent(id);
 
     revalidatePath("/events");
     revalidatePath(`/`);

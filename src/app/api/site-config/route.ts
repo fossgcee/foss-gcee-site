@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import SiteConfig from "@/models/SiteConfig";
+import { getSiteConfig } from "@/services/siteConfig";
+import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
@@ -81,22 +81,24 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    await dbConnect();
-    const config = await SiteConfig.findOne({ section });
-    let data = config ? config.data : defaults[section] ?? {};
+    const configData = await getSiteConfig(section);
+    let data = configData ? configData : defaults[section] ?? {};
 
     // Dynamically inject real contribution count for the "about" section
     if (section === "about" && data.stats) {
       try {
-        const Contribution = (await import("@/models/Contribution")).default;
-        const count = await Contribution.countDocuments();
+        const { count } = await supabase
+          .from("contributions")
+          .select("*", { count: "exact", head: true });
+        
+        const countVal = count || 0;
         
         // Ensure data is deep cloned if it came from defaults so we don't mutate defaults
         data = JSON.parse(JSON.stringify(data));
         
         data.stats = data.stats.map((stat: { label: string; value: string }) => {
           if (stat.label.toLowerCase().includes("oss") || stat.label.toLowerCase().includes("contribution") || stat.label.toLowerCase().includes("project")) {
-            return { ...stat, value: `${count}+` };
+            return { ...stat, value: `${countVal}+` };
           }
           return stat;
         });
@@ -109,7 +111,7 @@ export async function GET(req: NextRequest) {
       success: true,
       data,
       section,
-      fromDb: !!config,
+      fromDb: !!configData,
     });
   } catch (error) {
     return NextResponse.json(

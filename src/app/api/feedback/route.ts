@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import Feedback from "@/models/Feedback";
-import Event from "@/models/Event";
+import { createFeedback } from "@/services/feedback";
+import { supabase } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   try {
-    await dbConnect();
     const body = await req.json();
     const { name, email, year, department, eventName, rating, comments } = body;
 
@@ -13,7 +11,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Event name, rating, year and department are required." }, { status: 400 });
     }
 
-    const newFeedback = await Feedback.create({
+    const newFeedback = await createFeedback({
       name,
       email,
       year: parseInt(year),
@@ -25,27 +23,30 @@ export async function POST(req: NextRequest) {
 
     // Auto-register logic if participant provided email and name
     if (email && name) {
-      const event = await Event.findOne({ title: eventName });
-      if (event) {
-        const isRegistered = event.registrations?.some((r: any) => r.email === email);
-        if (!isRegistered) {
-          await Event.updateOne(
-            { _id: event._id },
-            {
-              $push: {
-                registrations: {
-                  name,
-                  department,
-                  college: "Government College of Engineering, Erode",
-                  year: parseInt(year),
-                  mobile: "Unknown",
-                  email,
-                  registeredAt: new Date(),
-                },
-              },
-              $inc: { registrationsCount: 1 },
-            }
-          );
+      const { data: event, error: eventErr } = await supabase
+        .from("events")
+        .select("id")
+        .eq("title", eventName)
+        .maybeSingle();
+
+      if (event && !eventErr) {
+        const { data: existingReg, error: regErr } = await supabase
+          .from("event_registrations")
+          .select("id")
+          .eq("event_id", event.id)
+          .eq("email", email)
+          .maybeSingle();
+
+        if (!existingReg && !regErr) {
+          await supabase.from("event_registrations").insert({
+            event_id: event.id,
+            name,
+            email,
+            phone: "Unknown",
+            college: "Government College of Engineering, Erode",
+            year: parseInt(year),
+            department,
+          });
         }
       }
     }

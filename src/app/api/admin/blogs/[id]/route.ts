@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import BlogPost from "@/models/BlogPost";
+import { updateBlogPost, deleteBlogPost } from "@/services/blog";
+import { supabase } from "@/lib/supabase";
 import { requireAdmin } from "@/lib/adminAuth";
 
 export async function PUT(
@@ -11,7 +11,6 @@ export async function PUT(
   if (auth) return auth;
 
   try {
-    await dbConnect();
     const { id } = await params;
     const body = await req.json();
     const { title, content, excerpt, coverImage, category, author, status } = body;
@@ -26,6 +25,16 @@ export async function PUT(
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
+    const { data: oldPost, error: fetchErr } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (fetchErr || !oldPost) {
+      return NextResponse.json({ success: false, error: "Post not found" }, { status: 404 });
+    }
+
     const updateObj: any = {
       title,
       slug,
@@ -37,18 +46,13 @@ export async function PUT(
       status,
     };
 
-    const oldPost = await BlogPost.findById(id);
-    if (!oldPost) {
-      return NextResponse.json({ success: false, error: "Post not found" }, { status: 404 });
-    }
-
     if (status === "published" && oldPost.status !== "published") {
       updateObj.publishedAt = new Date();
     } else if (status === "draft") {
       updateObj.publishedAt = null;
     }
 
-    const updated = await BlogPost.findByIdAndUpdate(id, updateObj, { returnDocument: 'after' });
+    const updated = await updateBlogPost(id, updateObj);
     return NextResponse.json({ success: true, data: updated });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
@@ -63,13 +67,20 @@ export async function DELETE(
   if (auth) return auth;
 
   try {
-    await dbConnect();
     const { id } = await params;
-    const deleted = await BlogPost.findByIdAndDelete(id);
-    if (!deleted) {
+    
+    const { data: oldPost, error: fetchErr } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (fetchErr || !oldPost) {
       return NextResponse.json({ success: false, error: "Post not found" }, { status: 404 });
     }
-    return NextResponse.json({ success: true, data: deleted });
+
+    await deleteBlogPost(id);
+    return NextResponse.json({ success: true, data: oldPost });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }

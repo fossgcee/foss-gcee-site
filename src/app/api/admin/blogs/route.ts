@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import BlogPost from "@/models/BlogPost";
+import { getBlogPosts, addBlogPost } from "@/services/blog";
 import { requireAdmin } from "@/lib/adminAuth";
 
 export async function GET(req: NextRequest) {
@@ -8,10 +7,7 @@ export async function GET(req: NextRequest) {
   if (auth) return auth;
 
   try {
-    await dbConnect();
-    const posts = await BlogPost.find({})
-      .populate("category")
-      .sort({ createdAt: -1 });
+    const posts = await getBlogPosts();
     return NextResponse.json({ success: true, data: posts });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
@@ -23,7 +19,6 @@ export async function POST(req: NextRequest) {
   if (auth) return auth;
 
   try {
-    await dbConnect();
     const body = await req.json();
     const { title, content, excerpt, coverImage, category, author, status } = body;
     if (!title || !content || !category || !author) {
@@ -37,7 +32,7 @@ export async function POST(req: NextRequest) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
-    const post = await BlogPost.create({
+    const postObj = {
       title,
       slug,
       content,
@@ -47,7 +42,9 @@ export async function POST(req: NextRequest) {
       author,
       status: status || "draft",
       publishedAt: status === "published" ? new Date() : undefined,
-    });
+    };
+
+    const post = await addBlogPost(postObj);
     return NextResponse.json({ success: true, data: post });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import Registration from "@/models/Registration";
+import { supabase } from "@/lib/supabase";
 import { getClientIp, rateLimit } from "@/lib/rateLimit";
 
 const getErrorMessage = (error: unknown) => {
@@ -20,7 +19,6 @@ export async function POST(request: Request) {
       );
     }
 
-    await dbConnect();
     const body = await request.json();
     const { name, email, linkedin, phone, year, department } = body;
 
@@ -40,34 +38,49 @@ export async function POST(request: Request) {
     }
 
     // Check if phone or email is already registered
-    const existingByPhone = await Registration.findOne({ phone: normalizedPhone, otpVerified: true }).select("email");
+    const { data: existingByPhone, error: phoneErr } = await supabase
+      .from("registrations")
+      .select("email")
+      .eq("phone", normalizedPhone)
+      .eq("otp_verified", true)
+      .maybeSingle();
+
+    if (phoneErr) throw phoneErr;
+
     if (existingByPhone && existingByPhone.email?.toLowerCase() !== normalizedEmail) {
       return NextResponse.json({ success: false, error: "This mobile number is already registered." }, { status: 400 });
     }
 
-    const existingByEmail = await Registration.findOne({ email: normalizedEmail, otpVerified: true }).select("email");
+    const { data: existingByEmail, error: emailErr } = await supabase
+      .from("registrations")
+      .select("email")
+      .eq("email", normalizedEmail)
+      .eq("otp_verified", true)
+      .maybeSingle();
+
+    if (emailErr) throw emailErr;
+
     if (existingByEmail) {
       return NextResponse.json({ success: false, error: "This email is already registered." }, { status: 400 });
     }
 
     // Save directly with otpVerified: true
-    await Registration.findOneAndUpdate(
-      { email: normalizedEmail },
-      {
-        $set: {
-          name,
-          email: normalizedEmail,
-          linkedin,
-          phone: normalizedPhone,
-          year,
-          department,
-          otpVerified: true,
-          approved: false,
-          role: "Member",
-        },
-      },
-      { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }
-    );
+    const { error: upsertErr } = await supabase
+      .from("registrations")
+      .upsert({
+        name,
+        email: normalizedEmail,
+        linkedin,
+        phone: normalizedPhone,
+        year,
+        department,
+        otp_verified: true,
+        approved: false,
+        role: "Member",
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "email" });
+
+    if (upsertErr) throw upsertErr;
 
     return NextResponse.json({ success: true, message: "Registration complete!" });
   } catch (error: unknown) {

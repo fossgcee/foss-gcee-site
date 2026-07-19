@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import Event from "@/models/Event";
+import { supabase } from "@/lib/supabase";
+import { getEventRegistrations } from "@/services/event";
 import { sendBulkEmail } from "@/lib/mailer";
 import { requireAdmin } from "@/lib/adminAuth";
 
@@ -61,25 +61,37 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "Subject and message are required." }, { status: 400 });
     }
 
-    await dbConnect();
-    const event = await Event.findOne({ slug: eventSlug })
-      .select("title slug startDate endDate startTime endTime venue registrations")
-      .lean<EventSummary>();
+    const { data: event, error: eventErr } = await supabase
+      .from("events")
+      .select("*")
+      .eq("slug", eventSlug)
+      .maybeSingle();
 
-    if (!event) {
+    if (eventErr || !event) {
       return NextResponse.json({ success: false, error: "Event not found." }, { status: 404 });
     }
 
+    const registrations = await getEventRegistrations(event.id);
     const uniqueEmails = Array.from(
-      new Set((event.registrations || []).map((reg) => String(reg.email || "").trim().toLowerCase()))
+      new Set(registrations.map((reg) => String(reg.email || "").trim().toLowerCase()))
     ).filter((email) => emailRegex.test(email));
 
     if (uniqueEmails.length === 0) {
       return NextResponse.json({ success: false, error: "No registered member emails found." }, { status: 400 });
     }
 
+    const eventSummary: EventSummary = {
+      title: event.title,
+      slug: event.slug,
+      startDate: event.start_date,
+      endDate: event.end_date,
+      startTime: event.start_time,
+      endTime: event.end_time,
+      venue: event.venue,
+    };
+
     const safeMessage = escapeHtml(message).replace(/\n/g, "<br />");
-    const eventWindow = formatEventWindow(event);
+    const eventWindow = formatEventWindow(eventSummary);
 
     const html = `
       <!DOCTYPE html>
@@ -106,7 +118,7 @@ export async function POST(request: Request) {
       "",
       "Event Details",
       event.title,
-      formatEventWindow(event),
+      eventWindow,
       `Venue: ${event.venue}`,
       "",
       "FOSS Club · GCE Erode",

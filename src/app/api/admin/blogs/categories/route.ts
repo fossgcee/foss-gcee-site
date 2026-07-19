@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import BlogCategory from "@/models/BlogCategory";
+import { getBlogCategories, addBlogCategory } from "@/services/blog";
 import { requireAdmin } from "@/lib/adminAuth";
 
 export async function GET(req: NextRequest) {
@@ -8,8 +7,7 @@ export async function GET(req: NextRequest) {
   if (auth) return auth;
 
   try {
-    await dbConnect();
-    let categories = await BlogCategory.find({}).sort({ name: 1 });
+    let categories = await getBlogCategories();
     if (categories.length === 0) {
       const defaultCategories = [
         { name: "Newsletters", slug: "newsletters" },
@@ -17,8 +15,10 @@ export async function GET(req: NextRequest) {
         { name: "Guides", slug: "guides" },
         { name: "Updates", slug: "updates" }
       ];
-      await BlogCategory.insertMany(defaultCategories);
-      categories = await BlogCategory.find({}).sort({ name: 1 });
+      for (const cat of defaultCategories) {
+        await addBlogCategory(cat.name, cat.slug);
+      }
+      categories = await getBlogCategories();
     }
     return NextResponse.json({ success: true, data: categories });
   } catch (err: any) {
@@ -31,7 +31,6 @@ export async function POST(req: NextRequest) {
   if (auth) return auth;
 
   try {
-    await dbConnect();
     const body = await req.json();
     const { name } = body;
     if (!name) {
@@ -42,7 +41,7 @@ export async function POST(req: NextRequest) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
-    const category = await BlogCategory.create({ name, slug });
+    const category = await addBlogCategory(name, slug);
     return NextResponse.json({ success: true, data: category });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });

@@ -1,8 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import dbConnect from "@/lib/db";
-import Event from "@/models/Event";
+import { getEvents, getEventBySlug } from "@/services/event";
 import { ArrowLeft, CheckCircle2, ListChecks, Award, ExternalLink, MessageSquare } from "lucide-react";
 import EventRegisterButton from "@/components/EventRegisterButton";
 
@@ -36,11 +35,12 @@ type EventDetails = {
 /* ── Static params ─────────────────────────────────────────── */
 export async function generateStaticParams() {
   try {
-    await dbConnect();
-    const events = await Event.find({ status: { $ne: "draft" } }, "slug").lean<EventSlug[]>();
-    return events.map((e) => ({ slug: e.slug }));
+    const events = await getEvents();
+    return events
+      .filter((e) => e.status !== "draft")
+      .map((e) => ({ slug: e.slug }));
   } catch {
-    console.warn("Could not connect to MongoDB during build. Skipping static generation for events.");
+    console.warn("Could not connect to Supabase during build. Skipping static generation for events.");
     return [];
   }
 }
@@ -48,13 +48,16 @@ export async function generateStaticParams() {
 /* ── Metadata ──────────────────────────────────────────────── */
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  await dbConnect();
-  const event = await Event.findOne({ slug }).lean<EventMetadata>();
-  if (!event) return { title: "Event Not Found – FOSSGCEE" };
-  return {
-    title: `${event.title} – FOSSGCEE`,
-    description: event.description ?? `FOSSGCEE event: ${event.title}`,
-  };
+  try {
+    const event = await getEventBySlug(slug);
+    if (!event) return { title: "Event Not Found – FOSSGCEE" };
+    return {
+      title: `${event.title} – FOSSGCEE`,
+      description: event.description ?? `FOSSGCEE event: ${event.title}`,
+    };
+  } catch {
+    return { title: "Event Not Found – FOSSGCEE" };
+  }
 }
 
 const fmt = (d: string) => {
@@ -70,8 +73,12 @@ function todayIST() {
 /* ── Page ──────────────────────────────────────────────────── */
 export default async function EventPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  await dbConnect();
-  const event = await Event.findOne({ slug }).lean<EventDetails>();
+  let event: any = null;
+  try {
+    event = await getEventBySlug(slug);
+  } catch (e) {
+    console.error(e);
+  }
   if (!event) notFound();
   // Rely purely on DB status — admin may have manually overridden it
   const isPast = event.status === "completed";
