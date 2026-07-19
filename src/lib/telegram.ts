@@ -160,8 +160,11 @@ export const setupBotCommands = (bot: Bot) => {
       `• /projects — Browse student open-source projects\n` +
       `• /faq — Open-source learning resources & guides\n` +
       `• /help — View this help menu\n\n` +
+      `📞 *Need Any Clarification? Reach Out:*\n` +
+      `• 📧 Email: bharathjp02@gmail.com\n` +
+      `• 💬 Telegram: @bharathjp02\n\n` +
       `🌐 *Official Website:* ${siteUrl}\n` +
-      `💬 *Community Group:* https://t.me/+etLLOTprJDU2NGM9`;
+      `👥 *Community Group:* https://t.me/+etLLOTprJDU2NGM9`;
 
     await ctx.reply(helpText, { parse_mode: "Markdown" });
   });
