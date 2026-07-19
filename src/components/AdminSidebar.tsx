@@ -16,6 +16,7 @@ import {
   BookOpen,
   MessageSquare,
   ChevronRight,
+  Megaphone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/app/(admin)/admin/login/actions";
@@ -25,6 +26,7 @@ const menuItems = [
   { icon: PanelTop, label: "Site CMS", href: "/admin/site-cms", highlight: true },
   { icon: Users, label: "Members", href: "/admin/members" },
   { icon: Calendar, label: "Events", href: "/admin/events" },
+  { icon: Megaphone, label: "Campaigns", href: "/admin/campaigns" },
   { icon: GitCommit, label: "Contributions", href: "/admin/contributions" },
   { icon: BookOpen, label: "Blogs", href: "/admin/blogs" },
   { icon: MessageSquare, label: "Feedback", href: "/admin/feedback" },
