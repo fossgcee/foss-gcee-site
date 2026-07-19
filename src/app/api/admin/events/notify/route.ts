@@ -71,13 +71,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "Event not found." }, { status: 404 });
     }
 
-    const registrations = await getEventRegistrations(event.id);
-    const uniqueEmails = Array.from(
-      new Set(registrations.map((reg) => String(reg.email || "").trim().toLowerCase()))
-    ).filter((email) => emailRegex.test(email));
+    const testEmail = String(body?.testEmail || "").trim().toLowerCase();
 
-    if (uniqueEmails.length === 0) {
-      return NextResponse.json({ success: false, error: "No registered member emails found." }, { status: 400 });
+    let uniqueEmails: string[] = [];
+
+    if (testEmail) {
+      if (!emailRegex.test(testEmail)) {
+        return NextResponse.json({ success: false, error: "Invalid test email address." }, { status: 400 });
+      }
+      uniqueEmails = [testEmail];
+    } else {
+      const registrations = await getEventRegistrations(event.id);
+      uniqueEmails = Array.from(
+        new Set(registrations.map((reg) => String(reg.email || "").trim().toLowerCase()))
+      ).filter((email) => emailRegex.test(email));
+
+      if (uniqueEmails.length === 0) {
+        return NextResponse.json({ success: false, error: "No registered member emails found." }, { status: 400 });
+      }
     }
 
     const eventSummary: EventSummary = {

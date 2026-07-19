@@ -9,70 +9,7 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
-/**
- * Generates a cryptographically secure 6-digit OTP.
- * Uses crypto.getRandomValues() instead of Math.random() to ensure
- * unpredictability and resistance to prediction attacks.
- */
-export function generateOtp(): string {
-  const array = new Uint32Array(1);
-  crypto.getRandomValues(array);
-  // Map the random uint32 into the range [100000, 999999]
-  return String(100000 + (array[0] % 900000));
-}
 
-/**
- * Sends an OTP email to the user without any attachments.
- */
-export async function sendOtpEmail(to: string, name: string, otp: string) {
-  const fromEmail = process.env.EMAIL_SERVER_USER || process.env.EMAIL_USER;
-  await transporter.sendMail({
-    from: `"FOSS Club GCE Erode" <${fromEmail}>`,
-    replyTo: fromEmail,
-    to,
-    subject: "Your Verification Code",
-    text: `Hi ${name},\n\nYour FOSSGCEE verification code is: ${otp}\n\nThis code expires in 10 minutes. If you did not initiate this, please ignore this email.\n\nFOSS Club · GCE Erode`,
-    html: `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8" />
-        <title>Verification Code</title>
-      </head>
-      <body style="margin: 0; padding: 0; background-color: #080808; font-family: 'Inter', system-ui, -apple-system, sans-serif;">
-        <div style="max-width: 600px; margin: 40px auto; background-color: #0f0f0f; border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; overflow: hidden; box-shadow: 0 24px 48px rgba(0,0,0,0.45);">
-          <div style="padding: 36px 40px 28px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center;">
-            <img src="${getLogoUrl()}" alt="FOSS Club GCE Erode" width="72" height="72" style="display:block; margin: 0 auto 16px; width:72px; height:72px; border-radius:16px;" />
-            <div style="display:inline-block; padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8); font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;">
-              FOSS CLUB
-            </div>
-            <h1 style="color: #ffffff; margin: 18px 0 0; font-size: 24px; font-weight: 700; letter-spacing: -0.02em;">Verify your email</h1>
-            <p style="color: rgba(255,255,255,0.55); margin: 12px 0 0; font-size: 14px; line-height: 1.7;">
-              Hello ${name}, use the verification code below to complete your registration.
-            </p>
-          </div>
-          
-          <div style="padding: 42px 40px; text-align: center;">
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 22px 26px; display: inline-block;">
-              <span style="color: #ffffff; font-family: 'Courier New', monospace; font-size: 40px; font-weight: 700; letter-spacing: 10px; margin-right: -10px;">${otp}</span>
-            </div>
-            <p style="color: rgba(255,255,255,0.4); font-size: 13px; margin-top: 26px; line-height: 1.7;">
-              This code expires in <strong style="color:rgba(255,255,255,0.7)">10 minutes</strong>.<br/>
-              If you did not initiate this request, you can safely ignore this email.
-            </p>
-          </div>
-
-          <div style="padding: 26px 40px; border-top: 1px solid rgba(255,255,255,0.05); background-color: rgba(255,255,255,0.01); text-align: center;">
-            <div style="color: rgba(255,255,255,0.25); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;">
-              FOSS Club · GCE Erode
-            </div>
-          </div>
-        </div>
-      </body>
-      </html>
-    `,
-  });
-}
 
 /**
  * Sends a confirmation email for event registration.

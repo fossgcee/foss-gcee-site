@@ -86,6 +86,8 @@ export default function AdminEventsManager() {
   const [emailMessage, setEmailMessage] = useState("");
   const [emailStatus, setEmailStatus] = useState<string | null>(null);
   const [isEmailing, setIsEmailing] = useState(false);
+  const [testEmail, setTestEmail] = useState("");
+  const [isTestEmailing, setIsTestEmailing] = useState(false);
 
   // Mail Attendees modal state
   const [isMailAttendeesOpen, setIsMailAttendeesOpen] = useState(false);
@@ -183,6 +185,41 @@ export default function AdminEventsManager() {
       setEmailStatus("Failed to send email.");
     } finally {
       setIsEmailing(false);
+    }
+  };
+
+  const handleSendTestEmail = async () => {
+    if (!selectedEventReg) return;
+    const subject = emailSubject.trim();
+    const message = emailMessage.trim();
+    const tEmail = testEmail.trim();
+    if (!subject || !message || !tEmail) {
+      setEmailStatus("Subject, message, and test email are required.");
+      return;
+    }
+    setIsTestEmailing(true);
+    setEmailStatus(null);
+    try {
+      const res = await fetch("/api/admin/events/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventSlug: selectedEventReg.slug,
+          subject,
+          message,
+          testEmail: tEmail
+        }),
+      });
+      const d = await res.json();
+      if (!d.success) {
+        setEmailStatus(d.error || "Failed to send test email.");
+        return;
+      }
+      setEmailStatus(`Test email sent successfully to ${tEmail}.`);
+    } catch {
+      setEmailStatus("Failed to send test email.");
+    } finally {
+      setIsTestEmailing(false);
     }
   };
 
@@ -566,17 +603,33 @@ export default function AdminEventsManager() {
                         rows={4}
                         className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[10px] text-white focus:outline-none focus:border-white/20 transition-all placeholder:text-white/20 resize-none"
                       />
+                      <input
+                        value={testEmail}
+                        onChange={(e) => setTestEmail(e.target.value)}
+                        placeholder="Test email address (optional)"
+                        className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[10px] text-white focus:outline-none focus:border-white/20 transition-all placeholder:text-white/20"
+                      />
                       {emailStatus && (
                         <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest">{emailStatus}</p>
                       )}
-                      <button
-                        onClick={handleSendEmail}
-                        disabled={isEmailing || registrations.length === 0 || regLoading}
-                        className="w-full py-3 rounded-2xl bg-white/5 border border-white/10 text-white font-pixel text-[10px] hover:bg-white/10 transition-all flex items-center justify-center gap-3 uppercase disabled:opacity-50"
-                      >
-                        <Mail className="w-4 h-4" />
-                        {isEmailing ? "SENDING..." : "SEND_EMAIL.SYS"}
-                      </button>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={handleSendTestEmail}
+                          disabled={isTestEmailing || !testEmail.trim() || regLoading}
+                          className="flex-1 py-3 rounded-2xl bg-white/5 border border-white/10 text-white font-pixel text-[10px] hover:bg-white/10 transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-50"
+                        >
+                          <Mail className="w-4 h-4" />
+                          {isTestEmailing ? "..." : "TEST.SYS"}
+                        </button>
+                        <button
+                          onClick={handleSendEmail}
+                          disabled={isEmailing || registrations.length === 0 || regLoading}
+                          className="flex-[2] py-3 rounded-2xl bg-white/10 border border-white/20 text-white font-pixel text-[10px] hover:bg-white/20 transition-all flex items-center justify-center gap-3 uppercase disabled:opacity-50"
+                        >
+                          <Mail className="w-4 h-4" />
+                          {isEmailing ? "SENDING..." : "SEND_ALL.SYS"}
+                        </button>
+                      </div>
                    </div>
 
                    <button 

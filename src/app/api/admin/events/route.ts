@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { supabase } from "@/lib/supabase";
 import { getEvents, addEvent, updateEvent, deleteEvent, getEventRegistrations } from "@/services/event";
 import { sendBulkEmail } from "@/lib/mailer";
+import { sendTelegramBroadcast } from "@/lib/telegram";
 import { requireAdmin } from "@/lib/adminAuth";
 import { emailRegex, getSiteUrl, getLogoUrl, escapeHtml, getErrorMessage } from "@/lib/utils";
 
@@ -248,6 +249,10 @@ export async function POST(request: Request) {
             html: emailContent.html,
             bcc: recipients,
           });
+
+          // Notify telegram users
+          const telegramMessage = `🎉 New Event: ${event.title} 🎉\n\n${event.description}\n\nVenue: ${event.venue}\nDate: ${event.startDate} at ${event.startTime}\n\nCheck out the website for more details!`;
+          await sendTelegramBroadcast(telegramMessage).catch(console.error);
         }
       } catch (notifyError) {
         console.warn("Event created, but member notification failed:", notifyError);
