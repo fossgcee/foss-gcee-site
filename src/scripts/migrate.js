@@ -1,14 +1,36 @@
 const mongoose = require("mongoose");
-const { createClient } = require("@supabase/supabase-js");
+const { Client } = require("pg");
 const crypto = require("crypto");
+const fs = require("fs");
+const path = require("path");
+
+// Load local environment variables
+if (fs.existsSync(".env.local")) {
+  console.log("Loading .env.local variables...");
+  const envFile = fs.readFileSync(".env.local", "utf8");
+  envFile.split("\n").forEach(line => {
+    const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+    if (match) {
+      const key = match[1];
+      let value = match[2] || "";
+      if (value.startsWith('"') && value.endsWith('"')) {
+        value = value.substring(1, value.length - 1);
+      } else if (value.startsWith("'") && value.endsWith("'")) {
+        value = value.substring(1, value.length - 1);
+      }
+      process.env[key] = value;
+    }
+  });
+}
 
 // Configuration
 const mongoUri = process.env.MONGODB_URI || "mongodb+srv://fossgcee_db_user:Bofje83N8eVxQqDz@foss-website.rjwmdp2.mongodb.net/?appName=foss-website";
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://lcztqoqleygtgtpmmetw.supabase.co";
-// Since RLS is disabled, anon key works for inserts, but we can also use service role key
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjenRxb3FsZXlndGd0cG1tZXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyOTA1OTYsImV4cCI6MjA5OTg2NjU5Nn0.6mUz9lseEJICmBfvWr91MdOZ_6oBySdsKXtZzcqo7Gw";
+const databaseUrl = process.env.DATABASE_URL;
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+if (!databaseUrl) {
+  console.error("Error: DATABASE_URL environment variable is not defined.");
+  process.exit(1);
+}
 
 function toUUID(mongoId) {
   if (!mongoId) return null;
@@ -26,43 +48,53 @@ function toUUID(mongoId) {
 async function migrate() {
   console.log("Connecting to MongoDB...");
   await mongoose.connect(mongoUri);
-  const db = mongoose.connection.db;
-  console.log("Connected to MongoDB database.");
+  const mongoDb = mongoose.connection.db;
+  console.log("Connected to MongoDB.");
 
-  // Clear existing Supabase tables (optional but useful for a clean migration)
-  console.log("Clearing existing Supabase data...");
-  await supabase.from("feedbacks").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-  await supabase.from("event_registrations").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-  await supabase.from("events").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-  await supabase.from("contributions").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-  await supabase.from("blog_posts").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-  await supabase.from("blog_categories").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-  await supabase.from("registrations").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-  await supabase.from("site_configs").delete().neq("section", "dummy");
-  console.log("Supabase tables cleared.");
+  console.log("Connecting to Postgres...");
+  const pgClient = new Client({ connectionString: databaseUrl });
+  await pgClient.connect();
+  console.log("Connected to Postgres.");
+
+  // Clear existing tables in correct order of dependency
+  console.log("Clearing existing Postgres data...");
+  await pgClient.query("DELETE FROM feedbacks");
+  await pgClient.query("DELETE FROM event_registrations");
+  await pgClient.query("DELETE FROM events");
+  await pgClient.query("DELETE FROM contributions");
+  await pgClient.query("DELETE FROM blog_posts");
+  await pgClient.query("DELETE FROM blog_categories");
+  await pgClient.query("DELETE FROM registrations");
+  await pgClient.query("DELETE FROM site_configs");
+  await pgClient.query("DELETE FROM otp_sessions");
+  console.log("Postgres tables cleared.");
 
   // 1. Migrate Site Configs
   console.log("Migrating site configs...");
-  const siteConfigs = await db.collection("siteconfigs").find({}).toArray();
+  const siteConfigs = await mongoDb.collection("siteconfigs").find({}).toArray();
   for (const sc of siteConfigs) {
-    const { error } = await supabase.from("site_configs").insert({
-      section: sc.section,
-      data: sc.data,
-      created_at: sc.createdAt || new Date().toISOString(),
-      updated_at: sc.updatedAt || new Date().toISOString()
-    });
-    if (error) console.error("Error migrating site config:", error);
+    await pgClient.query(
+      `INSERT INTO site_configs (section, data, created_at, updated_at) 
+       VALUES ($1, $2, $3, $4)`,
+      [
+        sc.section,
+        JSON.stringify(sc.data),
+        sc.createdAt || new Date().toISOString(),
+        sc.updatedAt || new Date().toISOString()
+      ]
+    );
   }
   console.log(`Migrated ${siteConfigs.length} site configs.`);
 
   // 2. Migrate Registrations (Members / Accounts)
   console.log("Migrating registrations...");
-  const registrations = await db.collection("registrations").find({}).toArray();
+  const registrations = await mongoDb.collection("registrations").find({}).toArray();
   const regIds = new Set(registrations.map(r => r._id.toString()));
 
   // Ensure contributions memberIds exist in registrations
-  const contributions = await db.collection("contributions").find({}).toArray();
+  const contributions = await mongoDb.collection("contributions").find({}).toArray();
   for (const c of contributions) {
+    if (!c.memberId) continue;
     const mIdStr = c.memberId.toString();
     if (!regIds.has(mIdStr)) {
       console.log(`Found missing memberId in contributions: ${mIdStr}. Creating placeholder registration...`);
@@ -84,179 +116,183 @@ async function migrate() {
     }
   }
 
-  const regPayloads = registrations.map(r => ({
-    id: toUUID(r._id),
-    name: r.name,
-    email: r.email,
-    linkedin: r.linkedin,
-    phone: r.phone,
-    year: r.year,
-    department: r.department,
-    otp_verified: r.otpVerified || false,
-    approved: r.approved || false,
-    role: r.role || "Member",
-    created_at: r.createdAt || new Date().toISOString(),
-    updated_at: r.updatedAt || new Date().toISOString()
-  }));
-  if (regPayloads.length > 0) {
-    const { error } = await supabase.from("registrations").insert(regPayloads);
-    if (error) {
-      console.error("Error migrating registrations:", error);
-      // Try migrating one by one to print which row failed
-      for (const payload of regPayloads) {
-        const { error: singleErr } = await supabase.from("registrations").insert(payload);
-        if (singleErr) console.error("Failed payload:", payload, "Error:", singleErr);
-      }
-    }
+  for (const r of registrations) {
+    await pgClient.query(
+      `INSERT INTO registrations (id, name, email, linkedin, phone, year, department, otp_verified, approved, role, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+      [
+        toUUID(r._id),
+        r.name,
+        r.email,
+        r.linkedin,
+        r.phone,
+        r.year,
+        r.department,
+        r.otpVerified || false,
+        r.approved || false,
+        r.role || "Member",
+        r.createdAt || new Date().toISOString(),
+        r.updatedAt || new Date().toISOString()
+      ]
+    );
   }
   console.log(`Migrated ${registrations.length} registrations.`);
 
   // 3. Migrate Blog Categories
   console.log("Migrating blog categories...");
-  const blogcategories = await db.collection("blogcategories").find({}).toArray();
-  const catPayloads = blogcategories.map(c => ({
-    id: toUUID(c._id),
-    name: c.name,
-    slug: c.slug,
-    created_at: c.createdAt || new Date().toISOString(),
-    updated_at: c.updatedAt || new Date().toISOString()
-  }));
-  if (catPayloads.length > 0) {
-    const { error } = await supabase.from("blog_categories").insert(catPayloads);
-    if (error) console.error("Error migrating blog categories:", error);
+  const blogcategories = await mongoDb.collection("blogcategories").find({}).toArray();
+  for (const c of blogcategories) {
+    await pgClient.query(
+      `INSERT INTO blog_categories (id, name, slug, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [
+        toUUID(c._id),
+        c.name,
+        c.slug,
+        c.createdAt || new Date().toISOString(),
+        c.updatedAt || new Date().toISOString()
+      ]
+    );
   }
   console.log(`Migrated ${blogcategories.length} blog categories.`);
 
   // 4. Migrate Blog Posts
   console.log("Migrating blog posts...");
-  const blogposts = await db.collection("blogposts").find({}).toArray();
-  const postPayloads = blogposts.map(p => ({
-    id: toUUID(p._id),
-    title: p.title,
-    slug: p.slug,
-    content: p.content,
-    excerpt: p.excerpt || null,
-    cover_image: p.coverImage || null,
-    category_id: toUUID(p.category),
-    author: p.author,
-    status: p.status || "draft",
-    published_at: p.publishedAt || null,
-    created_at: p.createdAt || new Date().toISOString(),
-    updated_at: p.updatedAt || new Date().toISOString()
-  }));
-  if (postPayloads.length > 0) {
-    const { error } = await supabase.from("blog_posts").insert(postPayloads);
-    if (error) console.error("Error migrating blog posts:", error);
+  const blogposts = await mongoDb.collection("blogposts").find({}).toArray();
+  for (const p of blogposts) {
+    await pgClient.query(
+      `INSERT INTO blog_posts (id, title, slug, content, excerpt, cover_image, category_id, author, status, published_at, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+      [
+        toUUID(p._id),
+        p.title,
+        p.slug,
+        p.content,
+        p.excerpt || null,
+        p.coverImage || null,
+        toUUID(p.category),
+        p.author,
+        p.status || "draft",
+        p.publishedAt || null,
+        p.createdAt || new Date().toISOString(),
+        p.updatedAt || new Date().toISOString()
+      ]
+    );
   }
   console.log(`Migrated ${blogposts.length} blog posts.`);
 
   // 5. Migrate Contributions
   console.log("Migrating contributions...");
-  const contributionsList = await db.collection("contributions").find({}).toArray();
-  const contribPayloads = contributionsList.map(c => ({
-    id: toUUID(c._id),
-    member_id: toUUID(c.memberId),
-    title: c.title,
-    description: c.description,
-    url: c.url || null,
-    links: c.links || [],
-    image_url: c.imageUrl || null,
-    is_featured: c.isFeatured || false,
-    order: c.order || 0,
-    created_at: c.createdAt || new Date().toISOString(),
-    updated_at: c.updatedAt || new Date().toISOString()
-  }));
-  if (contribPayloads.length > 0) {
-    const { error } = await supabase.from("contributions").insert(contribPayloads);
-    if (error) console.error("Error migrating contributions:", error);
+  for (const c of contributions) {
+    await pgClient.query(
+      `INSERT INTO contributions (id, member_id, title, description, url, links, image_url, is_featured, "order", created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      [
+        toUUID(c._id),
+        toUUID(c.memberId),
+        c.title,
+        c.description,
+        c.url || null,
+        JSON.stringify(c.links || []),
+        c.imageUrl || null,
+        c.isFeatured || false,
+        c.order || 0,
+        c.createdAt || new Date().toISOString(),
+        c.updatedAt || new Date().toISOString()
+      ]
+    );
   }
   console.log(`Migrated ${contributions.length} contributions.`);
 
   // 6. Migrate Feedbacks
   console.log("Migrating feedbacks...");
-  const feedbacks = await db.collection("feedbacks").find({}).toArray();
-  const feedPayloads = feedbacks.map(f => ({
-    id: toUUID(f._id),
-    name: f.name || null,
-    email: f.email || null,
-    year: f.year,
-    department: f.department,
-    event_name: f.eventName,
-    rating: f.rating,
-    comments: f.comments || null,
-    created_at: f.createdAt || new Date().toISOString(),
-    updated_at: f.updatedAt || new Date().toISOString()
-  }));
-  if (feedPayloads.length > 0) {
-    const { error } = await supabase.from("feedbacks").insert(feedPayloads);
-    if (error) console.error("Error migrating feedbacks:", error);
+  const feedbacks = await mongoDb.collection("feedbacks").find({}).toArray();
+  for (const f of feedbacks) {
+    await pgClient.query(
+      `INSERT INTO feedbacks (id, name, email, year, department, event_name, rating, comments, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [
+        toUUID(f._id),
+        f.name || null,
+        f.email || null,
+        f.year,
+        f.department,
+        f.eventName,
+        f.rating,
+        f.comments || null,
+        f.createdAt || new Date().toISOString(),
+        f.updatedAt || new Date().toISOString()
+      ]
+    );
   }
   console.log(`Migrated ${feedbacks.length} feedbacks.`);
 
   // 7. Migrate Events and Event Registrations
   console.log("Migrating events and event registrations...");
-  const events = await db.collection("events").find({}).toArray();
+  const events = await mongoDb.collection("events").find({}).toArray();
   for (const ev of events) {
     const evId = toUUID(ev._id);
-    const { error: evError } = await supabase.from("events").insert({
-      id: evId,
-      title: ev.title,
-      slug: ev.slug,
-      description: ev.description,
-      agenda: ev.agenda || [],
-      outcomes: ev.outcomes || "",
-      academic_year: ev.academicYear,
-      start_date: ev.startDate,
-      end_date: ev.endDate,
-      start_time: ev.startTime,
-      end_time: ev.endTime,
-      venue: ev.venue,
-      category: ev.category,
-      handled_by: ev.handledBy,
-      organizers: ev.organizers || [],
-      poster: ev.poster || null,
-      photos: ev.photos || [],
-      gallery_link: ev.galleryLink || "",
-      status: ev.status || "upcoming",
-      manual_status: ev.manualStatus || false,
-      is_featured: ev.isFeatured || false,
-      registrations_count: ev.registrationsCount || 0,
-      created_at: ev.createdAt || new Date().toISOString(),
-      updated_at: ev.updatedAt || new Date().toISOString()
-    });
-    if (evError) {
-      console.error("Error migrating event:", ev.title, evError);
-      continue;
-    }
+    await pgClient.query(
+      `INSERT INTO events (id, title, slug, description, agenda, outcomes, academic_year, start_date, end_date, start_time, end_time, venue, category, handled_by, organizers, poster, photos, gallery_link, status, manual_status, is_featured, registrations_count, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)`,
+      [
+        evId,
+        ev.title,
+        ev.slug,
+        ev.description,
+        JSON.stringify(ev.agenda || []),
+        ev.outcomes || "",
+        ev.academicYear,
+        ev.startDate,
+        ev.endDate,
+        ev.startTime,
+        ev.endTime,
+        ev.venue,
+        ev.category,
+        ev.handledBy,
+        ev.organizers || [],
+        ev.poster || null,
+        ev.photos || [],
+        ev.galleryLink || "",
+        ev.status || "upcoming",
+        ev.manualStatus || false,
+        ev.isFeatured || false,
+        ev.registrationsCount || 0,
+        ev.createdAt || new Date().toISOString(),
+        ev.updatedAt || new Date().toISOString()
+      ]
+    );
 
     if (ev.registrations && ev.registrations.length > 0) {
-      const regPayloads = ev.registrations.map(reg => ({
-        id: toUUID(reg._id),
-        event_id: evId,
-        name: reg.name,
-        department: reg.department,
-        college: reg.college,
-        year: Number(reg.year),
-        mobile: reg.mobile || "Unknown",
-        email: reg.email.toLowerCase().trim(),
-        registered_at: reg.registeredAt || new Date().toISOString()
-      }));
-
-      const { error: regError } = await supabase.from("event_registrations").insert(regPayloads);
-      if (regError) {
-        console.error(`Error migrating event registrations for ${ev.title}:`, regError);
-        for (const payload of regPayloads) {
-          const { error: singleRegErr } = await supabase.from("event_registrations").insert(payload);
-          if (singleRegErr) console.error("Failed event registration payload:", payload, "Error:", singleRegErr);
-        }
+      for (const reg of ev.registrations) {
+        await pgClient.query(
+          `INSERT INTO event_registrations (id, event_id, name, department, college, year, mobile, email, registered_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+           ON CONFLICT (event_id, email) DO NOTHING`,
+          [
+            toUUID(reg._id),
+            evId,
+            reg.name,
+            reg.department,
+            reg.college,
+            Number(reg.year),
+            reg.mobile || "Unknown",
+            reg.email.toLowerCase().trim(),
+            reg.registeredAt || new Date().toISOString()
+          ]
+        );
       }
     }
   }
   console.log(`Migrated ${events.length} events and their registrations.`);
 
   console.log("Migration complete!");
+  await pgClient.end();
 }
 
 migrate()
-  .catch(console.error)
+  .catch(async (err) => {
+    console.error("Migration failed:", err);
+    process.exit(1);
+  })
   .finally(() => mongoose.disconnect());
