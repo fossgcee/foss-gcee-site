@@ -7,14 +7,9 @@ export async function GET() {
   try {
     let categories = await getBlogCategories();
     if (categories.length === 0) {
-      const defaultCategories = [
-        { name: "Newsletters", slug: "newsletters" },
-        { name: "Tips & Tricks", slug: "tips-tricks" },
-        { name: "Guides", slug: "guides" },
-        { name: "Updates", slug: "updates" }
-      ];
-      for (const cat of defaultCategories) {
-        await addBlogCategory(cat.name, cat.slug);
+      const defaultNames = ["Newsletters", "Tips & Tricks", "Guides", "Updates"];
+      for (const name of defaultNames) {
+        await addBlogCategory(name);
       }
       categories = await getBlogCategories();
     }

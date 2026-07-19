@@ -13,7 +13,7 @@ const getErrorMessage = (error: unknown) => {
 export async function POST(request: Request) {
   try {
     const ip = getClientIp(request);
-    const ipLimit = rateLimit(`event-register:ip:${ip}`, 5, 10 * 60 * 1000);
+    const ipLimit = await rateLimit(`event-register:ip:${ip}`, 5, 10 * 60 * 1000);
     if (!ipLimit.allowed) {
       return NextResponse.json(
         { success: false, error: "Too many requests. Please wait a bit." },

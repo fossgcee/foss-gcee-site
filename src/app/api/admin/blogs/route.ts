@@ -27,26 +27,11 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
 
-    const postObj = {
-      title,
-      slug,
-      content,
-      excerpt,
-      coverImage,
-      category,
-      author,
-      status: status || "draft",
-      publishedAt: status === "published" ? new Date() : undefined,
-    };
-
-    const post = await addBlogPost(postObj);
+    const post = await addBlogPost({ title, content, excerpt, coverImage, category, author, status });
     return NextResponse.json({ success: true, data: post });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
+

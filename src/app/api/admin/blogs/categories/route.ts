@@ -9,14 +9,9 @@ export async function GET(req: NextRequest) {
   try {
     let categories = await getBlogCategories();
     if (categories.length === 0) {
-      const defaultCategories = [
-        { name: "Newsletters", slug: "newsletters" },
-        { name: "Tips & Tricks", slug: "tips-tricks" },
-        { name: "Guides", slug: "guides" },
-        { name: "Updates", slug: "updates" }
-      ];
-      for (const cat of defaultCategories) {
-        await addBlogCategory(cat.name, cat.slug);
+      const defaultNames = ["Newsletters", "Tips & Tricks", "Guides", "Updates"];
+      for (const name of defaultNames) {
+        await addBlogCategory(name);
       }
       categories = await getBlogCategories();
     }
@@ -36,12 +31,7 @@ export async function POST(req: NextRequest) {
     if (!name) {
       return NextResponse.json({ success: false, error: "Name is required" }, { status: 400 });
     }
-    const slug = name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-
-    const category = await addBlogCategory(name, slug);
+    const category = await addBlogCategory(name);
     return NextResponse.json({ success: true, data: category });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });

@@ -11,7 +11,7 @@ const getErrorMessage = (error: unknown) => {
 export async function POST(request: Request) {
   try {
     const ip = getClientIp(request);
-    const ipLimit = rateLimit(`verify-otp:ip:${ip}`, 10, 10 * 60 * 1000);
+    const ipLimit = await rateLimit(`verify-otp:ip:${ip}`, 10, 10 * 60 * 1000);
     if (!ipLimit.allowed) {
       return NextResponse.json(
         { success: false, error: "Too many attempts. Please wait." },
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
     const normalizedEmail = String(email).trim().toLowerCase();
 
-    const emailLimit = rateLimit(`verify-otp:email:${normalizedEmail}`, 8, 10 * 60 * 1000);
+    const emailLimit = await rateLimit(`verify-otp:email:${normalizedEmail}`, 8, 10 * 60 * 1000);
     if (!emailLimit.allowed) {
       return NextResponse.json(
         { success: false, error: "Too many attempts. Please wait." },

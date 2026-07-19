@@ -11,7 +11,7 @@ const getErrorMessage = (error: unknown) => {
 export async function POST(request: Request) {
   try {
     const ip = getClientIp(request);
-    const ipLimit = rateLimit(`otp:ip:${ip}`, 5, 10 * 60 * 1000);
+    const ipLimit = await rateLimit(`otp:ip:${ip}`, 5, 10 * 60 * 1000);
     if (!ipLimit.allowed) {
       return NextResponse.json(
         { success: false, error: "Too many requests. Try again later." },
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const normalizedEmail = String(email).trim().toLowerCase();
     const normalizedPhone = String(phone).replace(/\s+/g, "").trim();
 
-    const emailLimit = rateLimit(`otp:email:${normalizedEmail}`, 3, 10 * 60 * 1000);
+    const emailLimit = await rateLimit(`otp:email:${normalizedEmail}`, 3, 10 * 60 * 1000);
     if (!emailLimit.allowed) {
       return NextResponse.json(
         { success: false, error: "Too many registration requests. Please wait a bit." },

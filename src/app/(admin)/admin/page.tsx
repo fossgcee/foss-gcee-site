@@ -174,7 +174,7 @@ export default function AdminDashboard() {
             </div>
             <div>
               <p className="font-pixel text-xs text-white mb-0.5">DB_CONNECTED</p>
-              <p className="font-mono text-[10px] text-white/30">MongoDB Atlas · foss-website</p>
+              <p className="font-mono text-[10px] text-white/30">Supabase · PostgreSQL</p>
             </div>
           </div>
           <span className="px-3 py-1.5 rounded-lg bg-emerald-500 text-black font-mono text-[9px] font-bold tracking-wider">LIVE</span>
