@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Mail, Send, Users, CalendarDays, CheckCircle2, AlertCircle } from "lucide-react";
+import { Mail, Send, Users, CalendarDays, CheckCircle2, AlertCircle, FileText, SendHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type EventData = {
@@ -11,11 +11,13 @@ type EventData = {
 };
 
 export default function CampaignsPage() {
-  const [targetAudience, setTargetAudience] = useState<"all" | "event">("all");
+  const [targetAudience, setTargetAudience] = useState<"all" | "event" | "custom">("all");
   const [selectedEventSlug, setSelectedEventSlug] = useState("");
+  const [customEmails, setCustomEmails] = useState("");
   const [events, setEvents] = useState<EventData[]>([]);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [sendTelegram, setSendTelegram] = useState(false);
   const [testEmail, setTestEmail] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isTestSending, setIsTestSending] = useState(false);
@@ -42,10 +44,6 @@ export default function CampaignsPage() {
       setStatus({ type: "error", text: "Subject, message, and test email are required." });
       return;
     }
-    if (targetAudience === "event" && !selectedEventSlug) {
-      setStatus({ type: "error", text: "Please select an event." });
-      return;
-    }
     
     setIsTestSending(true);
     setStatus(null);
@@ -56,9 +54,10 @@ export default function CampaignsPage() {
         body: JSON.stringify({
           target: targetAudience,
           eventSlug: selectedEventSlug,
+          customEmails,
           subject: subject.trim(),
           message: message.trim(),
-          testEmail: tEmail
+          testEmail: tEmail,
         }),
       });
       const d = await res.json();
@@ -80,7 +79,11 @@ export default function CampaignsPage() {
       setStatus({ type: "error", text: "Please select an event." });
       return;
     }
-    if (!confirm("Are you sure you want to blast this email to the selected audience? This cannot be undone.")) {
+    if (targetAudience === "custom" && !customEmails.trim()) {
+      setStatus({ type: "error", text: "Please enter at least one custom email address." });
+      return;
+    }
+    if (!confirm("Are you sure you want to blast this campaign to the selected audience? This cannot be undone.")) {
       return;
     }
 
@@ -93,14 +96,21 @@ export default function CampaignsPage() {
         body: JSON.stringify({
           target: targetAudience,
           eventSlug: selectedEventSlug,
+          customEmails,
           subject: subject.trim(),
           message: message.trim(),
+          sendTelegram,
         }),
       });
       const d = await res.json();
       if (!d.success) throw new Error(d.error || "Failed to send campaign.");
-      setStatus({ type: "success", text: `Campaign sent successfully! ${d.sentCount} emails delivered.` });
-      // Reset form on success
+
+      let successText = `Campaign dispatched! ${d.sentCount} emails delivered.`;
+      if (sendTelegram) {
+        successText += " (Also broadcasted to Telegram)";
+      }
+
+      setStatus({ type: "success", text: successText });
       setSubject("");
       setMessage("");
     } catch (err: any) {
@@ -112,11 +122,11 @@ export default function CampaignsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-4">
         <div>
-          <h1 className="text-xl md:text-2xl font-pixel text-white mb-2 tracking-wide">CAMPAIGNS</h1>
+          <h1 className="text-xl md:text-2xl font-pixel text-white mb-1 tracking-wide">EMAIL & ANNOUNCEMENT CAMPAIGNS</h1>
           <p className="font-mono text-[10px] md:text-xs text-white/50 uppercase tracking-wider">
-            Email blast system for announcements & updates
+            Centralized notification widget for members, event attendees & custom blasts
           </p>
         </div>
       </div>
@@ -127,19 +137,19 @@ export default function CampaignsPage() {
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
             
             <h2 className="font-pixel text-xs text-white/80 mb-6 flex items-center gap-2">
-              <Mail className="w-4 h-4" /> COMPOSE_MESSAGE
+              <Mail className="w-4 h-4" /> COMPOSE_CAMPAIGN
             </h2>
 
             <div className="space-y-5 relative z-10">
               <div className="space-y-2">
-                <label className="font-mono text-[10px] text-white/50 uppercase tracking-widest">Target Audience</label>
-                <div className="grid grid-cols-2 gap-3">
+                <label className="font-mono text-[10px] text-white/50 uppercase tracking-widest">1. Select Target Audience</label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <button
                     onClick={() => setTargetAudience("all")}
                     className={cn(
-                      "flex items-center justify-center gap-2 py-3 rounded-xl border transition-all font-mono text-[10px] uppercase",
+                      "flex items-center justify-center gap-2 py-3 px-3 rounded-xl border transition-all font-mono text-[10px] uppercase",
                       targetAudience === "all" 
-                        ? "bg-white/10 border-white/20 text-white" 
+                        ? "bg-white/10 border-white/20 text-white font-bold" 
                         : "bg-white/5 border-white/10 text-white/50 hover:bg-white/[0.07]"
                     )}
                   >
@@ -148,13 +158,24 @@ export default function CampaignsPage() {
                   <button
                     onClick={() => setTargetAudience("event")}
                     className={cn(
-                      "flex items-center justify-center gap-2 py-3 rounded-xl border transition-all font-mono text-[10px] uppercase",
+                      "flex items-center justify-center gap-2 py-3 px-3 rounded-xl border transition-all font-mono text-[10px] uppercase",
                       targetAudience === "event" 
-                        ? "bg-white/10 border-white/20 text-white" 
+                        ? "bg-white/10 border-white/20 text-white font-bold" 
                         : "bg-white/5 border-white/10 text-white/50 hover:bg-white/[0.07]"
                     )}
                   >
                     <CalendarDays className="w-3.5 h-3.5" /> Event Attendees
+                  </button>
+                  <button
+                    onClick={() => setTargetAudience("custom")}
+                    className={cn(
+                      "flex items-center justify-center gap-2 py-3 px-3 rounded-xl border transition-all font-mono text-[10px] uppercase",
+                      targetAudience === "custom" 
+                        ? "bg-white/10 border-white/20 text-white font-bold" 
+                        : "bg-white/5 border-white/10 text-white/50 hover:bg-white/[0.07]"
+                    )}
+                  >
+                    <FileText className="w-3.5 h-3.5" /> Custom List
                   </button>
                 </div>
               </div>
@@ -167,7 +188,7 @@ export default function CampaignsPage() {
                     onChange={(e) => setSelectedEventSlug(e.target.value)}
                     className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[10px] text-white focus:outline-none focus:border-white/20 transition-all appearance-none"
                   >
-                    <option value="" className="bg-[#0a0a0a]">-- Select an event --</option>
+                    <option value="" className="bg-[#0a0a0a]">-- Select an Event --</option>
                     {events.map((e) => (
                       <option key={e.slug} value={e.slug} className="bg-[#0a0a0a]">{e.title}</option>
                     ))}
@@ -175,65 +196,94 @@ export default function CampaignsPage() {
                 </div>
               )}
 
+              {targetAudience === "custom" && (
+                <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <label className="font-mono text-[10px] text-white/50 uppercase tracking-widest">Custom Email Addresses (comma or newline separated)</label>
+                  <textarea
+                    value={customEmails}
+                    onChange={(e) => setCustomEmails(e.target.value)}
+                    placeholder="email1@example.com, email2@example.com..."
+                    rows={3}
+                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[10px] text-white focus:outline-none focus:border-white/20 transition-all placeholder:text-white/20 resize-none"
+                  />
+                </div>
+              )}
+
               <div className="space-y-2">
-                <label className="font-mono text-[10px] text-white/50 uppercase tracking-widest">Email Subject</label>
+                <label className="font-mono text-[10px] text-white/50 uppercase tracking-widest">2. Email Subject</label>
                 <input
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  placeholder="Subject line..."
+                  placeholder="e.g. Announcement: Upcoming Workshop & Event Updates"
                   className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[10px] text-white focus:outline-none focus:border-white/20 transition-all placeholder:text-white/20"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="font-mono text-[10px] text-white/50 uppercase tracking-widest">Message Content</label>
+                <label className="font-mono text-[10px] text-white/50 uppercase tracking-widest">3. Message Body</label>
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Write your email here..."
+                  placeholder="Type your message here..."
                   rows={8}
                   className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[10px] text-white focus:outline-none focus:border-white/20 transition-all placeholder:text-white/20 resize-none"
                 />
+              </div>
+
+              <div className="pt-2">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={sendTelegram}
+                    onChange={(e) => setSendTelegram(e.target.checked)}
+                    className="w-4 h-4 rounded border-white/20 bg-white/5 text-white focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                  />
+                  <span className="font-mono text-xs text-white/70 group-hover:text-white transition-colors">
+                    Also broadcast this announcement to Telegram Subscribers / Group
+                  </span>
+                </label>
               </div>
             </div>
           </div>
         </div>
 
         <div className="space-y-4">
-          <div className="bg-[#0a0a0a] border border-white/10 p-6 rounded-2xl relative overflow-hidden flex flex-col h-full">
-            <h2 className="font-pixel text-xs text-white/80 mb-6 flex items-center gap-2">
-              <Send className="w-4 h-4" /> DISPATCH
-            </h2>
+          <div className="bg-[#0a0a0a] border border-white/10 p-6 rounded-2xl relative overflow-hidden flex flex-col justify-between h-full">
+            <div>
+              <h2 className="font-pixel text-xs text-white/80 mb-6 flex items-center gap-2">
+                <SendHorizontal className="w-4 h-4" /> TEST_&_BLAST
+              </h2>
 
-            <div className="flex-1 space-y-6">
-              <div className="space-y-3">
-                <label className="font-mono text-[10px] text-white/50 uppercase tracking-widest">Test Delivery</label>
-                <input
-                  value={testEmail}
-                  onChange={(e) => setTestEmail(e.target.value)}
-                  placeholder="test@example.com"
-                  className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[10px] text-white focus:outline-none focus:border-white/20 transition-all placeholder:text-white/20"
-                />
-                <button
-                  onClick={handleSendTestEmail}
-                  disabled={isTestSending || !testEmail.trim()}
-                  className="w-full py-2.5 rounded-xl bg-white/5 border border-white/10 text-white font-mono text-[10px] hover:bg-white/10 transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-50"
-                >
-                  {isTestSending ? "Testing..." : "Send Test Email"}
-                </button>
-              </div>
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <label className="font-mono text-[10px] text-white/50 uppercase tracking-widest">Test Single Email First</label>
+                  <input
+                    value={testEmail}
+                    onChange={(e) => setTestEmail(e.target.value)}
+                    placeholder="your-email@gmail.com"
+                    className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[10px] text-white focus:outline-none focus:border-white/20 transition-all placeholder:text-white/20"
+                  />
+                  <button
+                    onClick={handleSendTestEmail}
+                    disabled={isTestSending || !testEmail.trim()}
+                    className="w-full py-2.5 rounded-xl bg-white/5 border border-white/10 text-white font-mono text-[10px] hover:bg-white/10 transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-50"
+                  >
+                    {isTestSending ? "Sending Test..." : "Send Test Email"}
+                  </button>
+                </div>
 
-              <div className="h-[1px] w-full bg-white/10" />
+                <div className="h-[1px] w-full bg-white/10" />
 
-              <div className="space-y-3">
-                <button
-                  onClick={handleSendCampaign}
-                  disabled={isSending || (targetAudience === "event" && !selectedEventSlug)}
-                  className="w-full py-4 rounded-xl bg-white text-black font-pixel text-[10px] hover:bg-white/90 transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-50"
-                >
-                  <Send className="w-4 h-4" />
-                  {isSending ? "SENDING..." : "BLAST_CAMPAIGN.EXE"}
-                </button>
+                <div className="space-y-3">
+                  <button
+                    onClick={handleSendCampaign}
+                    disabled={isSending || (targetAudience === "event" && !selectedEventSlug) || (targetAudience === "custom" && !customEmails.trim())}
+                    className="w-full py-4 rounded-xl bg-white text-black font-pixel text-[10px] hover:bg-white/90 transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-50 shadow-lg shadow-white/5"
+                  >
+                    <Send className="w-4 h-4" />
+                    {isSending ? "DISPATCHING..." : "BLAST_CAMPAIGN.EXE"}
+                  </button>
+                </div>
               </div>
             </div>
 

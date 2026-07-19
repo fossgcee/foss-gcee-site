@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/adminAuth";
 import { sendBulkEmail } from "@/lib/mailer";
+import { sendTelegramBroadcast } from "@/lib/telegram";
 import { supabase } from "@/lib/supabase";
 import { emailRegex, getSiteUrl, getLogoUrl, escapeHtml } from "@/lib/utils";
 
@@ -38,35 +39,33 @@ export async function POST(request: Request) {
   if (auth) return auth;
 
   try {
-    const { target, eventSlug, subject, message, testEmail } = await request.json();
+    const { target, eventSlug, customEmails, subject, message, testEmail, sendTelegram } = await request.json();
 
     if (!subject || !message) {
       return NextResponse.json({ success: false, error: "Subject and message are required." }, { status: 400 });
     }
 
-    if (target === "event" && !eventSlug) {
+    if (target === "event" && !eventSlug && !testEmail) {
       return NextResponse.json({ success: false, error: "Event selection is required for event campaigns." }, { status: 400 });
     }
 
     const emailContent = buildCampaignEmail(subject, message);
     let recipients: string[] = [];
 
-    if (testEmail && emailRegex.test(testEmail)) {
-      recipients = [testEmail];
+    if (testEmail && emailRegex.test(testEmail.trim())) {
+      recipients = [testEmail.trim()];
     } else {
       if (target === "all") {
-        // Fetch all approved and verified members
+        // Fetch all verified members
         const { data, error } = await supabase
           .from("registrations")
           .select("email")
-          .eq("approved", true)
           .eq("otp_verified", true);
         
         if (error) throw error;
         recipients = Array.from(new Set((data || []).map(r => r.email.trim().toLowerCase()))).filter(e => emailRegex.test(e));
       } else if (target === "event") {
         // Fetch event registrants
-        // First get the event ID
         const { data: eventData, error: eventError } = await supabase
           .from("events")
           .select("id")
@@ -80,19 +79,28 @@ export async function POST(request: Request) {
         const { data: regsData, error: regsError } = await supabase
           .from("event_registrations")
           .select("email")
-          .eq("event_id", eventData.id)
-          .eq("status", "approved");
+          .eq("event_id", eventData.id);
           
         if (regsError) throw regsError;
         recipients = Array.from(new Set((regsData || []).map(r => r.email.trim().toLowerCase()))).filter(e => emailRegex.test(e));
+      } else if (target === "custom") {
+        // Custom comma-separated list of emails
+        if (typeof customEmails === "string") {
+          recipients = Array.from(new Set(
+            customEmails
+              .split(/[\n,;]+/)
+              .map(e => e.trim().toLowerCase())
+              .filter(e => emailRegex.test(e))
+          ));
+        }
       }
     }
 
     if (recipients.length === 0) {
-      return NextResponse.json({ success: false, error: "No valid email recipients found for this audience." });
+      return NextResponse.json({ success: false, error: "No valid email recipients found for this audience." }, { status: 400 });
     }
 
-    // Our sendBulkEmail in mailer.ts automatically handles BCC batching (chunks of 80)
+    // Send emails using Nodemailer (BCC batching of 80)
     await sendBulkEmail({
       subject: emailContent.subject,
       text: emailContent.text,
@@ -100,7 +108,21 @@ export async function POST(request: Request) {
       bcc: recipients,
     });
 
-    return NextResponse.json({ success: true, sentCount: recipients.length });
+    // Optionally broadcast to Telegram as well if requested
+    let telegramResult = null;
+    if (sendTelegram && !testEmail) {
+      const telegramMsg = `📢 ${subject}\n\n${message}`;
+      telegramResult = await sendTelegramBroadcast(telegramMsg).catch(err => {
+        console.error("Telegram campaign broadcast error:", err);
+        return null;
+      });
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      sentCount: recipients.length,
+      telegram: telegramResult 
+    });
   } catch (error: any) {
     console.error("Campaign API Error:", error);
     return NextResponse.json({ success: false, error: error.message || "Failed to send campaign" }, { status: 500 });
