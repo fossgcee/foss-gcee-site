@@ -1,6 +1,7 @@
 import { Bot, InlineKeyboard } from "grammy";
 import { supabase } from "@/lib/supabase";
 import { getSiteUrl } from "@/lib/utils";
+import { getContributions } from "@/services/contribution";
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -99,13 +100,8 @@ export const setupBotCommands = (bot: Bot) => {
   // /projects command - Fetches open source projects
   bot.command("projects", async (ctx) => {
     try {
-      const { data: projects, error } = await supabase
-        .from("contributions")
-        .select("*, member:registrations(name)")
-        .order("order", { ascending: true })
-        .limit(6);
-
-      if (error) throw error;
+      const allProjects = await getContributions();
+      const projects = allProjects.slice(0, 6);
 
       if (!projects || projects.length === 0) {
         await ctx.reply("💻 *No projects listed yet.* Be the first student to showcase your open-source project!", { parse_mode: "Markdown" });
@@ -116,8 +112,8 @@ export const setupBotCommands = (bot: Bot) => {
       let msg = `💻 *FOSS GCEE Student Open-Source Projects*\n\n`;
 
       const keyboard = new InlineKeyboard();
-      projects.forEach((p, idx) => {
-        const authorName = (p.member as any)?.name || "GCE Erode Student";
+      projects.forEach((p: any, idx: number) => {
+        const authorName = typeof p.memberId === "object" && p.memberId?.name ? p.memberId.name : "GCE Erode Student";
         msg += `${idx + 1}. *${p.title}*\n`;
         msg += `   👤 Author: ${authorName}\n`;
         msg += `   📝 _${p.description ? p.description.slice(0, 90) : "Open Source Project"}...\n\n`;
