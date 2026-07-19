@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 interface Registration {
+  id: string;
   _id: string;
   name: string;
   email: string;

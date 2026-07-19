@@ -24,6 +24,7 @@ export async function GET(request: Request) {
     // Map to camelCase properties for frontend compatibility
     const mapped = registrations.map((r: any) => ({
       id: r.id,
+      _id: r.id,
       name: r.name,
       email: r.email,
       linkedin: r.linkedin,
@@ -85,6 +86,7 @@ export async function PATCH(request: Request) {
 
     const mapped = {
       id: updated.id,
+      _id: updated.id,
       name: updated.name,
       email: updated.email,
       linkedin: updated.linkedin,
