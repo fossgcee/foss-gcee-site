@@ -3,22 +3,37 @@ import { supabase } from "@/lib/supabase";
 export async function getContributions() {
   const { data, error } = await supabase
     .from("contributions")
-    .select("*, member:registrations(name, department, year)")
-    .order("order", { ascending: true })
-    .order("created_at", { ascending: false });
+    .select("*");
   if (error) throw error;
 
-  const mapped = data.map(item => {
-    const memberObj = item.member ? {
+  let membersMap: Record<string, any> = {};
+  try {
+    const memberIds = Array.from(new Set((data || []).map(d => d.member_id).filter(Boolean)));
+    if (memberIds.length > 0) {
+      const { data: members } = await supabase
+        .from("registrations")
+        .select("id, name, department, year")
+        .in("id", memberIds);
+      if (members) {
+        members.forEach(m => { membersMap[m.id] = m; });
+      }
+    }
+  } catch (mErr) {
+    console.error("Member map fetch error:", mErr);
+  }
+
+  const mapped = (data || []).map(item => {
+    const member = membersMap[item.member_id];
+    const memberObj = member ? {
       _id: item.member_id,
-      name: (item.member as any).name,
-      department: (item.member as any).department,
-      year: String((item.member as any).year)
+      name: member.name,
+      department: member.department,
+      year: String(member.year)
     } : null;
 
     return {
       _id: item.id,
-      memberId: memberObj || { _id: item.member_id, name: "Unknown Member", department: "", year: "" },
+      memberId: memberObj || { _id: item.member_id, name: "GCE Erode Student", department: "", year: "" },
       title: item.title,
       description: item.description,
       url: item.url,
@@ -27,8 +42,7 @@ export async function getContributions() {
       isFeatured: item.is_featured,
       order: item.order || 0,
       createdAt: item.created_at,
-      updatedAt: item.updated_at,
-      memberIdPopulated: item.member
+      updatedAt: item.updated_at
     };
   });
 
