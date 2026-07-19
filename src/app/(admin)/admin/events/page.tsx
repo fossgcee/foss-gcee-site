@@ -874,9 +874,9 @@ export default function AdminEventsManager() {
                       </div>
 
                       <div className="space-y-2">
-                         <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Speaker / Resource Person</label>
+                         <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Speaker(s) / Guest(s) (Comma separated)</label>
                          <div className="relative">
-                            <input type="text" placeholder="e.g. DR. SUNDAR · PRINCIPAL ARCHITECT" className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 uppercase" value={formData.speaker || ""} onChange={e => setFormData(prev => ({ ...prev, speaker: e.target.value }))} />
+                            <input type="text" placeholder="e.g. DR. SUNDAR (ARCHITECT), PROF. ANITA (HOD)" className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 uppercase" value={formData.speaker || ""} onChange={e => setFormData(prev => ({ ...prev, speaker: e.target.value }))} />
                          </div>
                       </div>
                     </div>

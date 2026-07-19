@@ -141,10 +141,14 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
 
             {event.speaker && (
                <div className="space-y-2">
-                  <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Speaker / Guest:</h3>
-                  <p className="text-muted-2 text-sm sm:text-base font-semibold">
-                     {event.speaker}
-                  </p>
+                  <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Speaker(s) / Guest(s):</h3>
+                  <div className="space-y-1">
+                    {event.speaker.split(/[\n,]+/).map(s => s.trim()).filter(Boolean).map((s, idx) => (
+                      <p key={idx} className="text-muted-2 text-sm sm:text-base font-semibold flex items-center gap-2">
+                        <span className="text-xs">🎙️</span> {s}
+                      </p>
+                    ))}
+                  </div>
                </div>
             )}
 
