@@ -17,6 +17,7 @@ export async function getEvents(filters?: { status?: string; isFeatured?: boolea
     startTime: item.start_time,
     endTime: item.end_time,
     handledBy: item.handled_by,
+    speaker: item.speaker || "",
     galleryLink: item.gallery_link,
     manualStatus: item.manual_status,
     isFeatured: item.is_featured,
@@ -40,6 +41,7 @@ export async function getEventBySlug(slug: string) {
     startTime: data.start_time,
     endTime: data.end_time,
     handledBy: data.handled_by,
+    speaker: data.speaker || "",
     galleryLink: data.gallery_link,
     manualStatus: data.manual_status,
     isFeatured: data.is_featured,
@@ -66,6 +68,7 @@ export async function addEvent(ev: any) {
       venue: ev.venue,
       category: ev.category,
       handled_by: ev.handledBy,
+      speaker: ev.speaker || "",
       organizers: ev.organizers || [],
       poster: ev.poster,
       photos: ev.photos || [],
@@ -95,6 +98,7 @@ export async function updateEvent(id: string, ev: any) {
   if (ev.venue !== undefined) mapped.venue = ev.venue;
   if (ev.category !== undefined) mapped.category = ev.category;
   if (ev.handledBy !== undefined) mapped.handled_by = ev.handledBy;
+  if (ev.speaker !== undefined) mapped.speaker = ev.speaker;
   if (ev.organizers !== undefined) mapped.organizers = ev.organizers;
   if (ev.poster !== undefined) mapped.poster = ev.poster;
   if (ev.photos !== undefined) mapped.photos = ev.photos;

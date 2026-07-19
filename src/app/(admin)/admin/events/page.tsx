@@ -48,6 +48,7 @@ interface EventData {
   venue: string;
   category: "workshop" | "talk" | "hackathon" | "meetup" | "other";
   handledBy: string;
+  speaker?: string;
   organizers: string[];
   poster?: string;
   photos?: string[];
@@ -116,6 +117,7 @@ export default function AdminEventsManager() {
     venue: "",
     category: "workshop",
     handledBy: "",
+    speaker: "",
     organizers: [],
     photos: [],
     galleryLink: "",
@@ -228,7 +230,7 @@ export default function AdminEventsManager() {
     setFormData({
       title: "", slug: "", description: "", academicYear: "", startDate: "", endDate: "",
       startTime: "09:00", endTime: "17:00", venue: "", category: "workshop",
-      handledBy: "", organizers: [], photos: [], agenda: [], outcomes: "",
+      handledBy: "", speaker: "", organizers: [], photos: [], agenda: [], outcomes: "",
       status: "upcoming", isFeatured: false, registrationsCount: 0,
       galleryLink: ""
     });
@@ -863,11 +865,20 @@ export default function AdminEventsManager() {
                        <input required type="text" placeholder="e.g. LAB_03 · GMEET" className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 uppercase" value={formData.venue} onChange={e => setFormData(prev => ({ ...prev, venue: e.target.value }))} />
                     </div>
 
-                    <div className="space-y-2">
-                       <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Handled By / Lead</label>
-                       <div className="relative">
-                          <input required type="text" placeholder="e.g. BHARATH · IT · 3RD" className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 uppercase" value={formData.handledBy} onChange={e => setFormData(prev => ({ ...prev, handledBy: e.target.value }))} />
-                       </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                         <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Handled By / Lead</label>
+                         <div className="relative">
+                            <input required type="text" placeholder="e.g. BHARATH · IT · 3RD" className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 uppercase" value={formData.handledBy} onChange={e => setFormData(prev => ({ ...prev, handledBy: e.target.value }))} />
+                         </div>
+                      </div>
+
+                      <div className="space-y-2">
+                         <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Speaker / Resource Person</label>
+                         <div className="relative">
+                            <input type="text" placeholder="e.g. DR. SUNDAR · PRINCIPAL ARCHITECT" className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 uppercase" value={formData.speaker || ""} onChange={e => setFormData(prev => ({ ...prev, speaker: e.target.value }))} />
+                         </div>
+                      </div>
                     </div>
                     
                     <div className="space-y-2 opacity-30 select-none pointer-events-none">

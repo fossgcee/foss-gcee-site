@@ -22,8 +22,10 @@ type EventDetails = {
   endDate?: string;
   startTime: string;
   endTime: string;
-  venue: string;
+  category: string;
   handledBy: string;
+  speaker?: string;
+  organizers: string[];
   poster?: string;
   status: "upcoming" | "completed" | "draft";
   manualStatus?: boolean;
@@ -137,8 +139,17 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
                </p>
             </div>
 
+            {event.speaker && (
+               <div className="space-y-2">
+                  <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Speaker / Guest:</h3>
+                  <p className="text-muted-2 text-sm sm:text-base font-semibold">
+                     {event.speaker}
+                  </p>
+               </div>
+            )}
+
             <div className="space-y-2">
-               <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Speaker:</h3>
+               <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Handled By / Lead:</h3>
                <p className="text-muted-2 text-sm sm:text-base">
                   {event.handledBy}
                </p>

@@ -8,7 +8,7 @@ export async function getContributions() {
     .order("created_at", { ascending: false });
   if (error) throw error;
 
-  return data.map(item => {
+  const mapped = data.map(item => {
     const memberObj = item.member ? {
       _id: item.member_id,
       name: (item.member as any).name,
@@ -25,12 +25,29 @@ export async function getContributions() {
       links: item.links,
       imageUrl: item.image_url,
       isFeatured: item.is_featured,
-      order: item.order,
+      order: item.order || 0,
       createdAt: item.created_at,
       updatedAt: item.updated_at,
       memberIdPopulated: item.member
     };
   });
+
+  // Sort logic: Explicit priority (order > 0) comes first (1, 2, 3...),
+  // followed by unprioritized projects (order === 0) sorted by newest created_at.
+  mapped.sort((a, b) => {
+    const orderA = a.order || 0;
+    const orderB = b.order || 0;
+    if (orderA > 0 && orderB > 0) {
+      if (orderA !== orderB) return orderA - orderB;
+    } else if (orderA > 0) {
+      return -1;
+    } else if (orderB > 0) {
+      return 1;
+    }
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
+  return mapped;
 }
 
 export async function addContribution(contrib: any) {

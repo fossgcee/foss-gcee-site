@@ -24,6 +24,7 @@ const mapEvent = (item: any) => ({
   startTime: item.start_time,
   endTime: item.end_time,
   handledBy: item.handled_by,
+  speaker: item.speaker || "",
   galleryLink: item.gallery_link,
   manualStatus: item.manual_status,
   isFeatured: item.is_featured,
@@ -218,13 +219,13 @@ export async function POST(request: Request) {
     const {
       title, slug, description, agenda, outcomes, academicYear,
       startDate, endDate, startTime, endTime, venue, category,
-      handledBy, organizers, poster, photos, galleryLink, status, isFeatured,
+      handledBy, speaker, organizers, poster, photos, galleryLink, status, isFeatured,
     } = body;
 
     const eventRaw = await addEvent({
       title, slug, description, agenda, outcomes, academicYear,
       startDate, endDate, startTime, endTime, venue, category,
-      handledBy, organizers, poster, photos, galleryLink,
+      handledBy, speaker, organizers, poster, photos, galleryLink,
       status: status ?? "upcoming",
       isFeatured: Boolean(isFeatured),
     });

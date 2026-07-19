@@ -27,6 +27,7 @@ interface PublicEvent {
   venue: string;
   category: string;
   handledBy: string;
+  speaker?: string;
   organizers: string[];
   poster?: string;
   photos?: string[];
