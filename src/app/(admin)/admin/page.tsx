@@ -13,6 +13,7 @@ import {
   PanelTop,
   TrendingUp,
   BookOpen,
+  Megaphone,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -78,6 +79,7 @@ export default function AdminDashboard() {
   ];
 
   const quickLinks = [
+    { href: "/admin/campaigns", label: "CAMPAIGNS_&_MAILING", desc: "Send mass emails & Telegram announcements", icon: Megaphone },
     { href: "/admin/members", label: "VIEW_ALL_MEMBERS", desc: "Search, filter and manage registrations", icon: Users },
     { href: "/admin/site-cms", label: "SITE_CMS", desc: "Edit hero, about, members, gallery, footer", icon: PanelTop },
     { href: "/admin/events", label: "EVENTS_MANAGER", desc: "Create and edit events", icon: Calendar },
