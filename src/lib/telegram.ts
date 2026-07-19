@@ -33,13 +33,28 @@ export const setupBotCommands = (bot: Bot) => {
         return;
       }
 
-      await ctx.reply(
-        isGroup
-          ? `Welcome to FOSS GCEE 🎉\n\nThis group is now registered for announcements!`
-          : `Welcome to FOSS GCEE 🎉\n\nYou are now registered for announcements.\n\nYou'll receive notifications whenever we organize a new event.`
-      );
+      const welcomeText = `Welcome to FOSS GCEE 🎉\n\n` +
+        `📝 Register for the club here:\nhttps://fossgcee.vercel.app/join\n\n` +
+        `🌐 Check out our FOSS United Forum thread:\nhttps://forum.fossunited.org/t/foss-club-government-college-of-engineering-erode/8457\n\n` +
+        (isGroup ? `This group is now registered for announcements!` : `You are now registered for announcements. You'll receive notifications whenever we organize a new event.`);
+
+      await ctx.reply(welcomeText);
     } catch (err) {
       console.error(err);
+    }
+  });
+
+  // Welcome new members automatically when they join the group
+  bot.on("message:new_chat_members", async (ctx) => {
+    const newMembers = ctx.message?.new_chat_members || [];
+    for (const member of newMembers) {
+      if (member.is_bot) continue;
+      
+      const welcomeText = `Welcome ${member.first_name} to FOSS GCEE! 🎉\n\n` +
+        `To get officially started, please complete your registration here:\nhttps://fossgcee.vercel.app/join\n\n` +
+        `Also, check out our FOSS United Forum thread:\nhttps://forum.fossunited.org/t/foss-club-government-college-of-engineering-erode/8457`;
+        
+      await ctx.reply(welcomeText);
     }
   });
 
