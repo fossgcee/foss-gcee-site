@@ -145,7 +145,7 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
                   <div className="space-y-1">
                     {event.speaker.split(/[\n,]+/).map((s: string) => s.trim()).filter(Boolean).map((s: string, idx: number) => (
                       <p key={idx} className="text-muted-2 text-sm sm:text-base font-semibold flex items-center gap-2">
-                        <span className="text-xs">🎙️</span> {s}
+                        <span className="text-xs">🎙️</span> {s.toUpperCase()}
                       </p>
                     ))}
                   </div>

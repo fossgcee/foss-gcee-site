@@ -127,7 +127,7 @@ export default function BlogsPage() {
                         <div className="w-full h-full flex items-center justify-center text-muted-2 bg-surface-2"><ImageIcon className="w-8 h-8 opacity-20" /></div>
                       )}
                     </div>
-                    <h3 className="font-pixel text-sm w-full text-text uppercase mb-2 line-clamp-2 leading-relaxed h-10">{post.title}</h3>
+                    <h3 className="font-pixel text-sm w-full text-text uppercase mb-2 line-clamp-2 leading-relaxed min-h-[3rem]">{post.title}</h3>
                     {post.excerpt && <p className="font-mono text-[11px] text-muted-2 line-clamp-3 mb-4">{post.excerpt}</p>}
                     
                     <div className="mt-auto space-y-1.5 pt-4 border-t border-border">

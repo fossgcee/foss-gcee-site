@@ -176,7 +176,7 @@ export default function EventsPage() {
                             <div className="w-full h-full flex items-center justify-center text-muted-2 bg-surface-2"><ImageIcon className="w-8 h-8 opacity-20" /></div>
                         )}
                       </div>
-                      <h3 className="font-pixel text-sm w-full text-text uppercase mb-3 line-clamp-2 leading-relaxed h-10">{event.title}</h3>
+                      <h3 className="font-pixel text-sm w-full text-text uppercase mb-3 line-clamp-2 leading-relaxed min-h-[3rem]">{event.title}</h3>
                       <div className="mt-auto space-y-1.5 pt-4 border-t border-border">
                         <p className="text-[10px] font-mono text-muted flex items-center gap-2">
                            <Calendar className="w-3 h-3 text-text opacity-50" />
@@ -244,7 +244,7 @@ export default function EventsPage() {
                           <div className="w-full h-full flex items-center justify-center text-muted-2 bg-surface-2"><ImageIcon className="w-8 h-8 opacity-20" /></div>
                        )}
                     </div>
-                    <h3 className="font-pixel text-sm w-full text-text uppercase mb-3 line-clamp-2 leading-relaxed h-10 group-hover:text-red-500 transition-colors">{event.title}</h3>
+                    <h3 className="font-pixel text-sm w-full text-text uppercase mb-3 line-clamp-2 leading-relaxed min-h-[3rem] group-hover:text-red-500 transition-colors">{event.title}</h3>
                     <div className="mt-auto space-y-1.5 pt-4 border-t border-border">
                       <p className="text-[10px] font-mono text-muted flex items-center gap-2">
                          <Calendar className="w-3 h-3 text-text opacity-50" />

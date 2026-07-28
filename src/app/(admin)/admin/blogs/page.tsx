@@ -301,20 +301,20 @@ export default function AdminBlogsManager() {
           </div>
         ) : filteredPosts.map((post) => (
           <div key={post._id} className="p-5 rounded-3xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.03] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-4 min-w-0 flex-1">
               <div className={`p-4 rounded-2xl border shrink-0 flex items-center justify-center ${post.status === "published" ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400" : "border-amber-500/20 bg-amber-500/10 text-amber-400"}`}>
                 <FileText className="w-6 h-6" />
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1 min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={`px-2 py-0.5 rounded-lg border text-[8px] font-mono ${post.status === "published" ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400" : "border-amber-500/20 bg-amber-500/10 text-amber-400"}`}>{post.status.toUpperCase()}</span>
                   <span className="px-2 py-0.5 rounded-lg border border-white/5 bg-white/5 text-[8px] font-mono text-white/50">{post.category?.name || "Uncategorized"}</span>
                 </div>
-                <h3 className="text-md font-pixel text-white uppercase">{post.title}</h3>
+                <h3 className="text-md font-pixel text-white uppercase break-words">{post.title}</h3>
                 <p className="font-mono text-[10px] text-white/30">By {post.author} · {new Date(post.createdAt).toLocaleDateString()}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 self-end sm:self-center">
+            <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
               <Link href={`/blog/${post.slug}`} target="_blank" className="p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all"><ExternalLink className="w-4 h-4" /></Link>
               <button onClick={() => handleEdit(post)} className="p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all"><Edit3 className="w-4 h-4" /></button>
               <button

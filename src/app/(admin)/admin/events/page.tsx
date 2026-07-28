@@ -435,11 +435,11 @@ export default function AdminEventsManager() {
           return (
             <div key={event._id} className="group relative p-1 rounded-3xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.03] transition-all">
               <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="flex items-start gap-5">
+                <div className="flex items-start gap-5 min-w-0 flex-1">
                   <div className={`p-4 rounded-2xl border ${statusColors[event.status]} shrink-0 flex items-center justify-center`}>
                     <CalendarIcon className="w-6 h-6" />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={`px-2 py-0.5 rounded-lg border text-[9px] font-mono flex items-center gap-1.5 ${statusColors[event.status]}`}>
                         <StatusIcon className="w-3 h-3" /> {event.status.toUpperCase()}
@@ -447,7 +447,7 @@ export default function AdminEventsManager() {
                       <span className="px-2 py-0.5 rounded-lg border border-white/5 bg-white/5 text-[9px] font-mono text-white/50">{event.category.toUpperCase()}</span>
                     </div>
                     <div>
-                      <h3 className="text-lg font-pixel text-white mb-1 uppercase tracking-tight">{event.title}</h3>
+                      <h3 className="text-lg font-pixel text-white mb-1 uppercase tracking-tight break-words">{event.title}</h3>
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] text-white/40">
                         <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3 opacity-50" /> {event.venue}</span>
                         <span className="flex items-center gap-1.5 font-bold text-white/60 lowercase italic">{event.startDate} → {event.endDate}</span>
@@ -456,7 +456,7 @@ export default function AdminEventsManager() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between md:justify-end gap-x-8 gap-y-4 pt-4 md:pt-0 border-t md:border-t-0 border-white/5">
+                <div className="flex items-center justify-between md:justify-end gap-x-8 gap-y-4 pt-4 md:pt-0 border-t md:border-t-0 border-white/5 shrink-0">
                   <button 
                     onClick={() => fetchRegistrations(event)}
                     className="flex items-center gap-4 group/reg"
