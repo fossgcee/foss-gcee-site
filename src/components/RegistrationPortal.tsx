@@ -14,7 +14,7 @@ const DEPARTMENTS = [
   "Electrical & Electronics Engineering",
   "Mechanical Engineering",
   "Civil Engineering",
-  "Artificial Intelligence & Data Science",
+  "Computer Science & Data Science",
   "Other",
 ];
 

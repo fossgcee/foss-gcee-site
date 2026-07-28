@@ -187,7 +187,7 @@ function FeedbackForm() {
                       <option value="MECH" className="bg-[#111]">Mechanical</option>
                       <option value="CIVIL" className="bg-[#111]">Civil</option>
                       <option value="AUTO" className="bg-[#111]">Automobile</option>
-                      <option value="AIDS" className="bg-[#111]">AI & DS</option>
+                      <option value="CSDS" className="bg-[#111]">CS & DS</option>
                       <option value="OTHER" className="bg-[#111]">Other</option>
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white/40">

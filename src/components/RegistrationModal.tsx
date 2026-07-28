@@ -171,7 +171,7 @@ export default function RegistrationModal({ isOpen, onClose, eventTitle, eventSl
                           <option value="MECH" className="bg-[#111]">Mech</option>
                           <option value="CIVIL" className="bg-[#111]">Civil</option>
                           <option value="AUTO" className="bg-[#111]">Auto</option>
-                          <option value="AIDS" className="bg-[#111]">AI&DS</option>
+                          <option value="CSDS" className="bg-[#111]">CS&DS</option>
                           <option value="OTHER" className="bg-[#111]">Other</option>
                         </select>
                         <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-white/30 fill-current" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>

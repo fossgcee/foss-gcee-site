@@ -24,7 +24,7 @@ interface Registration {
 }
 
 type FilterType = "all" | "verified" | "unverified" | "approved";
-type SortKey = "createdAt" | "name" | "year";
+type SortKey = "createdAt" | "name" | "year" | "department";
 type SortDir = "asc" | "desc";
 
 function VerifiedBadge({ verified }: { verified: boolean }) {
@@ -94,7 +94,7 @@ function EditModal({ member, onSave, onClose }: {
                 onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 font-mono text-xs text-white focus:outline-none appearance-none"
               >
-                {["Computer Science & Engineering", "Information Technology", "Electronics & Communication Engineering", "Electrical & Electronics Engineering", "Mechanical Engineering", "Civil Engineering", "Artificial Intelligence & Data Science", "Other"].map(d => (
+                {["Computer Science & Engineering", "Information Technology", "Electronics & Communication Engineering", "Electrical & Electronics Engineering", "Mechanical Engineering", "Civil Engineering", "Computer Science & Data Science", "Other"].map(d => (
                   <option key={d} value={d} className="bg-[#0a0a0a]">{d}</option>
                 ))}
               </select>
@@ -166,7 +166,7 @@ function MemberCard({ m, onApprove, onDelete, onEdit, onRole, actionLoading, del
   actionLoading: string | null;
   deleting: string | null;
 }) {
-  const deptShort = m.department.replace("Computer Science & Engineering", "CSE").replace("Information Technology", "IT").replace("Electronics & Communication Engineering", "ECE").replace("Electrical & Electronics Engineering", "EEE").replace("Mechanical Engineering", "Mech").replace("Civil Engineering", "Civil").replace("Artificial Intelligence & Data Science", "AI&DS");
+  const deptShort = m.department.replace("Computer Science & Engineering", "CSE").replace("Information Technology", "IT").replace("Electronics & Communication Engineering", "ECE").replace("Electrical & Electronics Engineering", "EEE").replace("Mechanical Engineering", "Mech").replace("Civil Engineering", "Civil").replace("Computer Science & Data Science", "CS&DS");
 
   return (
     <div className="rounded-2xl border border-white/8 bg-white/[0.02] overflow-hidden">
@@ -322,6 +322,7 @@ export default function AdminMembersPage() {
     { key: "createdAt", label: "Joined Date" },
     { key: "name", label: "Name" },
     { key: "year", label: "Year" },
+    { key: "department", label: "Dept" },
   ];
 
   const sorted = [...members].sort((a, b) => {
