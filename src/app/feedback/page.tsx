@@ -35,7 +35,7 @@ function FeedbackForm() {
   const selectedEvent = events.find(e => e.title === formData.eventName);
   const speakers = useMemo(() => {
     return selectedEvent?.speaker 
-      ? selectedEvent.speaker.split(/[\n,]+/).map(s => s.trim()).filter(Boolean)
+      ? selectedEvent.speaker.split(/[\n,]+/).map(s => s.trim()).filter(Boolean).filter(s => !s.startsWith("*"))
       : [];
   }, [selectedEvent]);
 
