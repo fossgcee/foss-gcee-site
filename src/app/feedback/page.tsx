@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { Send, CheckCircle, AlertCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
@@ -8,6 +8,7 @@ interface EventItem {
   _id: string;
   title: string;
   status: string;
+  speaker?: string;
 }
 
 function FeedbackForm() {
@@ -22,6 +23,7 @@ function FeedbackForm() {
     eventName: "",
     rating: 5,
     comments: "",
+    speakerRatings: {} as Record<string, number>,
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -29,6 +31,29 @@ function FeedbackForm() {
   
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
+
+  const selectedEvent = events.find(e => e.title === formData.eventName);
+  const speakers = useMemo(() => {
+    return selectedEvent?.speaker 
+      ? selectedEvent.speaker.split(/[\n,]+/).map(s => s.trim()).filter(Boolean)
+      : [];
+  }, [selectedEvent]);
+
+  useEffect(() => {
+    if (speakers.length > 1) {
+      setFormData(prev => {
+        const newSpeakerRatings = { ...prev.speakerRatings };
+        let changed = false;
+        speakers.forEach(s => {
+          if (newSpeakerRatings[s] === undefined) {
+            newSpeakerRatings[s] = 5;
+            changed = true;
+          }
+        });
+        return changed ? { ...prev, speakerRatings: newSpeakerRatings } : prev;
+      });
+    }
+  }, [speakers]);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -63,11 +88,19 @@ function FeedbackForm() {
     setLoading(true);
     setError(null);
 
+    let finalComments = formData.comments;
+    if (speakers.length > 1) {
+      const ratingsText = speakers
+        .map(s => `${s} (${formData.speakerRatings[s] || 5}/5)`)
+        .join(", ");
+      finalComments = `[Speaker Ratings: ${ratingsText}]\n\n${finalComments}`.trim();
+    }
+
     try {
       const res = await fetch("/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, comments: finalComments }),
       });
 
       const data = await res.json();
@@ -93,7 +126,7 @@ function FeedbackForm() {
           <button
             onClick={() => {
               setSuccess(false);
-              setFormData({ name: "", email: "", year: "1", department: "", eventName: "", rating: 5, comments: "" });
+              setFormData({ name: "", email: "", year: "1", department: "", eventName: "", rating: 5, comments: "", speakerRatings: {} });
             }}
             className="px-6 py-3 bg-white text-black font-mono text-sm font-bold rounded-xl hover:bg-white/90 transition-all"
           >
@@ -238,7 +271,7 @@ function FeedbackForm() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-mono text-[10px] uppercase tracking-widest text-white/40 ml-1">Rating *</label>
+                <label className="font-mono text-[10px] uppercase tracking-widest text-white/40 ml-1">{speakers.length > 1 ? "Event Overall Rating *" : "Rating *"}</label>
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -264,6 +297,39 @@ function FeedbackForm() {
                   ))}
                 </div>
               </div>
+
+              {speakers.length > 1 && speakers.map((speaker, idx) => (
+                <div key={idx} className="space-y-1.5">
+                  <label className="font-mono text-[10px] uppercase tracking-widest text-white/40 ml-1">Rate Speaker: {speaker} *</label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setFormData({ 
+                          ...formData, 
+                          speakerRatings: { ...formData.speakerRatings, [speaker]: star } 
+                        })}
+                        className={`w-12 h-12 rounded-xl border flex items-center justify-center transition-all ${
+                          (formData.speakerRatings[speaker] || 5) >= star 
+                            ? "bg-amber-500/10 border-amber-500 text-amber-500" 
+                            : "bg-white/[0.03] border-white/8 text-white/40 hover:bg-white/[0.06]"
+                        }`}
+                      >
+                        <svg
+                          className="w-6 h-6"
+                          fill={(formData.speakerRatings[speaker] || 5) >= star ? "currentColor" : "none"}
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        </svg>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
 
               <div className="space-y-1.5">
                 <label className="font-mono text-[10px] uppercase tracking-widest text-white/40 ml-1">Comments / Suggestions</label>
