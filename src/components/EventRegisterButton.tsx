@@ -25,7 +25,7 @@ export default function EventRegisterButton({
   children,
 }: EventRegisterButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const baseClassName = className || "inline-flex items-center justify-center gap-3 px-10 py-5 rounded-[20px] bg-text text-bg font-pixel text-[12px] uppercase tracking-[0.15em] hover:scale-[1.05] active:scale-[0.98] shadow-[0_0_30px_var(--color-accent-glow)] border border-border-2 transition-all duration-300 cursor-pointer";
+  const baseClassName = className || "inline-flex items-center justify-center gap-3 px-10 py-5 rounded-[20px] bg-emerald-500 hover:bg-emerald-400 text-black font-pixel text-[12px] uppercase tracking-[0.15em] hover:scale-[1.05] active:scale-[0.98] shadow-[0_0_30px_rgba(16,185,129,0.35)] hover:shadow-[0_0_45px_rgba(16,185,129,0.55)] border border-emerald-400/50 transition-all duration-300 cursor-pointer";
 
   let rsvpLabel = label;
   if (!rsvpLabel) {

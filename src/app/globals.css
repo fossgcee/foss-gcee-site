@@ -23,6 +23,15 @@
     --color-accent-glow: rgba(0, 0, 0, 0.12);
     --grid-color: rgba(0, 0, 0, 0.04);
 
+    /* Backwards compatibility aliases */
+    --surface: var(--color-surface);
+    --surface-2: var(--color-surface-2);
+    --border: var(--color-border);
+    --border-2: var(--color-border-2);
+    --accent: var(--color-accent);
+    --accent-dim: var(--color-accent-dim);
+    --accent-glow: var(--color-accent-glow);
+
     --font-pixel: "Press Start 2P", monospace;
     --font-body: "Inter", system-ui, sans-serif;
     --font-mono: "JetBrains Mono", monospace;
@@ -43,6 +52,15 @@
     --color-accent-dim: rgba(255, 255, 255, 0.07);
     --color-accent-glow: rgba(255, 255, 255, 0.15);
     --grid-color: rgba(255, 255, 255, 0.045);
+
+    /* Backwards compatibility aliases */
+    --surface: var(--color-surface);
+    --surface-2: var(--color-surface-2);
+    --border: var(--color-border);
+    --border-2: var(--color-border-2);
+    --accent: var(--color-accent);
+    --accent-dim: var(--color-accent-dim);
+    --accent-glow: var(--color-accent-glow);
   }
 }
 
