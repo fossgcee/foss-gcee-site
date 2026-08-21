@@ -32,7 +32,9 @@ import { AnimatePresence, motion } from "framer-motion";
 
 interface AgendaItem {
   time: string;
-  topic: string;
+  title: string;
+  topic?: string;
+  description: string;
 }
 
 interface EventData {
@@ -866,7 +868,7 @@ export default function AdminEventsManager() {
                         <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Event Agenda</label>
                         <button
                           type="button"
-                          onClick={() => setFormData(prev => ({ ...prev, agenda: [...(prev.agenda || []), { time: "", topic: "" }] }))}
+                          onClick={() => setFormData(prev => ({ ...prev, agenda: [...(prev.agenda || []), { time: "", title: "", description: "" }] }))}
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[9px] font-mono text-white/60 hover:text-white hover:bg-white/10 transition-all"
                         >
                           <Plus className="w-3 h-3" /> Add Item
@@ -877,38 +879,61 @@ export default function AdminEventsManager() {
                       ) : (
                         <div className="space-y-3">
                           {(formData.agenda || []).map((item, i) => (
-                            <div key={i} className="flex items-center gap-3">
-                              <input
-                                type="time"
-                                value={item.time}
-                                onChange={e => {
-                                  const updated = [...(formData.agenda || [])];
-                                  updated[i] = { ...updated[i], time: e.target.value };
-                                  setFormData(prev => ({ ...prev, agenda: updated }));
-                                }}
-                                className="w-28 px-3 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 [color-scheme:dark] shrink-0"
-                              />
-                              <input
-                                type="text"
-                                value={item.topic}
-                                placeholder="Session topic or activity..."
-                                onChange={e => {
-                                  const updated = [...(formData.agenda || [])];
-                                  updated[i] = { ...updated[i], topic: e.target.value };
-                                  setFormData(prev => ({ ...prev, agenda: updated }));
-                                }}
-                                className="flex-1 px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 placeholder:text-white/10"
-                              />
+                            <div key={i} className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 space-y-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr_auto] gap-3">
+                                <div className="space-y-1">
+                                  <label className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Time</label>
+                                  <input
+                                    type="text"
+                                    value={item.time}
+                                    placeholder="12:10 PM - 12:30 PM"
+                                    onChange={e => {
+                                      const updated = [...(formData.agenda || [])];
+                                      updated[i] = { ...updated[i], time: e.target.value };
+                                      setFormData(prev => ({ ...prev, agenda: updated }));
+                                    }}
+                                    className="w-full px-3 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 placeholder:text-white/10"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Title</label>
+                                  <input
+                                    type="text"
+                                    value={item.title || item.topic || ""}
+                                    placeholder="Linux Basics Walkthrough"
+                                    onChange={e => {
+                                      const updated = [...(formData.agenda || [])];
+                                      updated[i] = { ...updated[i], title: e.target.value, topic: undefined };
+                                      setFormData(prev => ({ ...prev, agenda: updated }));
+                                    }}
+                                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 placeholder:text-white/10"
+                                  />
+                                </div>
                               <button
                                 type="button"
                                 onClick={() => {
                                   const updated = (formData.agenda || []).filter((_, j) => j !== i);
                                   setFormData(prev => ({ ...prev, agenda: updated }));
                                 }}
-                                className="p-2.5 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-all shrink-0"
+                                  className="self-end p-3 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-all shrink-0"
                               >
                                 <X className="w-3.5 h-3.5" />
                               </button>
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Description</label>
+                                <textarea
+                                  rows={2}
+                                  value={item.description || ""}
+                                  placeholder="Quick intro to navigating Linux - terminal basics, file system, and everyday usage tips."
+                                  onChange={e => {
+                                    const updated = [...(formData.agenda || [])];
+                                    updated[i] = { ...updated[i], description: e.target.value };
+                                    setFormData(prev => ({ ...prev, agenda: updated }));
+                                  }}
+                                  className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 placeholder:text-white/10 resize-none"
+                                />
+                              </div>
                             </div>
                           ))}
                         </div>

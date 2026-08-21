@@ -7,22 +7,27 @@ import { sendTelegramBroadcast } from "@/lib/telegram";
 import { requireAdmin } from "@/lib/adminAuth";
 import { emailRegex, getSiteUrl, getLogoUrl, escapeHtml, getErrorMessage } from "@/lib/utils";
 
-type AgendaItem = { time?: string; topic?: string };
+type AgendaItem = { time?: string; title?: string; topic?: string; description?: string };
 
 const normalizeAgenda = (agenda?: AgendaItem[]) =>
   (agenda || []).map((item) => ({
     time: (item.time || "").trim(),
-    topic: (item.topic || "").trim(),
-  })).filter((item) => item.time || item.topic);
+    title: (item.title || item.topic || "").trim(),
+    description: (item.description || "").trim(),
+  })).filter((item) => item.time || item.title || item.description);
 
 const isHttpUrl = (value: string) => {
   try {
     const url = new URL(value);
     return url.protocol === "http:" || url.protocol === "https:";
   } catch {
-    return false;
+  return false;
   }
 };
+
+const isMissingRegistrationColumnsError = (error: unknown) =>
+  getErrorMessage(error).includes("registration_mode") ||
+  getErrorMessage(error).includes("external_rsvp_url");
 
 const mapEvent = (item: any) => ({
   ...item,
@@ -63,15 +68,19 @@ const buildAgendaUpdateEmail = (event: {
   const agenda = normalizeAgenda(event.agenda);
 
   const agendaLines = agenda.length
-    ? agenda.map((item) => `${item.time ? `${item.time} — ` : ""}${item.topic || "Session update"}`)
+    ? agenda.map((item) => [
+        item.time ? `Time: ${item.time}` : "",
+        item.title ? `Title: ${item.title}` : "",
+        item.description ? `Description: ${item.description}` : "",
+      ].filter(Boolean).join(" | "))
     : ["Agenda details will be updated soon."];
 
   const agendaHtml = agenda.length
     ? agenda.map((item) => `
         <li style="margin-bottom:8px;">
-          <span style="color:#ffffff;font-weight:600;">${escapeHtml(item.time || "")}</span>
-          ${item.time ? `<span style="color:rgba(255,255,255,0.4);"> — </span>` : ""}
-          <span style="color:rgba(255,255,255,0.75);">${escapeHtml(item.topic || "Session update")}</span>
+          ${item.time ? `<div style="color:#ffffff;font-weight:600;">${escapeHtml(item.time)}</div>` : ""}
+          <div style="color:rgba(255,255,255,0.78);font-weight:600;">${escapeHtml(item.title || "Session update")}</div>
+          ${item.description ? `<div style="color:rgba(255,255,255,0.58);line-height:1.5;margin-top:2px;">${escapeHtml(item.description)}</div>` : ""}
         </li>
       `).join("")
     : `<li style="margin-bottom:8px;color:rgba(255,255,255,0.7);">Agenda details will be updated soon.</li>`;
@@ -241,7 +250,7 @@ export async function POST(request: Request) {
     }
 
     const eventRaw = await addEvent({
-      title, slug, description, agenda, outcomes, academicYear,
+      title, slug, description, agenda: normalizeAgenda(agenda), outcomes, academicYear,
       startDate, endDate, startTime, endTime, venue, category,
       handledBy, speaker, organizers, poster, photos, galleryLink,
       registrationMode: nextRegistrationMode,
@@ -291,6 +300,12 @@ export async function POST(request: Request) {
     });
   } catch (error: unknown) {
     console.error("Create Event Error:", error);
+    if (isMissingRegistrationColumnsError(error)) {
+      return NextResponse.json({
+        success: false,
+        error: "Database migration required. Apply 20260822000000_event_registration_source.sql in Supabase, then try again.",
+      }, { status: 409 });
+    }
     return NextResponse.json({
       success: false,
       error: "Failed to create event.",
@@ -322,6 +337,9 @@ export async function PUT(request: Request) {
     }
 
     const updatePayload: Record<string, unknown> = { ...body };
+    if (Object.prototype.hasOwnProperty.call(body, "agenda")) {
+      updatePayload.agenda = normalizeAgenda(body.agenda);
+    }
     const nextRegistrationMode = Object.prototype.hasOwnProperty.call(body, "registrationMode")
       ? (body.registrationMode === "external" ? "external" : "internal")
       : (existing.registration_mode || "internal");
@@ -397,6 +415,12 @@ export async function PUT(request: Request) {
     });
   } catch (error: unknown) {
     console.error("Update Event Error:", error);
+    if (isMissingRegistrationColumnsError(error)) {
+      return NextResponse.json({
+        success: false,
+        error: "Database migration required. Apply 20260822000000_event_registration_source.sql in Supabase, then try again.",
+      }, { status: 409 });
+    }
     return NextResponse.json({
       success: false,
       error: getErrorMessage(error),

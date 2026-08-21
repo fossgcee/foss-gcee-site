@@ -5,7 +5,7 @@ import { getEvents, getEventBySlug } from "@/services/event";
 import { ArrowLeft, CheckCircle2, ListChecks, Award, ExternalLink, MessageSquare } from "lucide-react";
 import EventRegisterButton from "@/components/EventRegisterButton";
 
-type AgendaItem = { time: string; topic: string };
+type AgendaItem = { time: string; title?: string; topic?: string; description?: string };
 
 type EventSlug = { slug: string };
 
@@ -198,9 +198,14 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
                   <div className="w-1.5 h-1.5 rounded-full bg-text/40 group-hover:bg-text transition-colors" />
                 </div>
                 <div className="glass-card p-5 group-hover:-translate-x-0.5 transition-transform">
-                  <div className="flex items-center gap-4">
-                    <span className="font-pixel text-xs text-muted bg-surface-2 border border-border px-3 py-1.5 rounded-lg shrink-0">{item.time}</span>
-                    <p className="font-mono text-sm text-text">{item.topic}</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-3 sm:gap-5">
+                    <span className="font-pixel text-xs text-muted bg-surface-2 border border-border px-3 py-1.5 rounded-lg shrink-0 self-start">{item.time}</span>
+                    <div className="space-y-2">
+                      <p className="font-mono text-sm font-semibold text-text">{item.title || item.topic}</p>
+                      {item.description && (
+                        <p className="font-mono text-xs sm:text-sm text-muted-2 leading-relaxed">{item.description}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

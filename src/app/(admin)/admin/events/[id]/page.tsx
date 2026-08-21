@@ -8,7 +8,7 @@ import Link from "next/link";
 interface EventContent {
   _id: string;
   title: string;
-  agenda?: { time: string; topic: string }[];
+  agenda?: { time: string; title?: string; topic?: string; description?: string }[];
   outcomes?: string;
   photos?: string[];
   galleryLink?: string;
@@ -99,7 +99,7 @@ export default function AdminEventContentPage() {
                <h2 className="font-mono text-xs uppercase tracking-widest text-white/80">Event Agenda Timeline</h2>
              </div>
              <button 
-               onClick={() => setEvent(prev => prev ? { ...prev, agenda: [...(prev.agenda || []), { time: "09:00", topic: "New Agenda Item" }] } : prev)}
+               onClick={() => setEvent(prev => prev ? { ...prev, agenda: [...(prev.agenda || []), { time: "12:10 PM - 12:30 PM", title: "New Agenda Item", description: "" }] } : prev)}
                className="font-pixel text-[10px] text-emerald-400 uppercase bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors"
              >
                + ADD_ENTRY
@@ -111,9 +111,10 @@ export default function AdminEventContentPage() {
                <p className="font-mono text-[10px] text-white/20 italic p-4 text-center border border-dashed border-white/10 rounded-2xl">No timeline entries. Add one above.</p>
              )}
              {(event.agenda || []).map((item, idx) => (
-                <div key={idx} className="flex flex-col sm:flex-row gap-3 p-4 bg-white/[0.02] border border-white/10 rounded-2xl items-start sm:items-center">
-                  <div className="space-y-1 w-full sm:w-32 shrink-0">
-                    <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest pl-1">TIME (e.g. 09:00 AM)</label>
+                <div key={idx} className="p-4 bg-white/[0.02] border border-white/10 rounded-2xl space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr_auto] gap-3">
+                  <div className="space-y-1 w-full shrink-0">
+                    <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest pl-1">TIME RANGE</label>
                     <input 
                       type="text" 
                       value={item.time} 
@@ -122,20 +123,22 @@ export default function AdminEventContentPage() {
                         newAgenda[idx].time = e.target.value;
                         setEvent({ ...event, agenda: newAgenda });
                       }}
-                      className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-white/30"
+                      placeholder="12:10 PM - 12:30 PM"
+                      className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-white/30 placeholder:text-white/10"
                     />
                   </div>
                   <div className="space-y-1 flex-1 w-full">
-                    <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest pl-1">TOPIC / TITLE</label>
+                    <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest pl-1">TITLE</label>
                     <input 
                       type="text" 
-                      value={item.topic} 
+                      value={item.title || item.topic || ""} 
                       onChange={e => {
                         const newAgenda = [...(event.agenda || [])];
-                        newAgenda[idx].topic = e.target.value;
+                        newAgenda[idx] = { ...newAgenda[idx], title: e.target.value, topic: undefined };
                         setEvent({ ...event, agenda: newAgenda });
                       }}
-                      className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-white/30"
+                      placeholder="Linux Basics Walkthrough"
+                      className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-white/30 placeholder:text-white/10"
                     />
                   </div>
                   <button 
@@ -143,10 +146,25 @@ export default function AdminEventContentPage() {
                       const newAgenda = (event.agenda || []).filter((_, i) => i !== idx);
                       setEvent({ ...event, agenda: newAgenda });
                     }}
-                    className="p-3 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500/20 transition-colors mt-auto"
+                    className="self-end p-3 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500/20 transition-colors"
                   >
                     <Trash className="w-4 h-4" />
                   </button>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest pl-1">DESCRIPTION</label>
+                    <textarea
+                      value={item.description || ""}
+                      onChange={e => {
+                        const newAgenda = [...(event.agenda || [])];
+                        newAgenda[idx] = { ...newAgenda[idx], description: e.target.value };
+                        setEvent({ ...event, agenda: newAgenda });
+                      }}
+                      rows={2}
+                      placeholder="Quick intro to navigating Linux - terminal basics, file system, and everyday usage tips."
+                      className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-white/30 resize-none placeholder:text-white/10"
+                    />
+                  </div>
                 </div>
              ))}
            </div>
