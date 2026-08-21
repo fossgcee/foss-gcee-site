@@ -83,6 +83,8 @@ export default function AdminEventsManager() {
   const [regLoading, setRegLoading] = useState(false);
   const [registrations, setRegistrations] = useState<MemberRegistration[]>([]);
   const [selectedEventReg, setSelectedEventReg] = useState<EventData | null>(null);
+  const [isImportingCsv, setIsImportingCsv] = useState(false);
+  const [csvImportStatus, setCsvImportStatus] = useState<string | null>(null);
   const [emailSubject, setEmailSubject] = useState("");
   const [emailMessage, setEmailMessage] = useState("");
   const [emailStatus, setEmailStatus] = useState<string | null>(null);
@@ -146,6 +148,7 @@ export default function AdminEventsManager() {
     setEmailSubject(`Upcoming Event: ${event.title}`);
     setEmailMessage("");
     setEmailStatus(null);
+    setCsvImportStatus(null);
     setIsRegModalOpen(true);
     setRegLoading(true);
     try {
@@ -154,6 +157,44 @@ export default function AdminEventsManager() {
       if (d.success) setRegistrations(d.data);
     } finally {
       setRegLoading(false);
+    }
+  };
+
+  const handleImportRegistrations = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedEventReg) return;
+
+    const body = new FormData();
+    body.append("eventSlug", selectedEventReg.slug);
+    body.append("file", file);
+
+    setIsImportingCsv(true);
+    setCsvImportStatus(null);
+    try {
+      const res = await fetch("/api/admin/events/registrations", {
+        method: "POST",
+        body,
+      });
+      const d = await res.json();
+
+      if (!d.success) {
+        setCsvImportStatus(d.error || "CSV import failed.");
+        return;
+      }
+
+      setRegistrations(d.data.registrations);
+      setEvents(prev => prev.map(event => (
+        event._id === selectedEventReg._id
+          ? { ...event, registrationsCount: d.data.count }
+          : event
+      )));
+      setSelectedEventReg(prev => prev ? { ...prev, registrationsCount: d.data.count } : prev);
+      setCsvImportStatus(`${d.data.inserted} imported, ${d.data.updated} updated, ${d.data.skipped} skipped.`);
+    } catch {
+      setCsvImportStatus("CSV import failed.");
+    } finally {
+      setIsImportingCsv(false);
+      e.target.value = "";
     }
   };
 
@@ -518,6 +559,29 @@ export default function AdminEventsManager() {
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-8">
+                   <div className="mb-6 rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.03] p-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="space-y-1">
+                          <p className="font-pixel text-[10px] text-white uppercase">IMPORT_RSVP_CSV</p>
+                          <p className="font-mono text-[9px] text-white/30 uppercase tracking-widest">FOSS United or external RSVP export</p>
+                        </div>
+                        <label className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-pixel text-[10px] uppercase cursor-pointer hover:bg-emerald-500/15 transition-all">
+                          {isImportingCsv ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                          {isImportingCsv ? "IMPORTING" : "UPLOAD_CSV"}
+                          <input
+                            type="file"
+                            accept=".csv,text/csv"
+                            className="hidden"
+                            onChange={handleImportRegistrations}
+                            disabled={isImportingCsv || regLoading}
+                          />
+                        </label>
+                      </div>
+                      {csvImportStatus && (
+                        <p className="mt-3 font-mono text-[9px] text-white/40 uppercase tracking-widest">{csvImportStatus}</p>
+                      )}
+                   </div>
+
                    {regLoading ? (
                      <div className="h-full flex flex-col items-center justify-center space-y-4">
                         <Loader2 className="w-10 h-10 text-white/20 animate-spin" />
@@ -1012,4 +1076,3 @@ export default function AdminEventsManager() {
     </div>
   );
 }
-
