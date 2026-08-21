@@ -236,9 +236,9 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
             href={galleryLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-surface-2 border border-border-2 font-pixel text-xs uppercase tracking-tight text-text hover:scale-[1.02] transition-all"
+            className="inline-flex items-center gap-2 px-4 py-3 sm:px-6 sm:py-3 rounded-2xl bg-surface-2 border border-border-2 font-pixel text-[9px] sm:text-xs uppercase tracking-wider sm:tracking-tight text-text hover:scale-[1.02] transition-all"
           >
-            OPEN_ENTE_PHOTO_ALBUM <ExternalLink className="w-4 h-4" />
+            OPEN_ENTE_PHOTO_ALBUM <ExternalLink className="w-4 h-4 shrink-0" />
           </a>
         </section>
       )}

@@ -165,7 +165,7 @@ export default function EventsPage() {
         {/* ── Upcoming Events Grid ─────────────────────────────────── */}
         {upcomingEvents.length > 0 && (
           <div className="space-y-8 mb-24">
-            <h2 className="text-2xl font-pixel tracking-wide border-b border-border pb-4 text-text uppercase">
+            <h2 className="text-sm sm:text-lg md:text-2xl font-pixel tracking-wide border-b border-border pb-4 text-text uppercase">
               Upcoming Events
             </h2>
             <div className="events-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -220,7 +220,7 @@ export default function EventsPage() {
         {/* ── Past Academic Years (Archive) ─────────────────────────────────── */}
         <div className="space-y-8">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-border pb-4">
-             <h2 className="text-2xl font-pixel tracking-wide text-text uppercase">
+             <h2 className="text-sm sm:text-lg md:text-2xl font-pixel tracking-wide text-text uppercase">
                Past Academic Years
              </h2>
              
@@ -284,7 +284,7 @@ export default function EventsPage() {
         <div className="pt-24 text-center">
            <Link 
              href="/join"
-             className="inline-flex items-center gap-4 px-12 py-6 rounded-[24px] bg-text text-bg font-pixel text-[11px] border border-border hover:scale-[1.05] active:scale-[0.95] transition-all shadow-[0_10px_60px_rgba(255,255,255,0.15)] uppercase tracking-widest"
+             className="inline-flex items-center gap-4 px-6 py-4.5 sm:px-12 sm:py-6 rounded-[24px] bg-text text-bg font-pixel text-[8px] sm:text-[11px] border border-border hover:scale-[1.05] active:scale-[0.95] transition-all shadow-[0_10px_60px_rgba(255,255,255,0.15)] uppercase tracking-wider sm:tracking-widest"
            >
               INITIATE_JOIN_SEQUENCE <ArrowRight className="w-4 h-4" />
            </Link>
