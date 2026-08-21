@@ -8,7 +8,8 @@ import {
   Clock,
   ArrowRight, 
   Image as ImageIcon,
-  Loader2
+  Loader2,
+  ExternalLink
 } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -32,6 +33,8 @@ interface PublicEvent {
   poster?: string;
   photos?: string[];
   galleryLink?: string;
+  registrationMode?: "internal" | "external";
+  externalRsvpUrl?: string;
   status: "upcoming" | "completed" | "draft";
   isFeatured?: boolean;
   academicYear: string;
@@ -115,6 +118,10 @@ export default function EventsPage() {
   }, [loading, events, selectedYear]);
 
   const handleRegister = (event: PublicEvent) => {
+    if (event.registrationMode === "external" && event.externalRsvpUrl) {
+      window.open(event.externalRsvpUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
     setSelectedEvent(event);
     setIsModalOpen(true);
   };
@@ -194,7 +201,13 @@ export default function EventsPage() {
                           }}
                           className="mt-3 w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-border bg-text text-bg font-mono text-[10px] uppercase tracking-widest hover:scale-[1.02] transition-transform"
                         >
-                          REGISTER_NOW
+                          {event.registrationMode === "external" ? (
+                            <>
+                              RSVP_ON_FOSSUNITED <ExternalLink className="w-3 h-3" />
+                            </>
+                          ) : (
+                            "REGISTER_NOW"
+                          )}
                         </button>
                       </div>
                   </div>

@@ -53,6 +53,8 @@ interface EventData {
   poster?: string;
   photos?: string[];
   galleryLink?: string;
+  registrationMode?: "internal" | "external";
+  externalRsvpUrl?: string;
   agenda?: AgendaItem[];
   outcomes?: string;
   status: "upcoming" | "completed" | "draft";
@@ -123,6 +125,8 @@ export default function AdminEventsManager() {
     organizers: [],
     photos: [],
     galleryLink: "",
+    registrationMode: "internal",
+    externalRsvpUrl: "",
     agenda: [],
     outcomes: "",
     status: "upcoming",
@@ -272,6 +276,7 @@ export default function AdminEventsManager() {
       title: "", slug: "", description: "", academicYear: "", startDate: "", endDate: "",
       startTime: "09:00", endTime: "17:00", venue: "", category: "workshop",
       handledBy: "", speaker: "", organizers: [], photos: [], agenda: [], outcomes: "",
+      registrationMode: "internal", externalRsvpUrl: "",
       status: "upcoming", isFeatured: false, registrationsCount: 0,
       galleryLink: ""
     });
@@ -280,7 +285,11 @@ export default function AdminEventsManager() {
 
   const handleEdit = (event: EventData) => {
     setEditingEvent(event);
-    setFormData(event);
+    setFormData({
+      ...event,
+      registrationMode: event.registrationMode || "internal",
+      externalRsvpUrl: event.externalRsvpUrl || "",
+    });
     setIsModalOpen(true);
   };
 
@@ -813,6 +822,42 @@ export default function AdminEventsManager() {
                     <div className="space-y-2">
                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Description</label>
                        <textarea required rows={5} className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all resize-none placeholder:text-white/10" placeholder="Describe the mission scope..." value={formData.description} onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))} />
+                    </div>
+
+                    <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-mono text-white/70 uppercase tracking-widest font-bold">Registration Source</label>
+                        <p className="text-[9px] font-mono text-white/35 uppercase leading-relaxed">Choose one source for this event. Public pages will show only that registration action.</p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { value: "internal", label: "Club Website" },
+                          { value: "external", label: "External RSVP" },
+                        ].map((option) => (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, registrationMode: option.value as EventData["registrationMode"] }))}
+                            className={`px-3 py-3 rounded-xl border font-pixel text-[9px] uppercase transition-all ${
+                              formData.registrationMode === option.value
+                                ? "bg-white text-black border-white"
+                                : "bg-white/[0.03] text-white/45 border-white/10 hover:text-white hover:bg-white/[0.06]"
+                            }`}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                      {formData.registrationMode === "external" && (
+                        <input
+                          required
+                          type="url"
+                          value={formData.externalRsvpUrl || ""}
+                          placeholder="https://fossunited.org/c/.../rsvp"
+                          onChange={e => setFormData(prev => ({ ...prev, externalRsvpUrl: e.target.value }))}
+                          className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 placeholder:text-white/10"
+                        />
+                      )}
                     </div>
 
                     {/* Agenda builder */}

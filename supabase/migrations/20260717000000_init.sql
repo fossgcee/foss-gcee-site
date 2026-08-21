@@ -114,6 +114,8 @@ CREATE TABLE public.events (
     poster TEXT,
     photos TEXT[] DEFAULT '{}'::text[] NOT NULL,
     gallery_link TEXT DEFAULT ''::text NOT NULL,
+    registration_mode TEXT DEFAULT 'internal'::text NOT NULL CHECK (registration_mode IN ('internal', 'external')),
+    external_rsvp_url TEXT DEFAULT ''::text NOT NULL,
     status TEXT DEFAULT 'upcoming'::text NOT NULL CHECK (status IN ('upcoming', 'completed', 'draft')),
     manual_status BOOLEAN DEFAULT false NOT NULL,
     is_featured BOOLEAN DEFAULT false NOT NULL,

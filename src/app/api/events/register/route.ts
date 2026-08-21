@@ -40,6 +40,9 @@ export async function POST(request: Request) {
     if (event.status === "completed") {
       return NextResponse.json({ success: false, error: "Registrations are closed. This event has already concluded." }, { status: 400 });
     }
+    if (event.registration_mode === "external") {
+      return NextResponse.json({ success: false, error: "This event uses an external RSVP form. Please register from the event page." }, { status: 400 });
+    }
 
     // Check for duplicate registration
     const { data: existingReg, error: regErr } = await supabase

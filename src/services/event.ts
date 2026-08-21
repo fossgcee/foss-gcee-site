@@ -19,6 +19,8 @@ export async function getEvents(filters?: { status?: string; isFeatured?: boolea
     handledBy: item.handled_by,
     speaker: item.speaker || "",
     galleryLink: item.gallery_link,
+    registrationMode: item.registration_mode || "internal",
+    externalRsvpUrl: item.external_rsvp_url || "",
     manualStatus: item.manual_status,
     isFeatured: item.is_featured,
     registrationsCount: item.registrations_count,
@@ -43,6 +45,8 @@ export async function getEventBySlug(slug: string) {
     handledBy: data.handled_by,
     speaker: data.speaker || "",
     galleryLink: data.gallery_link,
+    registrationMode: data.registration_mode || "internal",
+    externalRsvpUrl: data.external_rsvp_url || "",
     manualStatus: data.manual_status,
     isFeatured: data.is_featured,
     registrationsCount: data.registrations_count,
@@ -73,6 +77,8 @@ export async function addEvent(ev: any) {
       poster: ev.poster,
       photos: ev.photos || [],
       gallery_link: ev.galleryLink || "",
+      registration_mode: ev.registrationMode || "internal",
+      external_rsvp_url: ev.externalRsvpUrl || "",
       status: ev.status || "upcoming",
       manual_status: ev.manualStatus || false,
       is_featured: ev.isFeatured || false
@@ -103,6 +109,8 @@ export async function updateEvent(id: string, ev: any) {
   if (ev.poster !== undefined) mapped.poster = ev.poster;
   if (ev.photos !== undefined) mapped.photos = ev.photos;
   if (ev.galleryLink !== undefined) mapped.gallery_link = ev.galleryLink;
+  if (ev.registrationMode !== undefined) mapped.registration_mode = ev.registrationMode;
+  if (ev.externalRsvpUrl !== undefined) mapped.external_rsvp_url = ev.externalRsvpUrl;
   if (ev.status !== undefined) mapped.status = ev.status;
   if (ev.manualStatus !== undefined) mapped.manual_status = ev.manualStatus;
   if (ev.isFeatured !== undefined) mapped.is_featured = ev.isFeatured;

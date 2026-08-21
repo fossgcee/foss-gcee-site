@@ -15,6 +15,15 @@ const normalizeAgenda = (agenda?: AgendaItem[]) =>
     topic: (item.topic || "").trim(),
   })).filter((item) => item.time || item.topic);
 
+const isHttpUrl = (value: string) => {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
 const mapEvent = (item: any) => ({
   ...item,
   _id: item.id,
@@ -26,6 +35,8 @@ const mapEvent = (item: any) => ({
   handledBy: item.handled_by,
   speaker: item.speaker || "",
   galleryLink: item.gallery_link,
+  registrationMode: item.registration_mode || "internal",
+  externalRsvpUrl: item.external_rsvp_url || "",
   manualStatus: item.manual_status,
   isFeatured: item.is_featured,
   registrationsCount: item.registrations_count,
@@ -220,12 +231,21 @@ export async function POST(request: Request) {
       title, slug, description, agenda, outcomes, academicYear,
       startDate, endDate, startTime, endTime, venue, category,
       handledBy, speaker, organizers, poster, photos, galleryLink, status, isFeatured,
+      registrationMode, externalRsvpUrl,
     } = body;
+    const nextRegistrationMode = registrationMode === "external" ? "external" : "internal";
+    const nextExternalRsvpUrl = String(externalRsvpUrl || "").trim();
+
+    if (nextRegistrationMode === "external" && !isHttpUrl(nextExternalRsvpUrl)) {
+      return NextResponse.json({ success: false, error: "A valid external RSVP URL is required." }, { status: 400 });
+    }
 
     const eventRaw = await addEvent({
       title, slug, description, agenda, outcomes, academicYear,
       startDate, endDate, startTime, endTime, venue, category,
       handledBy, speaker, organizers, poster, photos, galleryLink,
+      registrationMode: nextRegistrationMode,
+      externalRsvpUrl: nextRegistrationMode === "external" ? nextExternalRsvpUrl : "",
       status: status ?? "upcoming",
       isFeatured: Boolean(isFeatured),
     });
@@ -302,6 +322,24 @@ export async function PUT(request: Request) {
     }
 
     const updatePayload: Record<string, unknown> = { ...body };
+    const nextRegistrationMode = Object.prototype.hasOwnProperty.call(body, "registrationMode")
+      ? (body.registrationMode === "external" ? "external" : "internal")
+      : (existing.registration_mode || "internal");
+    const nextExternalRsvpUrl = Object.prototype.hasOwnProperty.call(body, "externalRsvpUrl")
+      ? String(body.externalRsvpUrl || "").trim()
+      : String(existing.external_rsvp_url || "").trim();
+
+    if (nextRegistrationMode === "external" && !isHttpUrl(nextExternalRsvpUrl)) {
+      return NextResponse.json({ success: false, error: "A valid external RSVP URL is required." }, { status: 400 });
+    }
+
+    if (Object.prototype.hasOwnProperty.call(body, "registrationMode")) {
+      updatePayload.registrationMode = nextRegistrationMode;
+      updatePayload.externalRsvpUrl = nextRegistrationMode === "external" ? nextExternalRsvpUrl : "";
+    } else if (Object.prototype.hasOwnProperty.call(body, "externalRsvpUrl")) {
+      updatePayload.externalRsvpUrl = nextExternalRsvpUrl;
+    }
+
     if (Object.prototype.hasOwnProperty.call(body, "status")) {
       updatePayload.manualStatus = true;
     }
