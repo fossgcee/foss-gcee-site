@@ -20,12 +20,29 @@ export default function EventRegisterButton({
   eventSlug,
   registrationMode = "internal",
   externalRsvpUrl = "",
-  label = "REGISTER_NOW",
+  label,
   className,
   children,
 }: EventRegisterButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const baseClassName = className || "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-text text-bg font-pixel text-[11px] uppercase tracking-widest hover:scale-[1.03] transition-transform";
+  const baseClassName = className || "inline-flex items-center justify-center gap-3 px-10 py-5 rounded-[20px] bg-text text-bg font-pixel text-[12px] uppercase tracking-[0.15em] hover:scale-[1.05] active:scale-[0.98] shadow-[0_0_30px_var(--color-accent-glow)] border border-border-2 transition-all duration-300 cursor-pointer";
+
+  let rsvpLabel = label;
+  if (!rsvpLabel) {
+    if (registrationMode === "external" && externalRsvpUrl) {
+      if (externalRsvpUrl.includes("fossunited.org")) {
+        rsvpLabel = "RSVP_ON_FOSSUNITED";
+      } else if (externalRsvpUrl.includes("lu.ma")) {
+        rsvpLabel = "RSVP_ON_LUMA";
+      } else if (externalRsvpUrl.includes("devfolio")) {
+        rsvpLabel = "RSVP_ON_DEVFOLIO";
+      } else {
+        rsvpLabel = "RSVP_EXTERNAL";
+      }
+    } else {
+      rsvpLabel = "REGISTER_NOW";
+    }
+  }
 
   if (registrationMode === "external" && externalRsvpUrl) {
     return (
@@ -37,7 +54,7 @@ export default function EventRegisterButton({
       >
         {children ?? (
           <>
-            RSVP_ON_FOSSUNITED <ExternalLink className="w-4 h-4" />
+            {rsvpLabel} <ExternalLink className="w-4 h-4 shrink-0" />
           </>
         )}
       </a>
@@ -51,7 +68,7 @@ export default function EventRegisterButton({
         onClick={() => setIsOpen(true)}
         className={baseClassName}
       >
-        {children ?? label}
+        {children ?? rsvpLabel}
       </button>
       <RegistrationModal
         isOpen={isOpen}

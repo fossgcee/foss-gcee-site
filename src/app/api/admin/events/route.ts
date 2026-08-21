@@ -58,6 +58,8 @@ const buildAgendaUpdateEmail = (event: {
   endTime: string;
   venue: string;
   agenda?: AgendaItem[];
+  registrationMode?: "internal" | "external";
+  externalRsvpUrl?: string;
 }) => {
   const dateRange = event.endDate && event.endDate !== event.startDate
     ? `${event.startDate} - ${event.endDate}`
@@ -66,6 +68,9 @@ const buildAgendaUpdateEmail = (event: {
   const logoUrl = getLogoUrl();
   const safeTitle = escapeHtml(event.title);
   const agenda = normalizeAgenda(event.agenda);
+
+  const rsvpUrl = event.registrationMode === "external" && event.externalRsvpUrl ? event.externalRsvpUrl : eventUrl;
+  const rsvpLabel = event.registrationMode === "external" ? "RSVP on FOSS United" : "Register Now";
 
   const agendaLines = agenda.length
     ? agenda.map((item) => [
@@ -96,7 +101,7 @@ const buildAgendaUpdateEmail = (event: {
     "Agenda:",
     ...agendaLines.map((line) => `- ${line}`),
     "",
-    `View details: ${eventUrl}`,
+    event.registrationMode === "external" && event.externalRsvpUrl ? `RSVP/Register: ${event.externalRsvpUrl}\nView event details: ${eventUrl}` : `View details: ${eventUrl}`,
     "",
     "FOSS Club · GCE Erode",
   ].join("\n");
@@ -129,7 +134,10 @@ const buildAgendaUpdateEmail = (event: {
               ${agendaHtml}
             </ul>
           </div>
-          <a href="${eventUrl}" style="display:inline-block;margin-top:20px;padding:12px 18px;border-radius:12px;background:#ffffff;color:#000000;font-size:12px;font-weight:700;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">View Event</a>
+          <div style="margin-top:20px;">
+            <a href="${rsvpUrl}" style="display:inline-block;padding:12px 18px;border-radius:12px;background:#ffffff;color:#000000;font-size:12px;font-weight:700;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">${rsvpLabel}</a>
+            ${event.registrationMode === "external" ? `<a href="${eventUrl}" style="display:inline-block;margin-left:10px;padding:12px 18px;border-radius:12px;background:rgba(255,255,255,0.08);color:#ffffff;font-size:12px;font-weight:700;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;border:1px solid rgba(255,255,255,0.1);">View Website</a>` : ""}
+          </div>
           <p style="margin-top:22px;font-size:11px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.08em;">FOSS Club · GCE Erode</p>
         </div>
       </body>
@@ -139,7 +147,18 @@ const buildAgendaUpdateEmail = (event: {
   return { subject, text, html };
 };
 
-const buildEventEmail = (event: { title: string; slug: string; startDate: string; endDate: string; startTime: string; endTime: string; venue: string; description?: string }) => {
+const buildEventEmail = (event: {
+  title: string;
+  slug: string;
+  startDate: string;
+  endDate: string;
+  startTime: string;
+  endTime: string;
+  venue: string;
+  description?: string;
+  registrationMode?: "internal" | "external";
+  externalRsvpUrl?: string;
+}) => {
   const dateRange = event.endDate && event.endDate !== event.startDate
     ? `${event.startDate} - ${event.endDate}`
     : event.startDate;
@@ -148,6 +167,9 @@ const buildEventEmail = (event: { title: string; slug: string; startDate: string
 
   const safeTitle = event.title.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const safeDesc = (event.description || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  const rsvpUrl = event.registrationMode === "external" && event.externalRsvpUrl ? event.externalRsvpUrl : eventUrl;
+  const rsvpLabel = event.registrationMode === "external" ? "RSVP on FOSS United" : "Register Now";
 
   const subject = `New Event: ${event.title}`;
   const text = [
@@ -159,7 +181,7 @@ const buildEventEmail = (event: { title: string; slug: string; startDate: string
     "",
     safeDesc ? `About: ${event.description}` : "",
     safeDesc ? "" : "",
-    `View details: ${eventUrl}`,
+    event.registrationMode === "external" && event.externalRsvpUrl ? `RSVP/Register: ${event.externalRsvpUrl}\nView event details: ${eventUrl}` : `Register: ${eventUrl}`,
     "",
     "FOSS Club · GCE Erode",
   ].filter(Boolean).join("\n");
@@ -184,7 +206,10 @@ const buildEventEmail = (event: { title: string; slug: string; startDate: string
             <div style="font-size:13px;color:rgba(255,255,255,0.65);margin-top:4px;">Time: ${event.startTime} - ${event.endTime}</div>
             <div style="font-size:13px;color:rgba(255,255,255,0.65);margin-top:4px;">Venue: ${event.venue}</div>
           </div>
-          <a href="${eventUrl}" style="display:inline-block;margin-top:20px;padding:12px 18px;border-radius:12px;background:#ffffff;color:#000000;font-size:12px;font-weight:700;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">View Event</a>
+          <div style="margin-top:20px;">
+            <a href="${rsvpUrl}" style="display:inline-block;padding:12px 18px;border-radius:12px;background:#ffffff;color:#000000;font-size:12px;font-weight:700;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">${rsvpLabel}</a>
+            ${event.registrationMode === "external" ? `<a href="${eventUrl}" style="display:inline-block;margin-left:10px;padding:12px 18px;border-radius:12px;background:rgba(255,255,255,0.08);color:#ffffff;font-size:12px;font-weight:700;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;border:1px solid rgba(255,255,255,0.1);">View Website</a>` : ""}
+          </div>
           <p style="margin-top:22px;font-size:11px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.08em;">FOSS Club · GCE Erode</p>
         </div>
       </body>
@@ -281,7 +306,10 @@ export async function POST(request: Request) {
           });
 
           // Notify telegram users
-          const telegramMessage = `🎉 New Event: ${event.title} 🎉\n\n${event.description}\n\nVenue: ${event.venue}\nDate: ${event.startDate} at ${event.startTime}\n\nCheck out the website for more details!`;
+          const eventLink = `${getSiteUrl()}/events/${event.slug}`;
+          const telegramMessage = event.registrationMode === "external" && event.externalRsvpUrl
+            ? `🎉 New Event: ${event.title} 🎉\n\n${event.description}\n\n📍 Venue: ${event.venue}\n📅 Date: ${event.startDate} at ${event.startTime}\n\n🔗 Details: ${eventLink}\n🎟️ RSVP on FOSS United: ${event.externalRsvpUrl}`
+            : `🎉 New Event: ${event.title} 🎉\n\n${event.description}\n\n📍 Venue: ${event.venue}\n📅 Date: ${event.startDate} at ${event.startTime}\n\n🔗 Register: ${eventLink}`;
           await sendTelegramBroadcast(telegramMessage).catch(console.error);
         }
       } catch (notifyError) {
@@ -390,6 +418,8 @@ export async function PUT(request: Request) {
               endTime: event.endTime,
               venue: event.venue,
               agenda: body.agenda,
+              registrationMode: event.registrationMode,
+              externalRsvpUrl: event.externalRsvpUrl,
             });
             await sendBulkEmail({
               subject: agendaEmail.subject,
