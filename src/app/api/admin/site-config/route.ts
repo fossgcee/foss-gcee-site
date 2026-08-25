@@ -20,8 +20,8 @@ const defaults: Record<string, unknown> = {
   about: {
     stats: [
       { value: "100+", label: "Active Members" },
-      { value: "0+", label: "Events Hosted" },
-      { value: "0+", label: "OSS Contributions" },
+      { value: "3+", label: "Events Hosted" },
+      { value: "3+", label: "OSS Contributions" },
       { value: "2026", label: "Founded" },
     ],
     cards: [

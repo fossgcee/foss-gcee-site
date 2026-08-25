@@ -27,8 +27,8 @@ const defaults: Record<PublicSection, unknown> = {
   about: {
     stats: [
       { value: "100+", label: "Active Members" },
-      { value: "0+", label: "Events Hosted" },
-      { value: "0+", label: "OSS Contributions" },
+      { value: "3+", label: "Events Hosted" },
+      { value: "3+", label: "OSS Contributions" },
       { value: "2026", label: "Founded" },
     ],
     cards: [
@@ -84,21 +84,27 @@ export async function GET(req: NextRequest) {
     const configData = await getSiteConfig(section);
     let data = configData ? configData : defaults[section] ?? {};
 
-    // Dynamically inject real contribution count for the "about" section
+    // Dynamically inject real database counts for the "about" section
     if (section === "about" && data.stats) {
       try {
-        const { count } = await supabase
-          .from("contributions")
-          .select("*", { count: "exact", head: true });
-        
-        const countVal = count || 0;
-        
+        const [contribRes, eventsRes] = await Promise.all([
+          supabase.from("contributions").select("*", { count: "exact", head: true }),
+          supabase.from("events").select("*", { count: "exact", head: true }),
+        ]);
+
+        const contribVal = contribRes.count ?? 0;
+        const eventsVal = eventsRes.count ?? 0;
+
         // Ensure data is deep cloned if it came from defaults so we don't mutate defaults
         data = JSON.parse(JSON.stringify(data));
-        
+
         data.stats = data.stats.map((stat: { label: string; value: string }) => {
-          if (stat.label.toLowerCase().includes("oss") || stat.label.toLowerCase().includes("contribution") || stat.label.toLowerCase().includes("project")) {
-            return { ...stat, value: `${countVal}+` };
+          const lower = stat.label.toLowerCase();
+          if (lower.includes("event")) {
+            return { ...stat, value: `${eventsVal}+` };
+          }
+          if (lower.includes("oss") || lower.includes("contribution") || lower.includes("project")) {
+            return { ...stat, value: `${contribVal}+` };
           }
           return stat;
         });
