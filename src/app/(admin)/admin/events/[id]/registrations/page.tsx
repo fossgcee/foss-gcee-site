@@ -18,6 +18,11 @@ import {
   Calendar,
   MapPin,
   CheckCircle2,
+  QrCode,
+  Sparkles,
+  ExternalLink,
+  ShieldCheck,
+  CircleDot
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -50,14 +55,17 @@ export default function AdminEventRegistrationsPage() {
 
   const [event, setEvent] = useState<EventMetadata | null>(null);
   const [registrations, setRegistrations] = useState<MemberRegistration[]>([]);
+  const [checkedInEmails, setCheckedInEmails] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDept, setSelectedDept] = useState("all");
+  const [attendanceFilter, setAttendanceFilter] = useState<"all" | "checkedin" | "pending">("all");
 
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [isDeletingEmail, setIsDeletingEmail] = useState<string | null>(null);
+  const [isTogglingEmail, setIsTogglingEmail] = useState<string | null>(null);
   const [isImportingCsv, setIsImportingCsv] = useState(false);
   const [csvImportStatus, setCsvImportStatus] = useState<string | null>(null);
 
@@ -81,16 +89,26 @@ export default function AdminEventRegistrationsPage() {
   const [isTestEmailing, setIsTestEmailing] = useState(false);
   const [emailStatus, setEmailStatus] = useState<string | null>(null);
 
-  // Fetch Event & Registrations
+  // Fetch Event, Registrations & Live Check-ins
   const fetchRegistrations = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/admin/events/registrations?id=${id}`);
-      const d = await res.json();
-      if (d.success) {
-        setEvent(d.event);
-        setRegistrations(d.data || []);
-        setEmailSubject(`Important Update: ${d.event?.title || "FOSS GCEE Event"}`);
+      const [regRes, checkinRes] = await Promise.all([
+        fetch(`/api/admin/events/registrations?id=${id}`),
+        fetch(`/api/events/checkin?id=${id}`),
+      ]);
+
+      const regData = await regRes.json();
+      const checkinData = await checkinRes.json();
+
+      if (regData.success) {
+        setEvent(regData.event);
+        setRegistrations(regData.data || []);
+        setEmailSubject(`Important Update: ${regData.event?.title || "FOSS GCEE Event"}`);
+      }
+
+      if (checkinData.success && checkinData.checkedInEmails) {
+        setCheckedInEmails(new Set(checkinData.checkedInEmails.map((e: string) => e.toLowerCase())));
       }
     } catch {
       console.error("Failed to load registrations");
@@ -118,6 +136,8 @@ export default function AdminEventRegistrationsPage() {
   const filteredRegistrations = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     return registrations.filter((r) => {
+      const isCheckedIn = checkedInEmails.has(r.email.toLowerCase());
+
       const matchSearch =
         !q ||
         r.name.toLowerCase().includes(q) ||
@@ -128,9 +148,14 @@ export default function AdminEventRegistrationsPage() {
 
       const matchDept = selectedDept === "all" || r.department === selectedDept;
 
-      return matchSearch && matchDept;
+      const matchAttendance =
+        attendanceFilter === "all" ||
+        (attendanceFilter === "checkedin" && isCheckedIn) ||
+        (attendanceFilter === "pending" && !isCheckedIn);
+
+      return matchSearch && matchDept && matchAttendance;
     });
-  }, [registrations, searchQuery, selectedDept]);
+  }, [registrations, checkedInEmails, searchQuery, selectedDept, attendanceFilter]);
 
   // Manual Add Participant Handler
   const handleSaveParticipant = async (e: React.FormEvent) => {
@@ -186,6 +211,34 @@ export default function AdminEventRegistrationsPage() {
     }
   };
 
+  // Toggle Check-in status directly from desk
+  const handleToggleCheckin = async (email: string) => {
+    if (!event) return;
+    const targetEmail = email.toLowerCase().trim();
+    setIsTogglingEmail(targetEmail);
+
+    try {
+      const res = await fetch("/api/admin/events/checkin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId: event.id,
+          email: targetEmail,
+          action: "toggle",
+        }),
+      });
+
+      const d = await res.json();
+      if (d.success) {
+        setCheckedInEmails(new Set(d.checkedInEmails.map((e: string) => e.toLowerCase())));
+      }
+    } catch {
+      alert("Failed to update check-in status");
+    } finally {
+      setIsTogglingEmail(null);
+    }
+  };
+
   // CSV Import Handler
   const handleImportCsv = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -232,23 +285,27 @@ export default function AdminEventRegistrationsPage() {
       return str;
     };
 
-    const headers = ["Name", "Email", "Department", "College", "Year", "Mobile", "Registered At"];
-    const rows = registrations.map((r) => [
-      escapeCell(r.name),
-      escapeCell(r.email),
-      escapeCell(r.department),
-      escapeCell(r.college),
-      escapeCell(r.year),
-      escapeCell(r.mobile),
-      escapeCell(r.registeredAt ? new Date(r.registeredAt).toLocaleString() : ""),
-    ]);
+    const headers = ["Name", "Email", "Department", "College", "Year", "Mobile", "Attendance", "Registered At"];
+    const rows = registrations.map((r) => {
+      const isChecked = checkedInEmails.has(r.email.toLowerCase());
+      return [
+        escapeCell(r.name),
+        escapeCell(r.email),
+        escapeCell(r.department),
+        escapeCell(r.college),
+        escapeCell(r.year),
+        escapeCell(r.mobile),
+        escapeCell(isChecked ? "CHECKED_IN" : "PENDING"),
+        escapeCell(r.registeredAt ? new Date(r.registeredAt).toLocaleString() : ""),
+      ];
+    });
 
     const csvContent = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${event.slug || "event"}-registrations.csv`;
+    link.download = `${event.slug || "event"}-attendance-list.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -368,6 +425,10 @@ export default function AdminEventRegistrationsPage() {
     );
   }
 
+  const checkedInCount = checkedInEmails.size;
+  const totalCount = registrations.length;
+  const checkinPercent = totalCount > 0 ? Math.round((checkedInCount / totalCount) * 100) : 0;
+
   return (
     <div className="space-y-8 py-8 max-w-7xl mx-auto px-4 sm:px-6">
       {/* Top Header */}
@@ -382,8 +443,8 @@ export default function AdminEventRegistrationsPage() {
           <div>
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl sm:text-3xl font-pixel text-white uppercase">{event.title}</h1>
-              <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-pixel text-[10px] uppercase">
-                {registrations.length} ATTENDEES
+              <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-pixel text-[10px] uppercase font-bold">
+                {checkedInCount} / {totalCount} CHECKED IN ({checkinPercent}%)
               </span>
             </div>
             <div className="flex items-center gap-4 text-[10px] font-mono text-white/40 uppercase tracking-widest mt-2 flex-wrap">
@@ -404,11 +465,21 @@ export default function AdminEventRegistrationsPage() {
 
         {/* Action Buttons Toolbar */}
         <div className="flex items-center gap-3 flex-wrap">
+          {/* Projector QR Check-in Button */}
+          <Link
+            href={`/events/${event.slug}/checkin/projector`}
+            target="_blank"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 text-black font-pixel text-[10px] uppercase font-bold hover:brightness-110 transition-all cursor-pointer shadow-[0_0_25px_rgba(16,185,129,0.3)]"
+            title="Launch Projector Fullscreen QR Code"
+          >
+            <QrCode className="w-4 h-4" /> PROJECTOR_QR
+          </Link>
+
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 text-black font-pixel text-[10px] uppercase hover:bg-emerald-400 transition-all cursor-pointer font-bold shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.06] border border-white/15 text-white font-pixel text-[10px] uppercase hover:bg-white/10 transition-all cursor-pointer"
           >
-            <Plus className="w-4 h-4" /> ADD_PARTICIPANT
+            <Plus className="w-4 h-4 text-emerald-400" /> ADD_WALK_IN
           </button>
 
           <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-pixel text-[10px] uppercase hover:bg-white/[0.08] transition-all cursor-pointer">
@@ -426,7 +497,7 @@ export default function AdminEventRegistrationsPage() {
           <button
             onClick={handleExportCsv}
             disabled={registrations.length === 0}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-pixel text-[10px] uppercase hover:bg-white/[0.08] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-pixel text-[10px] uppercase hover:bg-white/[0.08] transition-all cursor-pointer disabled:opacity-40"
           >
             <Download className="w-4 h-4 text-blue-400" /> EXPORT_CSV
           </button>
@@ -450,8 +521,8 @@ export default function AdminEventRegistrationsPage() {
         </div>
       )}
 
-      {/* Search & Department Filters Bar */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Search & Attendance Filter Bar */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="relative md:col-span-2">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
           <input
@@ -471,6 +542,7 @@ export default function AdminEventRegistrationsPage() {
           )}
         </div>
 
+        {/* Department Filter */}
         <div>
           <select
             value={selectedDept}
@@ -485,12 +557,25 @@ export default function AdminEventRegistrationsPage() {
             ))}
           </select>
         </div>
+
+        {/* Attendance Status Filter */}
+        <div>
+          <select
+            value={attendanceFilter}
+            onChange={(e) => setAttendanceFilter(e.target.value as any)}
+            className="w-full px-4 py-3 bg-[#0d0d0d] border border-white/10 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-emerald-500/50 transition-all"
+          >
+            <option value="all">All Attendees ({totalCount})</option>
+            <option value="checkedin">Checked In Only ({checkedInCount})</option>
+            <option value="pending">Pending Arrival ({Math.max(0, totalCount - checkedInCount)})</option>
+          </select>
+        </div>
       </div>
 
       {/* Participants Counter & Status Bar */}
       <div className="flex items-center justify-between text-xs font-mono text-white/40 uppercase tracking-widest px-1">
         <span>Showing {filteredRegistrations.length} of {registrations.length} participants</span>
-        {searchQuery && <span className="text-emerald-400">Search active</span>}
+        <span className="text-emerald-400">{checkedInCount} Present</span>
       </div>
 
       {/* Participants Table */}
@@ -511,7 +596,7 @@ export default function AdminEventRegistrationsPage() {
       ) : filteredRegistrations.length === 0 ? (
         <div className="py-20 rounded-3xl border border-dashed border-white/10 bg-white/[0.01] flex flex-col items-center justify-center space-y-2 text-center">
           <p className="font-pixel text-xs text-white/40 uppercase">NO_MATCHING_PARTICIPANTS</p>
-          <p className="font-mono text-[10px] text-white/20">Try clearing your search query or department filter.</p>
+          <p className="font-mono text-[10px] text-white/20">Try clearing your search query or filters.</p>
         </div>
       ) : (
         <div className="border border-white/10 rounded-2xl overflow-hidden bg-white/[0.01]">
@@ -523,73 +608,109 @@ export default function AdminEventRegistrationsPage() {
                   <th className="py-4 px-6">Participant</th>
                   <th className="py-4 px-6">Department</th>
                   <th className="py-4 px-6">Year</th>
-                  <th className="py-4 px-6">College</th>
+                  <th className="py-4 px-6">Attendance</th>
                   <th className="py-4 px-6">Contact</th>
                   <th className="py-4 px-6 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {filteredRegistrations.map((participant, index) => (
-                  <tr key={participant.email} className="hover:bg-white/[0.02] transition-colors group">
-                    <td className="py-4 px-6 text-white/30 text-[11px]">{index + 1}</td>
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-pixel text-xs flex items-center justify-center shrink-0">
-                          {participant.name.charAt(0).toUpperCase()}
+                {filteredRegistrations.map((participant, index) => {
+                  const isChecked = checkedInEmails.has(participant.email.toLowerCase());
+                  const isToggling = isTogglingEmail === participant.email.toLowerCase();
+
+                  return (
+                    <tr key={participant.email} className="hover:bg-white/[0.02] transition-colors group">
+                      <td className="py-4 px-6 text-white/30 text-[11px]">{index + 1}</td>
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-lg font-pixel text-xs flex items-center justify-center shrink-0 border ${
+                            isChecked
+                              ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
+                              : "bg-white/5 border-white/10 text-white/40"
+                          }`}>
+                            {isChecked ? "✓" : participant.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-bold text-white uppercase">{participant.name}</p>
+                            <a
+                              href={`mailto:${participant.email}`}
+                              className="text-white/40 hover:text-emerald-400 transition-colors text-[11px]"
+                            >
+                              {participant.email}
+                            </a>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-bold text-white uppercase">{participant.name}</p>
-                          <a
-                            href={`mailto:${participant.email}`}
-                            className="text-white/40 hover:text-emerald-400 transition-colors text-[11px]"
-                          >
-                            {participant.email}
-                          </a>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/10 text-white/70 text-[11px]">
-                        {participant.department || "—"}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className="text-white/60">
-                        {participant.year ? `Year ${participant.year}` : "—"}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 max-w-xs truncate text-white/50 text-[11px]">
-                      {participant.college || "Government College of Engineering, Erode"}
-                    </td>
-                    <td className="py-4 px-6">
-                      {participant.mobile ? (
-                        <a
-                          href={`tel:${participant.mobile}`}
-                          className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors"
-                        >
-                          <Phone className="w-3 h-3 text-emerald-400" />
-                          <span>{participant.mobile}</span>
-                        </a>
-                      ) : (
-                        <span className="text-white/20">—</span>
-                      )}
-                    </td>
-                    <td className="py-4 px-6 text-right">
-                      <button
-                        onClick={() => handleDeleteParticipant(participant.email)}
-                        disabled={isDeletingEmail === participant.email}
-                        className="p-2 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50"
-                        title="Remove attendee"
-                      >
-                        {isDeletingEmail === participant.email ? (
-                          <Loader2 className="w-4 h-4 animate-spin text-red-400" />
+                      </td>
+                      <td className="py-4 px-6">
+                        <span className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/10 text-white/70 text-[11px]">
+                          {participant.department || "—"}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6">
+                        <span className="text-white/60">
+                          {participant.year ? `Year ${participant.year}` : "—"}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6">
+                        {isChecked ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
+                            <CheckCircle2 className="w-3 h-3" /> PRESENT
+                          </span>
                         ) : (
-                          <Trash2 className="w-4 h-4" />
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.02] border border-white/10 text-white/30 text-[10px] uppercase tracking-wider">
+                            <CircleDot className="w-3 h-3 opacity-40" /> PENDING
+                          </span>
                         )}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="py-4 px-6">
+                        {participant.mobile ? (
+                          <a
+                            href={`tel:${participant.mobile}`}
+                            className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors"
+                          >
+                            <Phone className="w-3 h-3 text-emerald-400" />
+                            <span>{participant.mobile}</span>
+                          </a>
+                        ) : (
+                          <span className="text-white/20">—</span>
+                        )}
+                      </td>
+                      <td className="py-4 px-6 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleToggleCheckin(participant.email)}
+                            disabled={isToggling}
+                            className={`p-2 rounded-lg transition-all cursor-pointer ${
+                              isChecked
+                                ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20"
+                                : "bg-white/[0.03] text-white/30 hover:text-white hover:bg-white/[0.08] border border-white/10"
+                            }`}
+                            title={isChecked ? "Mark as un-checked in" : "Mark as checked in"}
+                          >
+                            {isToggling ? (
+                              <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+                            ) : (
+                              <CheckCircle2 className="w-4 h-4" />
+                            )}
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteParticipant(participant.email)}
+                            disabled={isDeletingEmail === participant.email}
+                            className="p-2 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 cursor-pointer"
+                            title="Remove attendee"
+                          >
+                            {isDeletingEmail === participant.email ? (
+                              <Loader2 className="w-4 h-4 animate-spin text-red-400" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -615,9 +736,9 @@ export default function AdminEventRegistrationsPage() {
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div className="space-y-1">
-                  <h3 className="font-pixel text-lg text-white uppercase">ADD_PARTICIPANT</h3>
+                  <h3 className="font-pixel text-lg text-white uppercase">ADD_WALK_IN_PARTICIPANT</h3>
                   <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest">
-                    Manual last-minute registration for {event.title}
+                    Manual registration for {event.title}
                   </p>
                 </div>
                 <button
@@ -719,7 +840,7 @@ export default function AdminEventRegistrationsPage() {
                   <button
                     type="submit"
                     disabled={isSavingParticipant}
-                    className="flex-[2] py-3 bg-emerald-500 text-black font-bold rounded-xl font-pixel text-[10px] uppercase hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="flex-[2] py-3 bg-emerald-500 text-black font-bold rounded-xl font-pixel text-[10px] uppercase hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                   >
                     {isSavingParticipant ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                     {isSavingParticipant ? "SAVING..." : "CONFIRM_ADD"}
