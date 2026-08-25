@@ -95,7 +95,7 @@ const normalizeImportRows = (rows: CsvRow[], eventId: string) => {
   const participants: ParticipantImportRow[] = [];
 
   rows.forEach((row, index) => {
-    const name = readColumn(row, ["name", "full name", "fullname", "participant name", "attendee name"]);
+    const name = readColumn(row, ["name", "name1", "full name", "fullname", "participant name", "attendee name"]);
     const email = readColumn(row, ["email", "email address", "e-mail", "mail"]).toLowerCase();
 
     if (!name || !emailRegex.test(email)) {
@@ -113,7 +113,7 @@ const normalizeImportRows = (rows: CsvRow[], eventId: string) => {
       mobile: readColumn(row, ["mobile", "phone", "phone number", "contact", "contact number", "whatsapp", "whatsapp number"]),
       department: readColumn(row, ["department", "dept", "branch", "course"]) || "External RSVP",
       college: readColumn(row, ["college", "institution", "organization", "organisation", "company"]) || "FOSS United RSVP",
-      year: normalizeYear(readColumn(row, ["year", "study year", "current year", "graduation year"])),
+      year: normalizeYear(readColumn(row, ["year", "year of study", "study year", "current year", "graduation year"])),
     });
   });
 
