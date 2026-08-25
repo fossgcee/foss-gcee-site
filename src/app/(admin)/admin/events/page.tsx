@@ -204,6 +204,40 @@ export default function AdminEventsManager() {
     }
   };
 
+  const handleExportCsv = () => {
+    if (!selectedEventReg || registrations.length === 0) return;
+
+    const escapeCell = (val: string | number | undefined | null) => {
+      const str = String(val ?? "");
+      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
+    const headers = ["Name", "Email", "Department", "College", "Year", "Mobile", "Registered At"];
+    const rows = registrations.map((r) => [
+      escapeCell(r.name),
+      escapeCell(r.email),
+      escapeCell(r.department),
+      escapeCell(r.college),
+      escapeCell(r.year),
+      escapeCell(r.mobile),
+      escapeCell(r.registeredAt ? new Date(r.registeredAt).toLocaleString() : ""),
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${selectedEventReg.slug || "event"}-registrations.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const handleSendEmail = async () => {
     if (!selectedEventReg) return;
     const subject = emailSubject.trim();
@@ -709,13 +743,13 @@ export default function AdminEventsManager() {
                       </div>
                    </div>
 
-                   <button 
-                     onClick={() => alert("Feature coming soon: Excel Export")}
-                     hidden={registrations.length === 0}
-                     className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-pixel text-[10px] hover:bg-white/10 transition-all flex items-center justify-center gap-3 uppercase"
-                   >
+                    <button 
+                      onClick={handleExportCsv}
+                      hidden={registrations.length === 0}
+                      className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-pixel text-[10px] hover:bg-white/10 transition-all flex items-center justify-center gap-3 uppercase cursor-pointer"
+                    >
                       <Download className="w-4 h-4" /> EXPORT_LIST.CSV
-                   </button>
+                    </button>
                 </div>
              </motion.div>
           </div>
