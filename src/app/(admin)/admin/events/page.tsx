@@ -543,22 +543,24 @@ export default function AdminEventsManager() {
                 </div>
 
                 <div className="flex items-center justify-between md:justify-end gap-x-8 gap-y-4 pt-4 md:pt-0 border-t md:border-t-0 border-white/5 shrink-0">
-                  <button 
-                    onClick={() => fetchRegistrations(event)}
+                  <Link 
+                    href={`/admin/events/${event._id}/registrations`}
                     className="flex items-center gap-4 group/reg"
+                    title="Manage Attendees & RSVP Logs"
                   >
                     <div className="space-y-1 text-right shrink-0">
                       <p className="text-[10px] font-mono text-white/30 uppercase tracking-[0.2em]">REGISTERED</p>
                       <p className="text-xl font-pixel text-white">{event.registrationsCount}</p>
                     </div>
-                    <div className="p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 group-hover/reg:text-emerald-400 group-hover/reg:border-emerald-500/30 transition-all">
+                    <div className="p-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 group-hover/reg:bg-emerald-500/20 group-hover/reg:text-emerald-300 transition-all">
                       <Users className="w-4 h-4" />
                     </div>
-                  </button>
+                  </Link>
                   <div className="flex items-center gap-2">
-                    <Link href={`/events/${event.slug}`} target="_blank" className="p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all"><ExternalLink className="w-4 h-4" /></Link>
+                    <Link href={`/events/${event.slug}`} target="_blank" className="p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all" title="View Public Page"><ExternalLink className="w-4 h-4" /></Link>
+                    <Link href={`/admin/events/${event._id}/registrations`} className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 transition-all text-[10px] font-pixel"><Users className="w-4 h-4" /> RSVPS</Link>
                     <Link href={`/admin/events/${event._id}`} className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white hover:bg-white/10 transition-all text-[10px] font-pixel"><ImageIcon className="w-4 h-4" /> CONTENT</Link>
-                    <button onClick={() => handleEdit(event)} className="p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all"><Edit3 className="w-4 h-4" /></button>
+                    <button onClick={() => handleEdit(event)} className="p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all" title="Edit Event"><Edit3 className="w-4 h-4" /></button>
                     {event.status === "completed" && (
                       <button
                         onClick={() => {

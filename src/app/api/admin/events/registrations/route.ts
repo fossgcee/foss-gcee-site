@@ -127,16 +127,20 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const eventSlug = searchParams.get('eventSlug');
+    const eventId = searchParams.get('eventId') || searchParams.get('id');
 
-    if (!eventSlug) {
-      return NextResponse.json({ success: false, error: "Event slug is required" }, { status: 400 });
+    if (!eventSlug && !eventId) {
+      return NextResponse.json({ success: false, error: "Event slug or ID is required" }, { status: 400 });
     }
 
-    const { data: event, error: eventErr } = await supabase
-      .from("events")
-      .select("id")
-      .eq("slug", eventSlug.toLowerCase())
-      .maybeSingle();
+    let query = supabase.from("events").select("id, title, slug, start_date, venue, registration_mode, external_rsvp_url, registrations_count");
+    if (eventId) {
+      query = query.eq("id", eventId);
+    } else if (eventSlug) {
+      query = query.eq("slug", eventSlug.toLowerCase());
+    }
+
+    const { data: event, error: eventErr } = await query.maybeSingle();
 
     if (eventErr || !event) {
       return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });
@@ -146,6 +150,16 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       success: true,
+      event: {
+        id: event.id,
+        title: event.title,
+        slug: event.slug,
+        startDate: event.start_date,
+        venue: event.venue,
+        registrationMode: event.registration_mode,
+        externalRsvpUrl: event.external_rsvp_url,
+        registrationsCount: regs.length,
+      },
       count: regs.length,
       data: regs,
     });
@@ -163,19 +177,87 @@ export async function POST(request: Request) {
   if (auth) return auth;
 
   try {
-    const formData = await request.formData();
-    const eventSlug = String(formData.get("eventSlug") || "");
-    const file = formData.get("file");
+    const contentType = request.headers.get("content-type") || "";
 
-    if (!eventSlug || !(file instanceof File)) {
-      return NextResponse.json({ success: false, error: "Event slug and CSV file are required" }, { status: 400 });
+    // 1. Handle JSON manual participant addition
+    if (contentType.includes("application/json")) {
+      const body = await request.json();
+      const eventSlug = body.eventSlug;
+      const eventId = body.eventId || body.id;
+      const participant = body.participant;
+
+      if ((!eventSlug && !eventId) || !participant) {
+        return NextResponse.json({ success: false, error: "Event and participant data are required" }, { status: 400 });
+      }
+
+      let query = supabase.from("events").select("id, slug, title");
+      if (eventId) {
+        query = query.eq("id", eventId);
+      } else {
+        query = query.eq("slug", eventSlug.toLowerCase());
+      }
+
+      const { data: event, error: eventErr } = await query.maybeSingle();
+      if (eventErr || !event) {
+        return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });
+      }
+
+      const name = (participant.name || "").trim();
+      const email = (participant.email || "").toLowerCase().trim();
+
+      if (!name) {
+        return NextResponse.json({ success: false, error: "Participant name is required" }, { status: 400 });
+      }
+      if (!emailRegex.test(email)) {
+        return NextResponse.json({ success: false, error: "A valid email address is required" }, { status: 400 });
+      }
+
+      const payload = {
+        event_id: event.id,
+        name,
+        email,
+        department: (participant.department || "").trim() || "General",
+        college: (participant.college || "").trim() || "Government College of Engineering, Erode",
+        year: Number(participant.year) || 0,
+        mobile: (participant.mobile || "").trim(),
+      };
+
+      const { error: upsertErr } = await supabase
+        .from("event_registrations")
+        .upsert(payload, { onConflict: "event_id,email" });
+
+      if (upsertErr) throw upsertErr;
+
+      const regs = await getEventRegistrations(event.id);
+
+      return NextResponse.json({
+        success: true,
+        message: "Participant saved successfully",
+        data: {
+          registrations: regs,
+          count: regs.length,
+        },
+      });
     }
 
-    const { data: event, error: eventErr } = await supabase
-      .from("events")
-      .select("id")
-      .eq("slug", eventSlug.toLowerCase())
-      .maybeSingle();
+    // 2. Handle Multipart CSV file upload
+    const formData = await request.formData();
+    const eventSlug = String(formData.get("eventSlug") || "");
+    const eventId = String(formData.get("eventId") || formData.get("id") || "");
+    const file = formData.get("file");
+
+    if ((!eventSlug && !eventId) || !(file instanceof File)) {
+      return NextResponse.json({ success: false, error: "Event identifier and CSV file are required" }, { status: 400 });
+    }
+
+    let query = supabase.from("events").select("id, slug, title");
+    if (eventId) {
+      query = query.eq("id", eventId);
+    } else {
+      query = query.eq("slug", eventSlug.toLowerCase());
+    }
+
+    const { data: event, error: eventErr } = await query.maybeSingle();
 
     if (eventErr || !event) {
       return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });
@@ -252,17 +334,21 @@ export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const eventSlug = searchParams.get('eventSlug');
+    const eventId = searchParams.get('eventId') || searchParams.get('id');
     const email = searchParams.get('email');
 
-    if (!eventSlug || !email) {
-      return NextResponse.json({ success: false, error: "Event slug and email are required" }, { status: 400 });
+    if ((!eventSlug && !eventId) || !email) {
+      return NextResponse.json({ success: false, error: "Event identifier and email are required" }, { status: 400 });
     }
 
-    const { data: event, error: eventErr } = await supabase
-      .from("events")
-      .select("id")
-      .eq("slug", eventSlug.toLowerCase())
-      .maybeSingle();
+    let query = supabase.from("events").select("id");
+    if (eventId) {
+      query = query.eq("id", eventId);
+    } else if (eventSlug) {
+      query = query.eq("slug", eventSlug.toLowerCase());
+    }
+
+    const { data: event, error: eventErr } = await query.maybeSingle();
 
     if (eventErr || !event) {
       return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });
