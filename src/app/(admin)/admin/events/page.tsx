@@ -542,25 +542,25 @@ export default function AdminEventsManager() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between md:justify-end gap-x-8 gap-y-4 pt-4 md:pt-0 border-t md:border-t-0 border-white/5 shrink-0">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between md:justify-end gap-4 pt-4 md:pt-0 border-t md:border-t-0 border-white/5 shrink-0">
                   <Link 
                     href={`/admin/events/${event._id}/registrations`}
-                    className="flex items-center gap-4 group/reg"
+                    className="flex items-center gap-3 sm:gap-4 group/reg"
                     title="Manage Attendees & RSVP Logs"
                   >
-                    <div className="space-y-1 text-right shrink-0">
-                      <p className="text-[10px] font-mono text-white/30 uppercase tracking-[0.2em]">REGISTERED</p>
-                      <p className="text-xl font-pixel text-white">{event.registrationsCount}</p>
+                    <div className="space-y-0.5 text-left sm:text-right shrink-0">
+                      <p className="text-[9px] font-mono text-white/30 uppercase tracking-[0.2em]">REGISTERED</p>
+                      <p className="text-lg sm:text-xl font-pixel text-white">{event.registrationsCount}</p>
                     </div>
-                    <div className="p-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 group-hover/reg:bg-emerald-500/20 group-hover/reg:text-emerald-300 transition-all">
+                    <div className="p-2 sm:p-2.5 rounded-xl border border-white/20 bg-white/10 text-white group-hover/reg:bg-white/20 transition-all">
                       <Users className="w-4 h-4" />
                     </div>
                   </Link>
-                  <div className="flex items-center gap-2">
-                    <Link href={`/events/${event.slug}`} target="_blank" className="p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all" title="View Public Page"><ExternalLink className="w-4 h-4" /></Link>
-                    <Link href={`/admin/events/${event._id}/registrations`} className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 transition-all text-[10px] font-pixel"><Users className="w-4 h-4" /> RSVPS</Link>
-                    <Link href={`/admin/events/${event._id}`} className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white hover:bg-white/10 transition-all text-[10px] font-pixel"><ImageIcon className="w-4 h-4" /> CONTENT</Link>
-                    <button onClick={() => handleEdit(event)} className="p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all" title="Edit Event"><Edit3 className="w-4 h-4" /></button>
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+                    <Link href={`/events/${event.slug}`} target="_blank" className="p-2 sm:p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all" title="View Public Page"><ExternalLink className="w-4 h-4" /></Link>
+                    <Link href={`/admin/events/${event._id}/registrations`} className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-all text-[9px] sm:text-[10px] font-pixel"><Users className="w-3.5 h-3.5" /> RSVPS</Link>
+                    <Link href={`/admin/events/${event._id}`} className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white hover:bg-white/10 transition-all text-[9px] sm:text-[10px] font-pixel"><ImageIcon className="w-3.5 h-3.5" /> CONTENT</Link>
+                    <button onClick={() => handleEdit(event)} className="p-2 sm:p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all" title="Edit Event"><Edit3 className="w-4 h-4" /></button>
                     {event.status === "completed" && (
                       <button
                         onClick={() => {
@@ -570,7 +570,7 @@ export default function AdminEventsManager() {
                           setMailAttendeesStatus(null);
                           setIsMailAttendeesOpen(true);
                         }}
-                        className="p-2.5 rounded-xl border border-amber-500/20 bg-amber-500/5 text-amber-400/60 hover:text-amber-400 hover:border-amber-500/40 transition-all"
+                        className="p-2 sm:p-2.5 rounded-xl border border-white/15 bg-white/5 text-white/60 hover:text-white transition-all"
                         title="Mail Attendees"
                       >
                         <MailOpen className="w-4 h-4" />
@@ -579,7 +579,8 @@ export default function AdminEventsManager() {
                     <button 
                       onClick={() => handleDelete(event._id!)} 
                       disabled={isDeleting === event._id}
-                      className="p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-red-400/40 hover:text-red-400 transition-all disabled:opacity-50"
+                      className="p-2 sm:p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-red-400/50 hover:text-red-400 transition-all disabled:opacity-50"
+                      title="Delete Event"
                     >
                       {isDeleting === event._id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                     </button>

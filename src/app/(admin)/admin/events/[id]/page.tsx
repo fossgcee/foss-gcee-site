@@ -75,17 +75,17 @@ export default function AdminEventContentPage() {
              <ArrowLeft className="w-3.5 h-3.5" /> Return to Events
           </Link>
           <div>
-            <h1 className="text-2xl font-pixel text-white uppercase">{event.title}</h1>
-            <p className="font-mono text-[9px] text-white/30 uppercase tracking-[0.2em] italic mt-1">/events/{event.slug} :: CONTENT_MANAGER</p>
+            <h1 className="text-xl sm:text-2xl font-pixel text-white uppercase break-words leading-snug">{event.title}</h1>
+            <p className="font-mono text-[9px] text-white/30 uppercase tracking-[0.2em] italic mt-1 break-all">/events/{event.slug} :: CONTENT_MANAGER</p>
           </div>
         </div>
 
         <button 
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center justify-center gap-2 px-8 py-3 bg-white text-black rounded-xl font-pixel text-[11px] hover:bg-white/90 disabled:opacity-50 transition-all active:scale-95 shadow-[0_4px_20px_rgba(255,255,255,0.1)]"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-white text-black rounded-xl font-pixel text-[11px] hover:bg-white/90 disabled:opacity-50 transition-all active:scale-95 shadow-[0_4px_20px_rgba(255,255,255,0.1)]"
         >
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+          {saving ? <Loader2 className="w-4 h-4 animate-spin text-black" /> : <Save className="w-4 h-4 text-black" />}
           SAVE_CHANGES
         </button>
       </div>

@@ -106,7 +106,7 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
       {/* FOSS CIT Style Hero Layout */}
       <div className="max-w-4xl mx-auto px-6 mb-16 flex flex-col items-center">
          
-         <h1 className="text-3xl sm:text-5xl md:text-6xl font-pixel text-center mb-10 px-4 text-text uppercase text-balance leading-tight">
+         <h1 className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-pixel text-center mb-8 sm:mb-10 px-2 sm:px-4 text-text uppercase break-words leading-snug">
             {event.title}
          </h1>
 

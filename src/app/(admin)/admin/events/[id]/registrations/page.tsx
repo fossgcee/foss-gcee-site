@@ -19,9 +19,6 @@ import {
   MapPin,
   CheckCircle2,
   QrCode,
-  Sparkles,
-  ExternalLink,
-  ShieldCheck,
   CircleDot
 } from "lucide-react";
 import Link from "next/link";
@@ -136,7 +133,7 @@ export default function AdminEventRegistrationsPage() {
   const filteredRegistrations = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     return registrations.filter((r) => {
-      const isCheckedIn = checkedInEmails.has(r.email.toLowerCase());
+      const isChecked = checkedInEmails.has(r.email.toLowerCase());
 
       const matchSearch =
         !q ||
@@ -150,8 +147,8 @@ export default function AdminEventRegistrationsPage() {
 
       const matchAttendance =
         attendanceFilter === "all" ||
-        (attendanceFilter === "checkedin" && isCheckedIn) ||
-        (attendanceFilter === "pending" && !isCheckedIn);
+        (attendanceFilter === "checkedin" && isChecked) ||
+        (attendanceFilter === "pending" && !isChecked);
 
       return matchSearch && matchDept && matchAttendance;
     });
@@ -211,7 +208,7 @@ export default function AdminEventRegistrationsPage() {
     }
   };
 
-  // Toggle Check-in status directly from desk
+  // Toggle Check-in status directly from desk / mobile
   const handleToggleCheckin = async (email: string) => {
     if (!event) return;
     const targetEmail = email.toLowerCase().trim();
@@ -408,7 +405,7 @@ export default function AdminEventRegistrationsPage() {
   if (loading) {
     return (
       <div className="py-32 flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-10 h-10 text-emerald-400 animate-spin" />
+        <Loader2 className="w-10 h-10 text-white/30 animate-spin" />
         <p className="font-mono text-xs text-white/30 tracking-[0.3em] uppercase">Loading Registration Logs...</p>
       </div>
     );
@@ -416,9 +413,9 @@ export default function AdminEventRegistrationsPage() {
 
   if (!event) {
     return (
-      <div className="py-20 max-w-4xl mx-auto text-center space-y-4">
-        <p className="font-pixel text-red-400">EVENT_RECORD_NOT_FOUND</p>
-        <Link href="/admin/events" className="inline-flex items-center gap-2 text-xs font-mono text-white/50 hover:text-white">
+      <div className="py-20 max-w-4xl mx-auto text-center space-y-4 font-mono">
+        <p className="font-pixel text-white">EVENT_RECORD_NOT_FOUND</p>
+        <Link href="/admin/events" className="inline-flex items-center gap-2 text-xs text-white/50 hover:text-white uppercase tracking-widest">
           <ArrowLeft className="w-4 h-4" /> Return to Events
         </Link>
       </div>
@@ -430,25 +427,29 @@ export default function AdminEventRegistrationsPage() {
   const checkinPercent = totalCount > 0 ? Math.round((checkedInCount / totalCount) * 100) : 0;
 
   return (
-    <div className="space-y-8 py-8 max-w-7xl mx-auto px-4 sm:px-6">
+    <div className="space-y-6 sm:space-y-8 py-4 sm:py-8 max-w-7xl mx-auto px-3 sm:px-6 font-mono">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/10">
+      <div className="flex flex-col gap-5 pb-6 border-b border-white/10">
         <div className="space-y-3">
           <Link
             href="/admin/events"
-            className="inline-flex items-center gap-2 text-[11px] font-mono text-white/40 hover:text-white uppercase tracking-widest transition-colors"
+            className="inline-flex items-center gap-2 text-[11px] text-white/40 hover:text-white uppercase tracking-widest transition-colors py-1"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Return to Events
           </Link>
-          <div>
+          
+          <div className="space-y-2">
             <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl sm:text-3xl font-pixel text-white uppercase">{event.title}</h1>
-              <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white font-pixel text-[10px] uppercase font-bold">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-pixel text-white uppercase tracking-tight break-words">
+                {event.title}
+              </h1>
+              <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white font-pixel text-[9px] sm:text-[10px] uppercase font-bold whitespace-nowrap">
                 {checkedInCount} / {totalCount} CHECKED IN ({checkinPercent}%)
               </span>
             </div>
-            <div className="flex items-center gap-4 text-[10px] font-mono text-white/40 uppercase tracking-widest mt-2 flex-wrap">
-              <span>/events/{event.slug}</span>
+
+            <div className="flex items-center gap-x-4 gap-y-1.5 text-[10px] text-white/40 uppercase tracking-wider flex-wrap">
+              <span className="truncate max-w-[280px]">/events/{event.slug}</span>
               {event.startDate && (
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3 h-3 text-white/30" /> {event.startDate}
@@ -463,9 +464,55 @@ export default function AdminEventRegistrationsPage() {
           </div>
         </div>
 
-        {/* Action Buttons Toolbar */}
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* Projector QR Check-in Button */}
+        {/* ── Mobile Action Toolbar (< sm screens) ── */}
+        <div className="flex flex-col gap-2.5 sm:hidden">
+          <Link
+            href={`/events/${event.slug}/checkin/projector`}
+            target="_blank"
+            className="w-full h-12 rounded-xl bg-white text-black font-pixel text-[11px] uppercase font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-95 transition-all"
+          >
+            <QrCode className="w-4 h-4" /> PROJECTOR_QR
+          </Link>
+
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="h-11 rounded-xl bg-white/[0.04] border border-white/15 text-white font-pixel text-[9px] uppercase hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+            >
+              <Plus className="w-3.5 h-3.5 text-white/70" /> + WALK_IN
+            </button>
+
+            <label className="h-11 rounded-xl bg-white/[0.04] border border-white/15 text-white font-pixel text-[9px] uppercase hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+              {isImportingCsv ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5 text-white/70" />}
+              {isImportingCsv ? "IMPORTING" : "UPLOAD_CSV"}
+              <input
+                type="file"
+                accept=".csv,text/csv"
+                className="hidden"
+                onChange={handleImportCsv}
+                disabled={isImportingCsv}
+              />
+            </label>
+
+            <button
+              onClick={handleExportCsv}
+              disabled={registrations.length === 0}
+              className="h-11 rounded-xl bg-white/[0.04] border border-white/15 text-white font-pixel text-[9px] uppercase hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center gap-1.5 disabled:opacity-40"
+            >
+              <Download className="w-3.5 h-3.5 text-white/70" /> EXPORT_CSV
+            </button>
+
+            <button
+              onClick={() => setIsEmailModalOpen(true)}
+              className="h-11 rounded-xl bg-white/[0.04] border border-white/15 text-white font-pixel text-[9px] uppercase hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+            >
+              <Mail className="w-3.5 h-3.5 text-white/70" /> EMAIL_ALL
+            </button>
+          </div>
+        </div>
+
+        {/* ── Desktop Action Toolbar (sm+ screens) ── */}
+        <div className="hidden sm:flex items-center gap-3 flex-wrap">
           <Link
             href={`/events/${event.slug}/checkin/projector`}
             target="_blank"
@@ -499,43 +546,43 @@ export default function AdminEventRegistrationsPage() {
             disabled={registrations.length === 0}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-pixel text-[10px] uppercase hover:bg-white/[0.08] transition-all cursor-pointer disabled:opacity-40"
           >
-            <Download className="w-4 h-4 text-blue-400" /> EXPORT_CSV
+            <Download className="w-4 h-4 text-white/70" /> EXPORT_CSV
           </button>
 
           <button
             onClick={() => setIsEmailModalOpen(true)}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-pixel text-[10px] uppercase hover:bg-white/[0.08] transition-all cursor-pointer"
           >
-            <Mail className="w-4 h-4 text-amber-400" /> BROADCAST_EMAIL
+            <Mail className="w-4 h-4 text-white/70" /> BROADCAST_EMAIL
           </button>
         </div>
       </div>
 
       {/* CSV Import Notification Banner */}
       {csvImportStatus && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-mono text-xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-white/10 border border-white/20 text-white text-xs flex items-center justify-between">
           <span>{csvImportStatus}</span>
-          <button onClick={() => setCsvImportStatus(null)} className="text-emerald-400 hover:text-white">
+          <button onClick={() => setCsvImportStatus(null)} className="text-white/60 hover:text-white p-1">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {/* Search & Attendance Filter Bar */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="relative md:col-span-2">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="relative sm:col-span-2">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by participant name, email, branch, phone..."
-            className="w-full pl-11 pr-4 py-3 bg-white/[0.02] border border-white/10 rounded-xl font-mono text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition-all"
+            placeholder="Search name, email, department, phone..."
+            className="w-full pl-10 pr-9 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-all"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white"
             >
               <X className="w-4 h-4" />
             </button>
@@ -547,7 +594,7 @@ export default function AdminEventRegistrationsPage() {
           <select
             value={selectedDept}
             onChange={(e) => setSelectedDept(e.target.value)}
-            className="w-full px-4 py-3 bg-[#0d0d0d] border border-white/10 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-emerald-500/50 transition-all"
+            className="w-full px-3.5 py-3 bg-[#0e0e0e] border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-white/40 transition-all cursor-pointer"
           >
             <option value="all">All Departments ({registrations.length})</option>
             {departments.map((dept) => (
@@ -563,164 +610,282 @@ export default function AdminEventRegistrationsPage() {
           <select
             value={attendanceFilter}
             onChange={(e) => setAttendanceFilter(e.target.value as any)}
-            className="w-full px-4 py-3 bg-[#0d0d0d] border border-white/10 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-emerald-500/50 transition-all"
+            className="w-full px-3.5 py-3 bg-[#0e0e0e] border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-white/40 transition-all cursor-pointer"
           >
-            <option value="all">All Attendees ({totalCount})</option>
+            <option value="all">All Statuses ({totalCount})</option>
             <option value="checkedin">Checked In Only ({checkedInCount})</option>
             <option value="pending">Pending Arrival ({Math.max(0, totalCount - checkedInCount)})</option>
           </select>
         </div>
       </div>
 
-      {/* Participants Counter & Status Bar */}
-      <div className="flex items-center justify-between text-xs font-mono text-white/40 uppercase tracking-widest px-1">
-        <span>Showing {filteredRegistrations.length} of {registrations.length} participants</span>
+      {/* Participants Counter Status */}
+      <div className="flex items-center justify-between text-xs text-white/40 uppercase tracking-widest px-1">
+        <span>Showing {filteredRegistrations.length} of {registrations.length}</span>
         <span className="text-white font-bold">{checkedInCount} Present</span>
       </div>
 
-      {/* Participants Table */}
+      {/* ── Empty State ── */}
       {registrations.length === 0 ? (
-        <div className="py-24 rounded-3xl border border-dashed border-white/10 bg-white/[0.01] flex flex-col items-center justify-center space-y-4 text-center">
+        <div className="py-20 px-4 rounded-3xl border border-dashed border-white/10 bg-white/[0.01] flex flex-col items-center justify-center space-y-4 text-center">
           <Users className="w-12 h-12 text-white/10" />
           <p className="font-pixel text-sm text-white/40 uppercase">NO_REGISTRATIONS_YET</p>
-          <p className="font-mono text-xs text-white/30 max-w-sm">
+          <p className="text-xs text-white/30 max-w-sm">
             Add participants manually or upload a CSV export from Google Forms / FOSS United RSVP.
           </p>
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="px-6 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white font-pixel text-xs uppercase hover:bg-white/20 transition-all cursor-pointer"
+            className="px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-pixel text-xs uppercase hover:bg-white/20 transition-all cursor-pointer"
           >
             + ADD_FIRST_PARTICIPANT
           </button>
         </div>
       ) : filteredRegistrations.length === 0 ? (
-        <div className="py-20 rounded-3xl border border-dashed border-white/10 bg-white/[0.01] flex flex-col items-center justify-center space-y-2 text-center">
+        <div className="py-16 px-4 rounded-3xl border border-dashed border-white/10 bg-white/[0.01] flex flex-col items-center justify-center space-y-2 text-center">
           <p className="font-pixel text-xs text-white/40 uppercase">NO_MATCHING_PARTICIPANTS</p>
-          <p className="font-mono text-[10px] text-white/20">Try clearing your search query or filters.</p>
+          <p className="text-[11px] text-white/20">Try clearing your search query or department filter.</p>
         </div>
       ) : (
-        <div className="border border-white/10 rounded-2xl overflow-hidden bg-white/[0.01]">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse font-mono text-xs">
-              <thead>
-                <tr className="border-b border-white/10 bg-white/[0.02] text-[10px] text-white/40 uppercase tracking-widest">
-                  <th className="py-4 px-6">#</th>
-                  <th className="py-4 px-6">Participant</th>
-                  <th className="py-4 px-6">Department</th>
-                  <th className="py-4 px-6">Year</th>
-                  <th className="py-4 px-6">Attendance</th>
-                  <th className="py-4 px-6">Contact</th>
-                  <th className="py-4 px-6 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {filteredRegistrations.map((participant, index) => {
-                  const isChecked = checkedInEmails.has(participant.email.toLowerCase());
-                  const isToggling = isTogglingEmail === participant.email.toLowerCase();
+        <>
+          {/* ── Mobile Touch Cards (md:hidden) ── */}
+          <div className="space-y-3 md:hidden">
+            {filteredRegistrations.map((participant, index) => {
+              const isChecked = checkedInEmails.has(participant.email.toLowerCase());
+              const isToggling = isTogglingEmail === participant.email.toLowerCase();
 
-                  return (
-                    <tr key={participant.email} className="hover:bg-white/[0.02] transition-colors group">
-                      <td className="py-4 px-6 text-white/30 text-[11px]">{index + 1}</td>
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-lg font-pixel text-xs flex items-center justify-center shrink-0 border ${
-                            isChecked
-                              ? "bg-white text-black font-bold border-white"
-                              : "bg-white/5 border-white/10 text-white/40"
-                          }`}>
-                            {isChecked ? "✓" : participant.name.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="font-bold text-white uppercase">{participant.name}</p>
-                            <a
-                              href={`mailto:${participant.email}`}
-                              className="text-white/40 hover:text-white transition-colors text-[11px]"
-                            >
-                              {participant.email}
-                            </a>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <span className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/10 text-white/70 text-[11px]">
-                          {participant.department || "—"}
-                        </span>
-                      </td>
-                      <td className="py-4 px-6">
-                        <span className="text-white/60">
-                          {participant.year ? `Year ${participant.year}` : "—"}
-                        </span>
-                      </td>
-                      <td className="py-4 px-6">
-                        {isChecked ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/10 border border-white/20 text-white text-[10px] font-bold uppercase tracking-wider">
-                            <CheckCircle2 className="w-3 h-3 text-white" /> PRESENT
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.02] border border-white/10 text-white/30 text-[10px] uppercase tracking-wider">
-                            <CircleDot className="w-3 h-3 opacity-40" /> PENDING
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-4 px-6">
-                        {participant.mobile ? (
-                          <a
-                            href={`tel:${participant.mobile}`}
-                            className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors"
-                          >
-                            <Phone className="w-3 h-3 text-white/40" />
-                            <span>{participant.mobile}</span>
-                          </a>
-                        ) : (
-                          <span className="text-white/20">—</span>
-                        )}
-                      </td>
-                      <td className="py-4 px-6 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => handleToggleCheckin(participant.email)}
-                            disabled={isToggling}
-                            className={`p-2 rounded-lg transition-all cursor-pointer ${
-                              isChecked
-                                ? "bg-white text-black hover:bg-white/90 border border-white font-bold"
-                                : "bg-white/[0.03] text-white/30 hover:text-white hover:bg-white/[0.08] border border-white/10"
-                            }`}
-                            title={isChecked ? "Mark as un-checked in" : "Mark as checked in"}
-                          >
-                            {isToggling ? (
-                              <Loader2 className="w-4 h-4 animate-spin text-white" />
-                            ) : (
-                              <CheckCircle2 className="w-4 h-4" />
-                            )}
-                          </button>
+              return (
+                <div
+                  key={participant.email}
+                  className="p-4 rounded-2xl border border-white/10 bg-white/[0.02] space-y-3 hover:border-white/20 transition-all"
+                >
+                  {/* Top: Name & Attendance Status */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className={`w-9 h-9 rounded-xl font-pixel text-xs flex items-center justify-center shrink-0 border ${
+                          isChecked
+                            ? "bg-white text-black font-bold border-white"
+                            : "bg-white/5 border-white/10 text-white/40"
+                        }`}
+                      >
+                        {isChecked ? "✓" : participant.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-white uppercase text-xs truncate">{participant.name}</p>
+                        <a
+                          href={`mailto:${participant.email}`}
+                          className="text-[10px] text-white/40 truncate block hover:text-white transition-colors"
+                        >
+                          {participant.email}
+                        </a>
+                      </div>
+                    </div>
 
-                          <button
-                            onClick={() => handleDeleteParticipant(participant.email)}
-                            disabled={isDeletingEmail === participant.email}
-                            className="p-2 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 cursor-pointer"
-                            title="Remove attendee"
-                          >
-                            {isDeletingEmail === participant.email ? (
-                              <Loader2 className="w-4 h-4 animate-spin text-red-400" />
-                            ) : (
-                              <Trash2 className="w-4 h-4" />
-                            )}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                    {isChecked ? (
+                      <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white/10 border border-white/20 text-white text-[9px] font-bold uppercase tracking-wider">
+                        <CheckCircle2 className="w-3 h-3" /> PRESENT
+                      </span>
+                    ) : (
+                      <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white/[0.02] border border-white/10 text-white/30 text-[9px] uppercase tracking-wider">
+                        <CircleDot className="w-3 h-3 opacity-40" /> PENDING
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Badges: Dept, Year, College */}
+                  <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-white/60">
+                    <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10">
+                      {participant.department || "General"}
+                    </span>
+                    {participant.year > 0 && (
+                      <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10">
+                        Year {participant.year}
+                      </span>
+                    )}
+                    {participant.college && (
+                      <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 truncate max-w-[200px]">
+                        {participant.college}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Bottom: Contact & Touch Action Buttons */}
+                  <div className="flex items-center justify-between gap-3 pt-2.5 border-t border-white/5 text-[11px]">
+                    {participant.mobile ? (
+                      <a
+                        href={`tel:${participant.mobile}`}
+                        className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors"
+                      >
+                        <Phone className="w-3.5 h-3.5 text-white/40" />
+                        <span>{participant.mobile}</span>
+                      </a>
+                    ) : (
+                      <span className="text-white/20 text-[10px]">—</span>
+                    )}
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleToggleCheckin(participant.email)}
+                        disabled={isToggling}
+                        className={`h-9 px-3 rounded-xl font-pixel text-[9px] uppercase transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
+                          isChecked
+                            ? "bg-white text-black font-bold border border-white"
+                            : "bg-white/10 text-white border border-white/20 hover:bg-white/20"
+                        }`}
+                      >
+                        {isToggling ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <CheckCircle2 className="w-3 h-3" />
+                        )}
+                        {isChecked ? "CHECKED" : "CHECK IN"}
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteParticipant(participant.email)}
+                        disabled={isDeletingEmail === participant.email}
+                        className="p-2 rounded-xl text-white/30 hover:text-red-400 hover:bg-red-500/10 border border-white/5 transition-all"
+                        title="Remove attendee"
+                      >
+                        {isDeletingEmail === participant.email ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-red-400" />
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
+
+          {/* ── Desktop Data Table (hidden md:block) ── */}
+          <div className="hidden md:block border border-white/10 rounded-2xl overflow-hidden bg-white/[0.01]">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="border-b border-white/10 bg-white/[0.02] text-[10px] text-white/40 uppercase tracking-widest">
+                    <th className="py-4 px-6">#</th>
+                    <th className="py-4 px-6">Participant</th>
+                    <th className="py-4 px-6">Department</th>
+                    <th className="py-4 px-6">Year</th>
+                    <th className="py-4 px-6">Attendance</th>
+                    <th className="py-4 px-6">Contact</th>
+                    <th className="py-4 px-6 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {filteredRegistrations.map((participant, index) => {
+                    const isChecked = checkedInEmails.has(participant.email.toLowerCase());
+                    const isToggling = isTogglingEmail === participant.email.toLowerCase();
+
+                    return (
+                      <tr key={participant.email} className="hover:bg-white/[0.02] transition-colors group">
+                        <td className="py-4 px-6 text-white/30 text-[11px]">{index + 1}</td>
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`w-8 h-8 rounded-lg font-pixel text-xs flex items-center justify-center shrink-0 border ${
+                                isChecked
+                                  ? "bg-white text-black font-bold border-white"
+                                  : "bg-white/5 border-white/10 text-white/40"
+                              }`}
+                            >
+                              {isChecked ? "✓" : participant.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-bold text-white uppercase truncate">{participant.name}</p>
+                              <a
+                                href={`mailto:${participant.email}`}
+                                className="text-white/40 hover:text-white transition-colors text-[11px] truncate block"
+                              >
+                                {participant.email}
+                              </a>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/10 text-white/70 text-[11px]">
+                            {participant.department || "—"}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className="text-white/60">
+                            {participant.year ? `Year ${participant.year}` : "—"}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6">
+                          {isChecked ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/10 border border-white/20 text-white text-[10px] font-bold uppercase tracking-wider">
+                              <CheckCircle2 className="w-3 h-3 text-white" /> PRESENT
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.02] border border-white/10 text-white/30 text-[10px] uppercase tracking-wider">
+                              <CircleDot className="w-3 h-3 opacity-40" /> PENDING
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6">
+                          {participant.mobile ? (
+                            <a
+                              href={`tel:${participant.mobile}`}
+                              className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors"
+                            >
+                              <Phone className="w-3 h-3 text-white/40" />
+                              <span>{participant.mobile}</span>
+                            </a>
+                          ) : (
+                            <span className="text-white/20">—</span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleToggleCheckin(participant.email)}
+                              disabled={isToggling}
+                              className={`p-2 rounded-lg transition-all cursor-pointer ${
+                                isChecked
+                                  ? "bg-white text-black hover:bg-white/90 border border-white font-bold"
+                                  : "bg-white/[0.03] text-white/30 hover:text-white hover:bg-white/[0.08] border border-white/10"
+                              }`}
+                              title={isChecked ? "Mark as un-checked in" : "Mark as checked in"}
+                            >
+                              {isToggling ? (
+                                <Loader2 className="w-4 h-4 animate-spin text-white" />
+                              ) : (
+                                <CheckCircle2 className="w-4 h-4" />
+                              )}
+                            </button>
+
+                            <button
+                              onClick={() => handleDeleteParticipant(participant.email)}
+                              disabled={isDeletingEmail === participant.email}
+                              className="p-2 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 cursor-pointer"
+                              title="Remove attendee"
+                            >
+                              {isDeletingEmail === participant.email ? (
+                                <Loader2 className="w-4 h-4 animate-spin text-red-400" />
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Modal: Manually Add Participant */}
       <AnimatePresence>
         {isAddModalOpen && (
-          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -729,75 +894,75 @@ export default function AdminEventRegistrationsPage() {
               className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="relative w-full max-w-lg bg-[#0b0b0b] border border-white/15 rounded-3xl p-8 shadow-2xl space-y-6"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 30 }}
+              className="relative w-full sm:max-w-lg bg-[#0b0b0b] border border-white/15 rounded-t-[28px] sm:rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 max-h-[90dvh] overflow-y-auto"
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <div className="space-y-1">
-                  <h3 className="font-pixel text-lg text-white uppercase">ADD_WALK_IN_PARTICIPANT</h3>
-                  <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest">
-                    Manual registration for {event.title}
+                <div className="space-y-1 min-w-0 pr-2">
+                  <h3 className="font-pixel text-sm sm:text-base text-white uppercase truncate">ADD_WALK_IN</h3>
+                  <p className="text-[10px] text-white/40 uppercase tracking-widest truncate">
+                    {event.title}
                   </p>
                 </div>
                 <button
                   onClick={() => setIsAddModalOpen(false)}
-                  className="p-2 rounded-xl text-white/40 hover:text-white"
+                  className="p-2 rounded-xl text-white/40 hover:text-white shrink-0"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {formError && (
-                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 font-mono text-xs">
+                <div className="p-3 rounded-xl bg-white/5 border border-white/20 text-white text-xs">
                   {formError}
                 </div>
               )}
 
-              <form onSubmit={handleSaveParticipant} className="space-y-4 font-mono text-xs">
+              <form onSubmit={handleSaveParticipant} className="space-y-3.5 text-xs">
                 <div className="space-y-1">
-                  <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1">Full Name *</label>
+                  <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1 block">Full Name *</label>
                   <input
                     type="text"
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. Bharath Kumar P"
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500/50"
+                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-sm sm:text-xs focus:outline-none focus:border-white/40"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1">Email Address *</label>
+                  <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1 block">Email Address *</label>
                   <input
                     type="email"
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="e.g. bharath@gmail.com"
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500/50"
+                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-sm sm:text-xs focus:outline-none focus:border-white/40"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1">Department</label>
+                    <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1 block">Department</label>
                     <input
                       type="text"
                       value={formData.department}
                       onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                       placeholder="CSE, IT, ECE..."
-                      className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500/50"
+                      className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-sm sm:text-xs focus:outline-none focus:border-white/40"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1">Year of Study</label>
+                    <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1 block">Year</label>
                     <select
                       value={formData.year}
                       onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#0f0f0f] border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500/50"
+                      className="w-full px-4 py-3 bg-[#0f0f0f] border border-white/10 rounded-xl text-white text-sm sm:text-xs focus:outline-none focus:border-white/40"
                     >
                       <option value="1">1st Year</option>
                       <option value="2">2nd Year</option>
@@ -808,39 +973,39 @@ export default function AdminEventRegistrationsPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1">College / Institution</label>
+                  <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1 block">College / Institution</label>
                   <input
                     type="text"
                     value={formData.college}
                     onChange={(e) => setFormData({ ...formData, college: e.target.value })}
                     placeholder="Government College of Engineering, Erode"
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500/50"
+                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-sm sm:text-xs focus:outline-none focus:border-white/40"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1">Mobile / Phone Number</label>
+                  <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1 block">Phone Number</label>
                   <input
                     type="text"
                     value={formData.mobile}
                     onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
                     placeholder="e.g. 9876543210"
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500/50"
+                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-sm sm:text-xs focus:outline-none focus:border-white/40"
                   />
                 </div>
 
-                <div className="flex gap-3 pt-4">
+                <div className="flex flex-col-reverse sm:flex-row gap-2.5 pt-3">
                   <button
                     type="button"
                     onClick={() => setIsAddModalOpen(false)}
-                    className="flex-1 py-3 bg-white/[0.04] border border-white/10 text-white/60 hover:text-white rounded-xl font-pixel text-[10px] uppercase transition-all"
+                    className="w-full sm:flex-1 py-3 bg-white/[0.04] border border-white/10 text-white/60 hover:text-white rounded-xl font-pixel text-[10px] uppercase transition-all"
                   >
                     CANCEL
                   </button>
                   <button
                     type="submit"
                     disabled={isSavingParticipant}
-                    className="flex-[2] py-3 bg-white text-black font-bold rounded-xl font-pixel text-[10px] uppercase hover:bg-white/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+                    className="w-full sm:flex-[2] py-3.5 bg-white text-black font-bold rounded-xl font-pixel text-[10px] uppercase hover:bg-white/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-[0_0_20px_rgba(255,255,255,0.15)]"
                   >
                     {isSavingParticipant ? <Loader2 className="w-4 h-4 animate-spin text-black" /> : <CheckCircle2 className="w-4 h-4 text-black" />}
                     {isSavingParticipant ? "SAVING..." : "CONFIRM_ADD"}
@@ -855,7 +1020,7 @@ export default function AdminEventRegistrationsPage() {
       {/* Modal: Broadcast Email */}
       <AnimatePresence>
         {isEmailModalOpen && (
-          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -864,89 +1029,89 @@ export default function AdminEventRegistrationsPage() {
               className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="relative w-full max-w-2xl bg-[#0b0b0b] border border-white/15 rounded-3xl p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 30 }}
+              className="relative w-full sm:max-w-2xl bg-[#0b0b0b] border border-white/15 rounded-t-[28px] sm:rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 max-h-[90dvh] overflow-y-auto"
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <div className="space-y-1">
-                  <h3 className="font-pixel text-lg text-white uppercase">BROADCAST_EMAIL</h3>
-                  <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest">
+                <div className="space-y-1 min-w-0 pr-2">
+                  <h3 className="font-pixel text-sm sm:text-base text-white uppercase truncate">BROADCAST_EMAIL</h3>
+                  <p className="text-[10px] text-white/40 uppercase tracking-widest truncate">
                     Notify {registrations.length} attendees of {event.title}
                   </p>
                 </div>
                 <button
                   onClick={() => setIsEmailModalOpen(false)}
-                  className="p-2 rounded-xl text-white/40 hover:text-white"
+                  className="p-2 rounded-xl text-white/40 hover:text-white shrink-0"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {emailStatus && (
-                <div className="p-3 rounded-xl bg-white/[0.04] border border-white/10 text-emerald-400 font-mono text-xs">
+                <div className="p-3 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs">
                   {emailStatus}
                 </div>
               )}
 
-              <div className="space-y-4 font-mono text-xs">
+              <div className="space-y-3.5 text-xs">
                 <div className="space-y-1">
-                  <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1">Email Subject</label>
+                  <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1 block">Email Subject</label>
                   <input
                     type="text"
                     value={emailSubject}
                     onChange={(e) => setEmailSubject(e.target.value)}
                     placeholder="e.g. Schedule & Venue update for tomorrow"
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
+                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-sm sm:text-xs focus:outline-none focus:border-white/30"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1">Message Content</label>
+                  <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1 block">Message Content</label>
                   <textarea
-                    rows={6}
+                    rows={5}
                     value={emailMessage}
                     onChange={(e) => setEmailMessage(e.target.value)}
                     placeholder="Write announcement, instructions, or meeting links..."
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30 resize-y"
+                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-sm sm:text-xs focus:outline-none focus:border-white/30 resize-y"
                   />
                 </div>
 
-                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
+                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2.5">
                   <p className="text-[10px] text-white/40 uppercase tracking-wider">Test Before Sending</p>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <input
                       type="email"
                       value={testEmail}
                       onChange={(e) => setTestEmail(e.target.value)}
                       placeholder="your.email@example.com"
-                      className="flex-1 px-4 py-2 bg-black/40 border border-white/10 rounded-xl text-white focus:outline-none"
+                      className="flex-1 px-4 py-2.5 bg-black/40 border border-white/10 rounded-xl text-white text-sm sm:text-xs focus:outline-none"
                     />
                     <button
                       onClick={handleSendTestEmail}
                       disabled={isTestEmailing || !testEmail.trim()}
-                      className="px-4 py-2 bg-white/10 border border-white/20 text-white rounded-xl font-pixel text-[10px] uppercase hover:bg-white/20 disabled:opacity-40"
+                      className="h-10 px-4 bg-white/10 border border-white/20 text-white rounded-xl font-pixel text-[9px] uppercase hover:bg-white/20 disabled:opacity-40"
                     >
                       {isTestEmailing ? "SENDING..." : "TEST.SYS"}
                     </button>
                   </div>
                 </div>
 
-                <div className="flex gap-3 pt-2">
+                <div className="flex flex-col-reverse sm:flex-row gap-2.5 pt-2">
                   <button
                     type="button"
                     onClick={() => setIsEmailModalOpen(false)}
-                    className="flex-1 py-3 bg-white/[0.04] border border-white/10 text-white/60 hover:text-white rounded-xl font-pixel text-[10px] uppercase"
+                    className="w-full sm:flex-1 py-3 bg-white/[0.04] border border-white/10 text-white/60 hover:text-white rounded-xl font-pixel text-[10px] uppercase"
                   >
                     CLOSE
                   </button>
                   <button
                     onClick={handleSendEmail}
                     disabled={isEmailing || registrations.length === 0}
-                    className="flex-[2] py-3 bg-white text-black font-bold rounded-xl font-pixel text-[10px] uppercase hover:bg-white/90 transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+                    className="w-full sm:flex-[2] py-3.5 bg-white text-black font-bold rounded-xl font-pixel text-[10px] uppercase hover:bg-white/90 transition-all flex items-center justify-center gap-2 disabled:opacity-40 shadow-[0_0_20px_rgba(255,255,255,0.15)] cursor-pointer"
                   >
-                    {isEmailing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                    {isEmailing ? <Loader2 className="w-4 h-4 animate-spin text-black" /> : <Mail className="w-4 h-4 text-black" />}
                     {isEmailing ? "DISPATCHING..." : `SEND_TO_${registrations.length}_ATTENDEES`}
                   </button>
                 </div>

@@ -120,7 +120,7 @@ export default function About() {
           {aboutData.stats.map((s, idx) => (
             <div key={idx} className="about-stat text-center glass-card px-4 sm:px-8 py-5 sm:py-6 cursor-default">
               <div className="font-pixel text-xl sm:text-2xl mb-1 text-text">{s.value}</div>
-              <div className="font-mono text-[9px] sm:text-xs uppercase tracking-widest mt-1 text-muted">{s.label}</div>
+              <div className="font-mono text-[9px] sm:text-xs uppercase tracking-wider mt-1 text-muted leading-tight break-words">{s.label}</div>
             </div>
           ))}
         </div>

@@ -52,7 +52,7 @@ export default function AdminSidebar() {
     return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
 
-  const currentPage = menuItems.find((m) => m.href === pathname)?.label ?? "Admin";
+  const currentPage = menuItems.find((m) => m.href === pathname || (m.href !== "/admin" && pathname.startsWith(m.href)))?.label ?? "Admin";
 
   return (
     <>

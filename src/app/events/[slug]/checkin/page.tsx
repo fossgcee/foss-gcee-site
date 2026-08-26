@@ -192,7 +192,7 @@ export default function AttendeeCheckinPage() {
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/15 text-white/80 font-mono text-[9px] uppercase font-bold tracking-widest">
           FOSS GCEE · CHECK_IN
         </div>
-        <h1 className="text-xl sm:text-2xl font-pixel text-white uppercase tracking-tight">
+        <h1 className="text-lg sm:text-xl md:text-2xl font-pixel text-white uppercase tracking-tight break-words leading-snug">
           {event.title}
         </h1>
         <div className="flex items-center justify-center gap-4 text-[10px] text-white/40 uppercase tracking-wider">
@@ -227,7 +227,7 @@ export default function AttendeeCheckinPage() {
               <span className="text-[9px] uppercase tracking-[0.25em] text-white/50 font-bold">
                 {successData.already ? "ATTENDANCE_ALREADY_CONFIRMED" : "CHECK_IN_CONFIRMED"}
               </span>
-              <h2 className="text-xl font-pixel text-white uppercase tracking-tight">
+              <h2 className="text-lg sm:text-xl font-pixel text-white uppercase tracking-tight break-words leading-snug">
                 {successData.participant.name}
               </h2>
             </div>
@@ -375,7 +375,7 @@ export default function AttendeeCheckinPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1 block">Department</label>
                     <input

@@ -340,7 +340,7 @@ export default function AdminMembersPage() {
       {/* Header */}
       <div className="flex flex-wrap justify-between items-start gap-3 pt-2">
         <div className="space-y-0.5">
-          <h1 className="font-pixel text-white whitespace-nowrap text-[clamp(1rem,3.8vw,1.875rem)]">REGISTERED_MEMBERS</h1>
+          <h1 className="font-pixel text-white text-base sm:text-xl md:text-2xl break-words">REGISTERED_MEMBERS</h1>
           <p className="font-mono text-xs text-white/40">All club join requests</p>
         </div>
         <button
