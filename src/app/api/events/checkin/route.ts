@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { getSiteConfig, updateSiteConfig } from "@/services/siteConfig";
 import { emailRegex } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -13,10 +12,6 @@ interface CheckinRecord {
   college?: string;
   mobile?: string;
   checkedInAt: string;
-}
-
-interface EventCheckinConfig {
-  checkins: CheckinRecord[];
 }
 
 export async function GET(req: NextRequest) {
@@ -41,10 +36,30 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });
     }
 
-    // Get checkins from site_configs
-    const checkinConfigKey = `checkin_${event.id}`;
-    const checkinData = (await getSiteConfig(checkinConfigKey)) as EventCheckinConfig | null;
-    const checkins = checkinData?.checkins || [];
+    // Get checkins from feedbacks table with event_name = 'checkin:' + event.id
+    const { data: checkinRows } = await supabase
+      .from("feedbacks")
+      .select("*")
+      .eq("event_name", `checkin:${event.id}`)
+      .order("created_at", { ascending: true });
+
+    const checkins: CheckinRecord[] = (checkinRows || []).map((row) => {
+      let meta: any = {};
+      try {
+        meta = JSON.parse(row.comments || "{}");
+      } catch {
+        meta = {};
+      }
+      return {
+        email: (row.email || "").toLowerCase(),
+        name: row.name || "",
+        department: row.department || "",
+        year: row.year || 0,
+        college: meta.college || "Government College of Engineering, Erode",
+        mobile: meta.mobile || "",
+        checkedInAt: row.created_at,
+      };
+    });
 
     // Total registrations
     const { count: totalRegs } = await supabase
@@ -159,37 +174,59 @@ export async function POST(req: NextRequest) {
       participantMobile = mobile;
     }
 
-    // 2. Load check-in records for this event
-    const checkinConfigKey = `checkin_${event.id}`;
-    const currentConfig = (await getSiteConfig(checkinConfigKey)) as EventCheckinConfig | null;
-    const checkins: CheckinRecord[] = currentConfig?.checkins ? [...currentConfig.checkins] : [];
+    // 2. Check if already recorded in checkins
+    const checkinTag = `checkin:${event.id}`;
+    const { data: existingCheckin } = await supabase
+      .from("feedbacks")
+      .select("*")
+      .eq("event_name", checkinTag)
+      .eq("email", email)
+      .maybeSingle();
 
-    const existingIndex = checkins.findIndex((c) => c.email.toLowerCase() === email);
-    const nowIso = new Date().toISOString();
+    if (existingCheckin) {
+      return NextResponse.json({
+        success: true,
+        alreadyCheckedIn: true,
+        event: {
+          id: event.id,
+          title: event.title,
+          slug: event.slug,
+          venue: event.venue,
+          startDate: event.start_date,
+        },
+        participant: {
+          name: existingCheckin.name || participantName,
+          email,
+          department: existingCheckin.department || participantDept,
+          year: existingCheckin.year || participantYear,
+          college: participantCollege,
+          checkedInAt: existingCheckin.created_at,
+        },
+      });
+    }
 
-    let alreadyCheckedIn = false;
-    let checkedInAt = nowIso;
-
-    if (existingIndex >= 0) {
-      alreadyCheckedIn = true;
-      checkedInAt = checkins[existingIndex].checkedInAt || nowIso;
-    } else {
-      const newRecord: CheckinRecord = {
-        email,
+    // Insert new check-in record
+    const { data: inserted, error: checkinErr } = await supabase
+      .from("feedbacks")
+      .insert({
+        event_name: checkinTag,
         name: participantName,
+        email,
         department: participantDept,
         year: participantYear,
-        college: participantCollege,
-        mobile: participantMobile,
-        checkedInAt: nowIso,
-      };
-      checkins.push(newRecord);
-      await updateSiteConfig(checkinConfigKey, { checkins });
+        rating: 5,
+        comments: JSON.stringify({ college: participantCollege, mobile: participantMobile }),
+      })
+      .select()
+      .single();
+
+    if (checkinErr) {
+      throw checkinErr;
     }
 
     return NextResponse.json({
       success: true,
-      alreadyCheckedIn,
+      alreadyCheckedIn: false,
       event: {
         id: event.id,
         title: event.title,
@@ -203,7 +240,7 @@ export async function POST(req: NextRequest) {
         department: participantDept,
         year: participantYear,
         college: participantCollege,
-        checkedInAt,
+        checkedInAt: inserted.created_at,
       },
     });
   } catch (error) {

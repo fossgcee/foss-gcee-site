@@ -443,7 +443,7 @@ export default function AdminEventRegistrationsPage() {
           <div>
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl sm:text-3xl font-pixel text-white uppercase">{event.title}</h1>
-              <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-pixel text-[10px] uppercase font-bold">
+              <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white font-pixel text-[10px] uppercase font-bold">
                 {checkedInCount} / {totalCount} CHECKED IN ({checkinPercent}%)
               </span>
             </div>
@@ -469,7 +469,7 @@ export default function AdminEventRegistrationsPage() {
           <Link
             href={`/events/${event.slug}/checkin/projector`}
             target="_blank"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 text-black font-pixel text-[10px] uppercase font-bold hover:brightness-110 transition-all cursor-pointer shadow-[0_0_25px_rgba(16,185,129,0.3)]"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-black font-pixel text-[10px] uppercase font-bold hover:bg-white/90 transition-all cursor-pointer shadow-[0_0_20px_rgba(255,255,255,0.15)]"
             title="Launch Projector Fullscreen QR Code"
           >
             <QrCode className="w-4 h-4" /> PROJECTOR_QR
@@ -477,13 +477,13 @@ export default function AdminEventRegistrationsPage() {
 
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.06] border border-white/15 text-white font-pixel text-[10px] uppercase hover:bg-white/10 transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/15 text-white font-pixel text-[10px] uppercase hover:bg-white/10 transition-all cursor-pointer"
           >
-            <Plus className="w-4 h-4 text-emerald-400" /> ADD_WALK_IN
+            <Plus className="w-4 h-4 text-white/70" /> ADD_WALK_IN
           </button>
 
           <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-pixel text-[10px] uppercase hover:bg-white/[0.08] transition-all cursor-pointer">
-            {isImportingCsv ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4 text-emerald-400" />}
+            {isImportingCsv ? <Loader2 className="w-4 h-4 animate-spin text-white/70" /> : <Upload className="w-4 h-4 text-white/70" />}
             {isImportingCsv ? "IMPORTING..." : "UPLOAD_CSV"}
             <input
               type="file"
@@ -575,7 +575,7 @@ export default function AdminEventRegistrationsPage() {
       {/* Participants Counter & Status Bar */}
       <div className="flex items-center justify-between text-xs font-mono text-white/40 uppercase tracking-widest px-1">
         <span>Showing {filteredRegistrations.length} of {registrations.length} participants</span>
-        <span className="text-emerald-400">{checkedInCount} Present</span>
+        <span className="text-white font-bold">{checkedInCount} Present</span>
       </div>
 
       {/* Participants Table */}
@@ -588,7 +588,7 @@ export default function AdminEventRegistrationsPage() {
           </p>
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="px-6 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-pixel text-xs uppercase hover:bg-emerald-500/20 transition-all"
+            className="px-6 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white font-pixel text-xs uppercase hover:bg-white/20 transition-all cursor-pointer"
           >
             + ADD_FIRST_PARTICIPANT
           </button>
@@ -625,7 +625,7 @@ export default function AdminEventRegistrationsPage() {
                         <div className="flex items-center gap-3">
                           <div className={`w-8 h-8 rounded-lg font-pixel text-xs flex items-center justify-center shrink-0 border ${
                             isChecked
-                              ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
+                              ? "bg-white text-black font-bold border-white"
                               : "bg-white/5 border-white/10 text-white/40"
                           }`}>
                             {isChecked ? "✓" : participant.name.charAt(0).toUpperCase()}
@@ -634,7 +634,7 @@ export default function AdminEventRegistrationsPage() {
                             <p className="font-bold text-white uppercase">{participant.name}</p>
                             <a
                               href={`mailto:${participant.email}`}
-                              className="text-white/40 hover:text-emerald-400 transition-colors text-[11px]"
+                              className="text-white/40 hover:text-white transition-colors text-[11px]"
                             >
                               {participant.email}
                             </a>
@@ -653,8 +653,8 @@ export default function AdminEventRegistrationsPage() {
                       </td>
                       <td className="py-4 px-6">
                         {isChecked ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
-                            <CheckCircle2 className="w-3 h-3" /> PRESENT
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/10 border border-white/20 text-white text-[10px] font-bold uppercase tracking-wider">
+                            <CheckCircle2 className="w-3 h-3 text-white" /> PRESENT
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.02] border border-white/10 text-white/30 text-[10px] uppercase tracking-wider">
@@ -668,7 +668,7 @@ export default function AdminEventRegistrationsPage() {
                             href={`tel:${participant.mobile}`}
                             className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors"
                           >
-                            <Phone className="w-3 h-3 text-emerald-400" />
+                            <Phone className="w-3 h-3 text-white/40" />
                             <span>{participant.mobile}</span>
                           </a>
                         ) : (
@@ -682,13 +682,13 @@ export default function AdminEventRegistrationsPage() {
                             disabled={isToggling}
                             className={`p-2 rounded-lg transition-all cursor-pointer ${
                               isChecked
-                                ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20"
+                                ? "bg-white text-black hover:bg-white/90 border border-white font-bold"
                                 : "bg-white/[0.03] text-white/30 hover:text-white hover:bg-white/[0.08] border border-white/10"
                             }`}
                             title={isChecked ? "Mark as un-checked in" : "Mark as checked in"}
                           >
                             {isToggling ? (
-                              <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+                              <Loader2 className="w-4 h-4 animate-spin text-white" />
                             ) : (
                               <CheckCircle2 className="w-4 h-4" />
                             )}
@@ -840,9 +840,9 @@ export default function AdminEventRegistrationsPage() {
                   <button
                     type="submit"
                     disabled={isSavingParticipant}
-                    className="flex-[2] py-3 bg-emerald-500 text-black font-bold rounded-xl font-pixel text-[10px] uppercase hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                    className="flex-[2] py-3 bg-white text-black font-bold rounded-xl font-pixel text-[10px] uppercase hover:bg-white/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-[0_0_20px_rgba(255,255,255,0.15)]"
                   >
-                    {isSavingParticipant ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                    {isSavingParticipant ? <Loader2 className="w-4 h-4 animate-spin text-black" /> : <CheckCircle2 className="w-4 h-4 text-black" />}
                     {isSavingParticipant ? "SAVING..." : "CONFIRM_ADD"}
                   </button>
                 </div>

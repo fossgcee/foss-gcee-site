@@ -1,21 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/adminAuth";
-import { getSiteConfig, updateSiteConfig } from "@/services/siteConfig";
 import { supabase } from "@/lib/supabase";
-
-interface CheckinRecord {
-  email: string;
-  name: string;
-  department?: string;
-  year?: number;
-  college?: string;
-  mobile?: string;
-  checkedInAt: string;
-}
-
-interface EventCheckinConfig {
-  checkins: CheckinRecord[];
-}
 
 export async function POST(req: NextRequest) {
   const auth = await requireAdmin(req);
@@ -29,13 +14,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Event ID is required" }, { status: 400 });
     }
 
-    const checkinConfigKey = `checkin_${eventId}`;
-    const currentConfig = (await getSiteConfig(checkinConfigKey)) as EventCheckinConfig | null;
-    let checkins: CheckinRecord[] = currentConfig?.checkins ? [...currentConfig.checkins] : [];
+    const checkinTag = `checkin:${eventId}`;
 
     if (action === "clear") {
-      await updateSiteConfig(checkinConfigKey, { checkins: [] });
-      return NextResponse.json({ success: true, message: "Check-ins cleared", checkins: [] });
+      await supabase.from("feedbacks").delete().eq("event_name", checkinTag);
+      return NextResponse.json({ success: true, message: "Check-ins cleared", checkedInCount: 0, checkedInEmails: [] });
     }
 
     if (!email) {
@@ -43,11 +26,18 @@ export async function POST(req: NextRequest) {
     }
 
     const targetEmail = email.toLowerCase().trim();
-    const existingIndex = checkins.findIndex((c) => c.email.toLowerCase() === targetEmail);
 
-    if (action === "uncheckin" || (action === "toggle" && existingIndex >= 0)) {
-      if (existingIndex >= 0) {
-        checkins.splice(existingIndex, 1);
+    // Check if already checked in
+    const { data: existingCheckin } = await supabase
+      .from("feedbacks")
+      .select("id")
+      .eq("event_name", checkinTag)
+      .eq("email", targetEmail)
+      .maybeSingle();
+
+    if (action === "uncheckin" || (action === "toggle" && existingCheckin)) {
+      if (existingCheckin) {
+        await supabase.from("feedbacks").delete().eq("id", existingCheckin.id);
       }
     } else {
       // Find participant details from event_registrations
@@ -58,31 +48,33 @@ export async function POST(req: NextRequest) {
         .eq("email", targetEmail)
         .maybeSingle();
 
-      const newRecord: CheckinRecord = {
-        email: targetEmail,
+      await supabase.from("feedbacks").insert({
+        event_name: checkinTag,
         name: participant?.name || targetEmail,
+        email: targetEmail,
         department: participant?.department || "General",
         year: participant?.year || 0,
-        college: participant?.college || "Government College of Engineering, Erode",
-        mobile: participant?.mobile || "",
-        checkedInAt: new Date().toISOString(),
-      };
-
-      if (existingIndex >= 0) {
-        checkins[existingIndex] = newRecord;
-      } else {
-        checkins.push(newRecord);
-      }
+        rating: 5,
+        comments: JSON.stringify({
+          college: participant?.college || "Government College of Engineering, Erode",
+          mobile: participant?.mobile || "",
+        }),
+      });
     }
 
-    await updateSiteConfig(checkinConfigKey, { checkins });
+    // Return updated checkins list
+    const { data: allCheckins } = await supabase
+      .from("feedbacks")
+      .select("email")
+      .eq("event_name", checkinTag);
+
+    const checkedInEmails = (allCheckins || []).map((c) => (c.email || "").toLowerCase());
 
     return NextResponse.json({
       success: true,
-      checkedIn: checkins.some((c) => c.email.toLowerCase() === targetEmail),
-      checkins,
-      checkedInCount: checkins.length,
-      checkedInEmails: checkins.map((c) => c.email.toLowerCase()),
+      checkedIn: checkedInEmails.includes(targetEmail),
+      checkedInCount: checkedInEmails.length,
+      checkedInEmails,
     });
   } catch (error) {
     return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 });

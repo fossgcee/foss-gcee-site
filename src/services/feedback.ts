@@ -21,7 +21,11 @@ export async function createFeedback(fb: any) {
 export const addFeedback = createFeedback;
 
 export async function getFeedbacks() {
-  const { data, error } = await supabase.from("feedbacks").select("*").order("created_at", { ascending: false });
+  const { data, error } = await supabase
+    .from("feedbacks")
+    .select("*")
+    .not("event_name", "like", "checkin:%")
+    .order("created_at", { ascending: false });
   if (error) throw error;
   
   return data.map(item => ({
