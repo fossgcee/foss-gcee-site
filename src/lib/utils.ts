@@ -15,9 +15,11 @@ export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
 /** Returns the canonical site URL, stripping any trailing slash. */
 export const getSiteUrl = (): string =>
   (
-    process.env.PUBLIC_SITE_URL ||
     process.env.NEXT_PUBLIC_SITE_URL ||
-    "https://fossgcee.in"
+    process.env.PUBLIC_SITE_URL ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "") ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "") ||
+    "https://fossgcee.vercel.app"
   ).replace(/\/$/, "");
 
 /** Returns the absolute URL to the FOSS Club logo used in emails. */

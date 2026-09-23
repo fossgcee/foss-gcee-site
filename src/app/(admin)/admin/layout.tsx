@@ -1,4 +1,13 @@
+import { Metadata } from "next";
 import AdminSidebar from "@/components/AdminSidebar";
+
+export const metadata: Metadata = {
+  title: "Admin Portal",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function AdminLayout({
   children,

@@ -1,39 +1,20 @@
 /* eslint-disable @next/next/no-img-element */
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { Metadata } from "next";
 import { getEvents, getEventBySlug } from "@/services/event";
 import { ArrowLeft, CheckCircle2, ListChecks, Award, ExternalLink, MessageSquare } from "lucide-react";
 import EventRegisterButton from "@/components/EventRegisterButton";
+import JsonLd from "@/components/JsonLd";
 
 type AgendaItem = { time: string; title?: string; topic?: string; description?: string };
 
-type EventSlug = { slug: string };
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://fossgcee.vercel.app";
 
-type EventMetadata = {
-  title: string;
-  description?: string;
-};
-
-type EventDetails = {
-  title: string;
-  slug: string;
-  description?: string;
-  startDate: string;
-  endDate?: string;
-  startTime: string;
-  endTime: string;
-  category: string;
-  handledBy: string;
-  speaker?: string;
-  organizers: string[];
-  poster?: string;
-  status: "upcoming" | "completed" | "draft";
-  manualStatus?: boolean;
-  agenda?: AgendaItem[];
-  outcomes?: string;
-  galleryLink?: string;
-  registrationMode?: "internal" | "external";
-  externalRsvpUrl?: string;
+const fmt = (d: string) => {
+  if (!d) return "N/A";
+  const [y, m, day] = d.split("-");
+  return `${day}/${m}/${y}`;
 };
 
 /* ── Static params ─────────────────────────────────────────── */
@@ -50,28 +31,51 @@ export async function generateStaticParams() {
 }
 
 /* ── Metadata ──────────────────────────────────────────────── */
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   try {
     const event = await getEventBySlug(slug);
-    if (!event) return { title: "Event Not Found – FOSSGCEE" };
+    if (!event || event.status === "draft") {
+      return {
+        title: "Event Not Found",
+        robots: { index: false, follow: false },
+      };
+    }
+
+    const title = `${event.title} – FOSS Club GCE Erode`;
+    const description =
+      event.description ||
+      `Join ${event.title} hosted by FOSS Club at Government College of Engineering, Erode on ${fmt(event.startDate)}.`;
+    const posterUrl = event.poster || `${siteUrl}/foss_gcee_logo.png`;
+
     return {
-      title: `${event.title} – FOSSGCEE`,
-      description: event.description ?? `FOSSGCEE event: ${event.title}`,
+      title,
+      description,
+      alternates: {
+        canonical: `/events/${event.slug}`,
+      },
+      openGraph: {
+        title,
+        description,
+        url: `${siteUrl}/events/${event.slug}`,
+        type: "website",
+        images: [
+          {
+            url: posterUrl,
+            alt: event.title,
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${event.title} – FOSSGCEE`,
+        description,
+        images: [posterUrl],
+      },
     };
   } catch {
     return { title: "Event Not Found – FOSSGCEE" };
   }
-}
-
-const fmt = (d: string) => {
-  if (!d) return "N/A";
-  const [y, m, day] = d.split("-");
-  return `${day}/${m}/${y}`;
-};
-
-function todayIST() {
-  return new Date(Date.now() + 5.5 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
 /* ── Page ──────────────────────────────────────────────────── */
@@ -83,7 +87,8 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
   } catch (e) {
     console.error(e);
   }
-  if (!event) notFound();
+  if (!event || event.status === "draft") notFound();
+
   // Rely purely on DB status — admin may have manually overridden it
   const isPast = event.status === "completed";
 
@@ -91,225 +96,297 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
   const galleryLink: string = event.galleryLink ?? "";
   const hasOutcomes = isPast && event.outcomes && event.outcomes.trim().length > 0;
   const hasGalleryLink = isPast && galleryLink.trim().length > 0;
-  const hasAgenda   = !isPast && agenda.length > 0;
+  const hasAgenda = !isPast && agenda.length > 0;
+
+  const pageUrl = `${siteUrl}/events/${event.slug}`;
+  const startIso = `${event.startDate}T${event.startTime || "09:00"}:00+05:30`;
+  const endIso = `${event.endDate || event.startDate}T${event.endTime || "17:00"}:00+05:30`;
+
+  const eventSchema = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "@id": `${pageUrl}#event`,
+    name: event.title,
+    description: event.description || event.title,
+    startDate: startIso,
+    endDate: endIso,
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    eventStatus: isPast
+      ? "https://schema.org/EventCompleted"
+      : "https://schema.org/EventScheduled",
+    location: {
+      "@type": "Place",
+      name: event.venue || "Government College of Engineering, Erode",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "Perundurai",
+        addressLocality: "Erode",
+        addressRegion: "Tamil Nadu",
+        postalCode: "638053",
+        addressCountry: "IN",
+      },
+    },
+    image: event.poster ? [event.poster] : [`${siteUrl}/foss_gcee_logo.png`],
+    organizer: {
+      "@type": "Organization",
+      name: "FOSS Club GCE Erode",
+      url: siteUrl,
+    },
+    ...(event.speaker
+      ? {
+          performer: {
+            "@type": "Person",
+            name: event.speaker.replace(/^\*/, "").trim(),
+          },
+        }
+      : {}),
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Events",
+        item: `${siteUrl}/events`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: event.title,
+        item: pageUrl,
+      },
+    ],
+  };
 
   return (
-    <div className="min-h-screen bg-bg text-text pt-24 pb-32 md:pb-20">
+    <>
+      <JsonLd data={[eventSchema, breadcrumbSchema]} />
+      <div className="min-h-screen bg-bg text-text pt-24 pb-32 md:pb-20">
 
-      {/* Back */}
-      <div className="max-w-4xl mx-auto px-6 mb-8">
-        <Link href="/events" className="inline-flex items-center gap-2 font-mono text-xs transition-colors hover:text-text text-muted uppercase tracking-[0.2em]">
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to Logs
-        </Link>
-      </div>
+        {/* Back */}
+        <div className="max-w-4xl mx-auto px-6 mb-8">
+          <Link href="/events" className="inline-flex items-center gap-2 font-mono text-xs transition-colors hover:text-text text-muted uppercase tracking-[0.2em]">
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to Logs
+          </Link>
+        </div>
 
-      {/* FOSS CIT Style Hero Layout */}
-      <div className="max-w-4xl mx-auto px-6 mb-16 flex flex-col items-center">
-         
-         <h1 className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-pixel text-center mb-8 sm:mb-10 px-2 sm:px-4 text-text uppercase break-words leading-snug">
-            {event.title}
-         </h1>
+        {/* Hero Layout */}
+        <div className="max-w-4xl mx-auto px-6 mb-16 flex flex-col items-center">
+           
+           <h1 className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-pixel text-center mb-8 sm:mb-10 px-2 sm:px-4 text-text uppercase break-words leading-snug">
+              {event.title}
+           </h1>
 
-         {event.poster && (
-            <div className="w-full max-w-3xl aspect-video bg-surface rounded-lg overflow-hidden border border-border mb-12 shadow-2xl relative">
-              <div className="absolute inset-0 shadow-[inset_0_0_50px_rgba(255,255,255,0.02)] pointer-events-none" />
-              <img src={event.poster} alt={event.title} className="w-full h-full object-contain" />
-            </div>
-         )}
+           {event.poster && (
+              <div className="w-full max-w-3xl aspect-video bg-surface rounded-lg overflow-hidden border border-border mb-12 shadow-2xl relative">
+                <div className="absolute inset-0 shadow-[inset_0_0_50px_rgba(255,255,255,0.02)] pointer-events-none" />
+                <img src={event.poster} alt={event.title} className="w-full h-full object-contain" />
+              </div>
+           )}
 
-         {/* 2-Column Specs Grid */}
-         <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-y-12 gap-x-10 text-left font-mono mt-4">
-            
-            <div className="space-y-2">
-               <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Date:</h3>
-               <p className="text-muted-2 text-sm sm:text-base">
-                  {fmt(event.startDate)} {event.endDate && event.endDate !== event.startDate ? ` - ${fmt(event.endDate)}` : ''}
-               </p>
-            </div>
-            
-            <div className="space-y-2">
-               <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Venue:</h3>
-               <p className="text-muted-2 text-sm sm:text-base">
-                  {event.venue}
-               </p>
-            </div>
-            
-            <div className="space-y-2">
-               <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Time:</h3>
-               <p className="text-muted-2 text-sm sm:text-base">
-                  {event.startTime} - {event.endTime}
-               </p>
-            </div>
+           {/* 2-Column Specs Grid */}
+           <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-y-12 gap-x-10 text-left font-mono mt-4">
+              
+              <div className="space-y-2">
+                 <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Date:</h3>
+                 <p className="text-muted-2 text-sm sm:text-base">
+                    {fmt(event.startDate)} {event.endDate && event.endDate !== event.startDate ? ` - ${fmt(event.endDate)}` : ''}
+                 </p>
+              </div>
+              
+              <div className="space-y-2">
+                 <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Venue:</h3>
+                 <p className="text-muted-2 text-sm sm:text-base">
+                    {event.venue}
+                 </p>
+              </div>
+              
+              <div className="space-y-2">
+                 <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Time:</h3>
+                 <p className="text-muted-2 text-sm sm:text-base">
+                    {event.startTime} - {event.endTime}
+                 </p>
+              </div>
 
-            {event.speaker && (
-               <div className="space-y-2">
-                  <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Speaker(s) / Guest(s):</h3>
-                  <div className="space-y-1">
-                    {event.speaker.split(/[\n,]+/).map((s: string) => s.trim().replace(/^\*/, "")).filter(Boolean).map((s: string, idx: number) => (
-                      <p key={idx} className="text-muted-2 text-sm sm:text-base font-semibold flex items-center gap-2">
-                        <span className="text-xs">🎙️</span> {s.toUpperCase()}
-                      </p>
-                    ))}
-                  </div>
-               </div>
-            )}
+              {event.speaker && (
+                 <div className="space-y-2">
+                    <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Speaker(s) / Guest(s):</h3>
+                    <div className="space-y-1">
+                      {event.speaker.split(/[\n,]+/).map((s: string) => s.trim().replace(/^\*/, "")).filter(Boolean).map((s: string, idx: number) => (
+                        <p key={idx} className="text-muted-2 text-sm sm:text-base font-semibold flex items-center gap-2">
+                          <span className="text-xs">🎙️</span> {s.toUpperCase()}
+                        </p>
+                      ))}
+                    </div>
+                 </div>
+              )}
 
-            <div className="space-y-2">
-               <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Handled By / Lead:</h3>
-               <p className="text-muted-2 text-sm sm:text-base">
-                  {event.handledBy}
-               </p>
-            </div>
+              <div className="space-y-2">
+                 <h3 className="text-lg sm:text-xl font-bold tracking-wide text-text uppercase">Handled By / Lead:</h3>
+                 <p className="text-muted-2 text-sm sm:text-base">
+                    {event.handledBy}
+                 </p>
+              </div>
 
-         </div>
-
-         {!isPast && (
-           <div className="mt-10">
-             <EventRegisterButton
-               eventTitle={event.title}
-               eventSlug={event.slug}
-               registrationMode={event.registrationMode}
-               externalRsvpUrl={event.externalRsvpUrl}
-             />
            </div>
-         )}
-      </div>
 
-      {/* Description */}
-      {event.description && (
-        <section className="max-w-4xl mx-auto px-6 py-10">
-          <h2 className="font-pixel text-sm text-text uppercase tracking-tight mb-6">:: MISSION_SCOPE</h2>
-          <p className="text-base sm:text-lg leading-relaxed text-muted-2 font-mono whitespace-pre-wrap border-l-2 border-border-2 pl-6">
-            {event.description}
-          </p>
-        </section>
-      )}
+           {!isPast && (
+             <div className="mt-10">
+               <EventRegisterButton
+                 eventTitle={event.title}
+                 eventSlug={event.slug}
+                 registrationMode={event.registrationMode}
+                 externalRsvpUrl={event.externalRsvpUrl}
+               />
+             </div>
+           )}
+        </div>
 
-      {/* Agenda — upcoming events only */}
-      {hasAgenda && (
-        <section className="max-w-4xl mx-auto px-6 py-10">
-          <h2 className="font-pixel text-sm text-text uppercase tracking-tight mb-8 flex items-center gap-2">
-            <ListChecks className="w-4 h-4" /> :: EVENT_AGENDA
-          </h2>
-          <div className="relative border-l-2 border-border-2 pl-6 space-y-0">
-            {agenda.map((item, i) => (
-              <div key={i} className="relative group pb-8 last:pb-0">
-                <div className="absolute -left-[29px] top-2 w-4 h-4 rounded-full border-2 border-border-2 bg-bg-2 group-hover:border-text transition-colors flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 rounded-full bg-text/40 group-hover:bg-text transition-colors" />
-                </div>
-                <div className="glass-card p-5 group-hover:-translate-x-0.5 transition-transform">
-                  <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-3 sm:gap-5">
-                    <span className="font-pixel text-xs text-muted bg-surface-2 border border-border px-3 py-1.5 rounded-lg shrink-0 self-start">{item.time}</span>
-                    <div className="space-y-2">
-                      <p className="font-mono text-sm font-semibold text-text">{item.title || item.topic}</p>
-                      {item.description && (
-                        <p className="font-mono text-xs sm:text-sm text-muted-2 leading-relaxed">{item.description}</p>
-                      )}
+        {/* Description */}
+        {event.description && (
+          <section className="max-w-4xl mx-auto px-6 py-10">
+            <h2 className="font-pixel text-sm text-text uppercase tracking-tight mb-6">:: MISSION_SCOPE</h2>
+            <p className="text-base sm:text-lg leading-relaxed text-muted-2 font-mono whitespace-pre-wrap border-l-2 border-border-2 pl-6">
+              {event.description}
+            </p>
+          </section>
+        )}
+
+        {/* Agenda — upcoming events only */}
+        {hasAgenda && (
+          <section className="max-w-4xl mx-auto px-6 py-10">
+            <h2 className="font-pixel text-sm text-text uppercase tracking-tight mb-8 flex items-center gap-2">
+              <ListChecks className="w-4 h-4" /> :: EVENT_AGENDA
+            </h2>
+            <div className="relative border-l-2 border-border-2 pl-6 space-y-0">
+              {agenda.map((item, i) => (
+                <div key={i} className="relative group pb-8 last:pb-0">
+                  <div className="absolute -left-[29px] top-2 w-4 h-4 rounded-full border-2 border-border-2 bg-bg-2 group-hover:border-text transition-colors flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 rounded-full bg-text/40 group-hover:bg-text transition-colors" />
+                  </div>
+                  <div className="glass-card p-5 group-hover:-translate-x-0.5 transition-transform">
+                    <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-3 sm:gap-5">
+                      <span className="font-pixel text-xs text-muted bg-surface-2 border border-border px-3 py-1.5 rounded-lg shrink-0 self-start">{item.time}</span>
+                      <div className="space-y-2">
+                        <p className="font-mono text-sm font-semibold text-text">{item.title || item.topic}</p>
+                        {item.description && (
+                          <p className="font-mono text-xs sm:text-sm text-muted-2 leading-relaxed">{item.description}</p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Outcomes — past events only */}
-      {hasOutcomes && (
-        <section className="max-w-4xl mx-auto px-6 py-10">
-          <h2 className="font-pixel text-sm text-text uppercase tracking-tight mb-6 flex items-center gap-2">
-            <Award className="w-4 h-4" /> :: EVENT_OUTCOMES
-          </h2>
-          <div className="p-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
-            <p className="text-base leading-relaxed text-muted-2 font-mono whitespace-pre-wrap">{event.outcomes}</p>
-          </div>
-        </section>
-      )}
-
-      {/* Gallery Link — past events only */}
-      {hasGalleryLink && (
-        <section className="max-w-4xl mx-auto px-6 py-10">
-          <h2 className="font-pixel text-sm text-text uppercase tracking-tight mb-6 flex items-center gap-2">
-            <ExternalLink className="w-4 h-4" /> :: MEDIA_ARCHIVE
-          </h2>
-          <a
-            href={galleryLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-3 sm:px-6 sm:py-3 rounded-2xl bg-surface-2 border border-border-2 font-pixel text-[9px] sm:text-xs uppercase tracking-wider sm:tracking-tight text-text hover:scale-[1.02] transition-all"
-          >
-            OPEN_ENTE_PHOTO_ALBUM <ExternalLink className="w-4 h-4 shrink-0" />
-          </a>
-        </section>
-      )}
-
-      {/* Empty state for completed events with no content yet */}
-      {isPast && !hasOutcomes && !hasGalleryLink && (
-        <section className="max-w-4xl mx-auto px-6 py-10">
-          <div className="p-8 rounded-2xl border border-dashed border-border-2 text-center">
-            <CheckCircle2 className="w-8 h-8 mx-auto mb-3 text-muted-2" />
-            <p className="font-pixel text-[10px] text-muted uppercase tracking-widest">Event Completed</p>
-            <p className="font-mono text-xs text-muted-2 mt-1">Outcomes and gallery link will be posted soon.</p>
-          </div>
-        </section>
-      )}
-
-      {/* Feedback Link for Past Events */}
-      {isPast && (
-        <section className="max-w-4xl mx-auto px-6 py-10">
-          <div className="p-8 rounded-2xl bg-surface-2 border border-border-2 text-center flex flex-col items-center justify-center space-y-5">
-            <div className="w-12 h-12 rounded-full bg-bg border border-border flex items-center justify-center">
-              <MessageSquare className="w-5 h-5 text-muted" />
+              ))}
             </div>
-            <div>
-              <h2 className="font-pixel text-sm text-text uppercase tracking-tight">
-                Submit Your Feedback
-              </h2>
-              <p className="font-mono text-xs text-muted-2 mt-2 max-w-sm mx-auto">
-                Did you attend this event? Help us improve future missions by sharing your thoughts.
-              </p>
+          </section>
+        )}
+
+        {/* Outcomes — past events only */}
+        {hasOutcomes && (
+          <section className="max-w-4xl mx-auto px-6 py-10">
+            <h2 className="font-pixel text-sm text-text uppercase tracking-tight mb-6 flex items-center gap-2">
+              <Award className="w-4 h-4" /> :: EVENT_OUTCOMES
+            </h2>
+            <div className="p-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
+              <p className="text-base leading-relaxed text-muted-2 font-mono whitespace-pre-wrap">{event.outcomes}</p>
             </div>
-            <Link
-              href={`/feedback?event=${event.slug}`}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-[14px] bg-text text-bg font-pixel text-[10px] hover:scale-[1.03] active:scale-[0.98] transition-all uppercase tracking-widest shadow-xl"
+          </section>
+        )}
+
+        {/* Gallery Link — past events only */}
+        {hasGalleryLink && (
+          <section className="max-w-4xl mx-auto px-6 py-10">
+            <h2 className="font-pixel text-sm text-text uppercase tracking-tight mb-6 flex items-center gap-2">
+              <ExternalLink className="w-4 h-4" /> :: MEDIA_ARCHIVE
+            </h2>
+            <a
+              href={galleryLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-3 sm:px-6 sm:py-3 rounded-2xl bg-surface-2 border border-border-2 font-pixel text-[9px] sm:text-xs uppercase tracking-wider sm:tracking-tight text-text hover:scale-[1.02] transition-all"
             >
-              PROVIDE_FEEDBACK
-            </Link>
-          </div>
-        </section>
-      )}
+              OPEN_ENTE_PHOTO_ALBUM <ExternalLink className="w-4 h-4 shrink-0" />
+            </a>
+          </section>
+        )}
 
-      {/* Footer */}
-      <div className="max-w-4xl mx-auto px-6 pt-16 pb-8 flex justify-center">
-        <Link href="/events" className="inline-flex items-center gap-3 px-8 py-4 bg-surface-2 border border-border-2 rounded-[20px] font-pixel text-xs transition-all hover:scale-[1.03] active:scale-[0.98] hover:bg-text hover:text-bg text-muted-2 uppercase tracking-tight shadow-xl">
-          <ArrowLeft className="w-5 h-5" /> RETURN_TO_LOGS
-        </Link>
-      </div>
-    
-      {/* Sticky Mobile Register Button */}
-      {!isPast && event && (
-        <div className="md:hidden fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 z-50">
-          <EventRegisterButton
-            eventTitle={event.title}
-            eventSlug={event.slug}
-            registrationMode={event.registrationMode}
-            externalRsvpUrl={event.externalRsvpUrl}
-            className="glass-strong w-full px-4 py-3 rounded-[24px] shadow-[0_18px_44px_rgba(0,0,0,0.24)] flex items-center justify-between gap-3 border border-border-2/80 bg-bg/85 backdrop-blur-xl active:scale-[0.98] transition-transform"
-          >
-            <div className="flex-1 min-w-0 pl-1 text-left">
-              <p className="font-pixel text-[6px] text-text uppercase tracking-[0.22em] truncate leading-none">
-                {event.title}
-              </p>
-              <p className="font-mono text-[9px] text-muted-2 uppercase mt-1 tracking-[0.18em] leading-none">
-                JOIN_MISSION
-              </p>
+        {/* Empty state for completed events with no content yet */}
+        {isPast && !hasOutcomes && !hasGalleryLink && (
+          <section className="max-w-4xl mx-auto px-6 py-10">
+            <div className="p-8 rounded-2xl border border-dashed border-border-2 text-center">
+              <CheckCircle2 className="w-8 h-8 mx-auto mb-3 text-muted-2" />
+              <p className="font-pixel text-[10px] text-muted uppercase tracking-widest">Event Completed</p>
+              <p className="font-mono text-xs text-muted-2 mt-1">Outcomes and gallery link will be posted soon.</p>
             </div>
-            <span className="flex-shrink-0 px-4 py-2.5 bg-text text-bg rounded-full font-pixel text-[9px] uppercase tracking-[0.18em] shadow-[0_10px_24px_rgba(0,0,0,0.18)] whitespace-nowrap">
-              {event.registrationMode === "external" ? "RSVP" : "REGISTER"}
-            </span>
-          </EventRegisterButton>
+          </section>
+        )}
+
+        {/* Feedback Link for Past Events */}
+        {isPast && (
+          <section className="max-w-4xl mx-auto px-6 py-10">
+            <div className="p-8 rounded-2xl bg-surface-2 border border-border-2 text-center flex flex-col items-center justify-center space-y-5">
+              <div className="w-12 h-12 rounded-full bg-bg border border-border flex items-center justify-center">
+                <MessageSquare className="w-5 h-5 text-muted" />
+              </div>
+              <div>
+                <h2 className="font-pixel text-sm text-text uppercase tracking-tight">
+                  Submit Your Feedback
+                </h2>
+                <p className="font-mono text-xs text-muted-2 mt-2 max-w-sm mx-auto">
+                  Did you attend this event? Help us improve future missions by sharing your thoughts.
+                </p>
+              </div>
+              <Link
+                href={`/feedback?event=${event.slug}`}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-[14px] bg-text text-bg font-pixel text-[10px] hover:scale-[1.03] active:scale-[0.98] transition-all uppercase tracking-widest shadow-xl"
+              >
+                PROVIDE_FEEDBACK
+              </Link>
+            </div>
+          </section>
+        )}
+
+        {/* Footer */}
+        <div className="max-w-4xl mx-auto px-6 pt-16 pb-8 flex justify-center">
+          <Link href="/events" className="inline-flex items-center gap-3 px-8 py-4 bg-surface-2 border border-border-2 rounded-[20px] font-pixel text-xs transition-all hover:scale-[1.03] active:scale-[0.98] hover:bg-text hover:text-bg text-muted-2 uppercase tracking-tight shadow-xl">
+            <ArrowLeft className="w-5 h-5" /> RETURN_TO_LOGS
+          </Link>
         </div>
-      )}
-    </div>
+      
+        {/* Sticky Mobile Register Button */}
+        {!isPast && event && (
+          <div className="md:hidden fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 z-50">
+            <EventRegisterButton
+              eventTitle={event.title}
+              eventSlug={event.slug}
+              registrationMode={event.registrationMode}
+              externalRsvpUrl={event.externalRsvpUrl}
+              className="glass-strong w-full px-4 py-3 rounded-[24px] shadow-[0_18px_44px_rgba(0,0,0,0.24)] flex items-center justify-between gap-3 border border-border-2/80 bg-bg/85 backdrop-blur-xl active:scale-[0.98] transition-transform"
+            >
+              <div className="flex-1 min-w-0 pl-1 text-left">
+                <p className="font-pixel text-[6px] text-text uppercase tracking-[0.22em] truncate leading-none">
+                  {event.title}
+                </p>
+                <p className="font-mono text-[9px] text-muted-2 uppercase mt-1 tracking-[0.18em] leading-none">
+                  JOIN_MISSION
+                </p>
+              </div>
+              <span className="flex-shrink-0 px-4 py-2.5 bg-text text-bg rounded-full font-pixel text-[9px] uppercase tracking-[0.18em] shadow-[0_10px_24px_rgba(0,0,0,0.18)] whitespace-nowrap">
+                {event.registrationMode === "external" ? "RSVP" : "REGISTER"}
+              </span>
+            </EventRegisterButton>
+          </div>
+        )}
+      </div>
+    </>
   );
 }

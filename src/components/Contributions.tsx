@@ -188,7 +188,7 @@ export default function Contributions() {
                   <div className="absolute inset-0 z-0 pointer-events-none">
                     <img 
                       src={c.imageUrl} 
-                      alt="" 
+                      alt={c.title} 
                       className="absolute inset-0 w-full h-full object-cover object-left opacity-80 transition-transform duration-700 group-hover:scale-105" 
                     />
                     {/* Glassmorphic Layer */}

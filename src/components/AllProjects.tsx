@@ -118,7 +118,7 @@ export default function AllProjects() {
                   <div className="absolute inset-0 z-0 pointer-events-none">
                     <img 
                       src={c.imageUrl} 
-                      alt="" 
+                      alt={c.title} 
                       className="absolute inset-0 w-full h-full object-cover object-left opacity-80 transition-transform duration-700 group-hover:scale-105" 
                     />
                     {/* Glassmorphic Layer */}
@@ -192,7 +192,7 @@ export default function AllProjects() {
             {/* Modal Image Header */}
             {selectedProject.imageUrl && (
               <div className="w-full relative shrink-0 bg-black/40 border-b border-white/5">
-                <img src={selectedProject.imageUrl} alt="" className="w-full max-h-[45vh] object-contain py-4" />
+                <img src={selectedProject.imageUrl} alt={selectedProject.title} className="w-full max-h-[45vh] object-contain py-4" />
                 <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent pointer-events-none" />
                 <button 
                   onClick={() => setSelectedProject(null)}
