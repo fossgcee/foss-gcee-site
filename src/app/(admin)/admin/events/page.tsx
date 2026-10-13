@@ -497,12 +497,12 @@ export default function AdminEventsManager() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="space-y-1">
           <h1 className="font-pixel text-white whitespace-nowrap text-[clamp(1.1rem,4vw,1.875rem)]">EVENTS_MANAGER</h1>
-          <p className="font-mono text-xs text-white/40 italic">Manage scheduled activities and historical records</p>
+          <p className="font-mono text-xs text-white/70 italic">Manage scheduled activities and historical records</p>
         </div>
 
         <button 
           onClick={handleCreateNew}
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-black rounded-xl font-pixel text-[11px] hover:bg-white/90 transition-all active:scale-95 shrink-0 group shadow-[0_4px_20px_rgba(255,255,255,0.1)]"
+          className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-black rounded-xl font-pixel text-[11px] hover:bg-white/90 transition-all active:scale-95 shrink-0 group shadow-[0_4px_20px_rgba(255,255,255,0.1)] cursor-pointer"
         >
           <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
           CREATE_NEW_RECORD
@@ -512,23 +512,23 @@ export default function AdminEventsManager() {
       {/* Control Bar */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
           <input 
             type="text" 
             placeholder="Search events by title or slug..." 
-            className="w-full pl-12 pr-4 py-3 bg-white/[0.02] border border-white/5 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/20 transition-all"
+            className="w-full pl-12 pr-4 py-3 bg-white/[0.04] border border-white/15 rounded-2xl font-mono text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-white/50 transition-all"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         
         <div className="flex items-center gap-2">
-          <div className="p-1 bg-white/[0.02] border border-white/5 rounded-2xl flex items-center">
+          <div className="p-1 bg-white/[0.04] border border-white/15 rounded-2xl flex items-center">
             {["all", "upcoming", "completed", "featured", "draft"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setFilter(tab)}
-                className={`px-4 py-2 rounded-xl text-[10px] font-pixel transition-all ${filter === tab ? "bg-white/10 text-white" : "text-white/30 hover:text-white/60"}`}
+                className={`px-4 py-2 rounded-xl text-[10px] font-pixel transition-all cursor-pointer ${filter === tab ? "bg-white/20 text-white font-bold border border-white/30" : "text-white/60 hover:text-white hover:bg-white/5"}`}
               >
                 {tab === "featured" ? "★ FEATURED" : tab.toUpperCase()}
               </button>
@@ -541,13 +541,13 @@ export default function AdminEventsManager() {
       <div className="grid grid-cols-1 gap-4">
         {loading && events.length === 0 ? (
           <div className="py-20 flex flex-col items-center justify-center space-y-4">
-            <Loader2 className="w-8 h-8 text-white/20 animate-spin" />
-            <p className="font-mono text-xs text-white/20 italic tracking-widest uppercase">Fetching logs...</p>
+            <Loader2 className="w-8 h-8 text-white/40 animate-spin" />
+            <p className="font-mono text-xs text-white/40 italic tracking-widest uppercase">Fetching logs...</p>
           </div>
         ) : filteredEvents.map((event) => {
           const StatusIcon = statusIcons[event.status];
           return (
-            <div key={event._id} className="group relative p-1 rounded-3xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.03] transition-all">
+            <div key={event._id} className="group relative p-1 rounded-3xl border border-white/15 bg-white/[0.03] hover:border-white/30 transition-all">
               <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-start gap-5 min-w-0 flex-1">
                   <div className={`p-4 rounded-2xl border ${statusColors[event.status]} shrink-0 flex items-center justify-center`}>
@@ -558,7 +558,7 @@ export default function AdminEventsManager() {
                       <span className={`px-2 py-0.5 rounded-lg border text-[9px] font-mono flex items-center gap-1.5 ${statusColors[event.status]}`}>
                         <StatusIcon className="w-3 h-3" /> {event.status.toUpperCase()}
                       </span>
-                      <span className="px-2 py-0.5 rounded-lg border border-white/5 bg-white/5 text-[9px] font-mono text-white/50">{event.category.toUpperCase()}</span>
+                      <span className="px-2 py-0.5 rounded-lg border border-white/15 bg-white/10 text-[9px] font-mono text-white/80">{event.category.toUpperCase()}</span>
                       {event.isFeatured && (
                         <span className="px-2 py-0.5 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-300 text-[9px] font-mono flex items-center gap-1 font-semibold">
                           <Star className="w-3 h-3 fill-amber-300" /> FEATURED ON HOME
@@ -567,22 +567,22 @@ export default function AdminEventsManager() {
                     </div>
                     <div>
                       <h3 className="text-lg font-pixel text-white mb-1 uppercase tracking-tight break-words">{event.title}</h3>
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] text-white/40">
-                        <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3 opacity-50" /> {event.venue}</span>
-                        <span className="flex items-center gap-1.5 font-bold text-white/60 lowercase italic">{event.startDate} → {event.endDate}</span>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] text-white/70">
+                        <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-white/50" /> {event.venue}</span>
+                        <span className="flex items-center gap-1.5 font-bold text-white/80 lowercase italic">{event.startDate} → {event.endDate}</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between md:justify-end gap-4 pt-4 md:pt-0 border-t md:border-t-0 border-white/5 shrink-0">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between md:justify-end gap-4 pt-4 md:pt-0 border-t md:border-t-0 border-white/10 shrink-0">
                   <Link 
                     href={`/admin/events/${event._id}/registrations`}
                     className="flex items-center gap-3 sm:gap-4 group/reg"
                     title="Manage Attendees & RSVP Logs"
                   >
                     <div className="space-y-0.5 text-left sm:text-right shrink-0">
-                      <p className="text-[9px] font-mono text-white/30 uppercase tracking-[0.2em]">REGISTERED</p>
+                      <p className="text-[9px] font-mono text-white/60 uppercase tracking-[0.2em] font-semibold">REGISTERED</p>
                       <p className="text-lg sm:text-xl font-pixel text-white">{event.registrationsCount}</p>
                     </div>
                     <div className="p-2 sm:p-2.5 rounded-xl border border-white/20 bg-white/10 text-white group-hover/reg:bg-white/20 transition-all">
@@ -592,20 +592,20 @@ export default function AdminEventsManager() {
                   <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
                     <button
                       onClick={() => handleToggleFeatured(event)}
-                      className={`flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl border text-[9px] sm:text-[10px] font-pixel transition-all ${
+                      className={`flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl border text-[9px] sm:text-[10px] font-pixel transition-all cursor-pointer ${
                         event.isFeatured
-                          ? "border-amber-500/40 bg-amber-500/15 text-amber-300 hover:bg-amber-500/25"
-                          : "border-white/5 bg-white/[0.02] text-white/40 hover:text-white hover:bg-white/10"
+                          ? "border-amber-500/40 bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"
+                          : "border-white/15 bg-white/5 text-white/70 hover:text-white hover:bg-white/15"
                       }`}
                       title={event.isFeatured ? "Unpin from home page terminal" : "Feature on home page terminal"}
                     >
                       <Star className={`w-3.5 h-3.5 ${event.isFeatured ? "fill-amber-300 text-amber-300" : ""}`} />
                       {event.isFeatured ? "FEATURED" : "FEATURE"}
                     </button>
-                    <Link href={`/events/${event.slug}`} target="_blank" className="p-2 sm:p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all" title="View Public Page"><ExternalLink className="w-4 h-4" /></Link>
+                    <Link href={`/events/${event.slug}`} target="_blank" className="p-2 sm:p-2.5 rounded-xl border border-white/15 bg-white/5 text-white/70 hover:text-white transition-all" title="View Public Page"><ExternalLink className="w-4 h-4" /></Link>
                     <Link href={`/admin/events/${event._id}/registrations`} className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-all text-[9px] sm:text-[10px] font-pixel"><Users className="w-3.5 h-3.5" /> RSVPS</Link>
-                    <Link href={`/admin/events/${event._id}`} className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white hover:bg-white/10 transition-all text-[9px] sm:text-[10px] font-pixel"><ImageIcon className="w-3.5 h-3.5" /> CONTENT</Link>
-                    <button onClick={() => handleEdit(event)} className="p-2 sm:p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all" title="Edit Event"><Edit3 className="w-4 h-4" /></button>
+                    <Link href={`/admin/events/${event._id}`} className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl border border-white/15 bg-white/5 text-white/70 hover:text-white hover:bg-white/15 transition-all text-[9px] sm:text-[10px] font-pixel"><ImageIcon className="w-3.5 h-3.5" /> CONTENT</Link>
+                    <button onClick={() => handleEdit(event)} className="p-2 sm:p-2.5 rounded-xl border border-white/15 bg-white/5 text-white/70 hover:text-white transition-all cursor-pointer" title="Edit Event"><Edit3 className="w-4 h-4" /></button>
                     {event.status === "completed" && (
                       <button
                         onClick={() => {
@@ -851,8 +851,8 @@ export default function AdminEventsManager() {
                   {/* General Details */}
                   <div className="space-y-8">
                     <div className="space-y-2">
-                       <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Event Title</label>
-                       <input required type="text" placeholder="e.g. Building AI Tools" className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all font-bold placeholder:text-white/10 uppercase" value={formData.title} onChange={e => {
+                       <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Event Title</label>
+                       <input required type="text" placeholder="e.g. Building AI Tools" className="w-full px-5 py-4 bg-white/[0.05] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 transition-all font-bold placeholder:text-white/40 uppercase" value={formData.title} onChange={e => {
                          const title = e.target.value;
                          setFormData(prev => ({ ...prev, title, slug: title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") }));
                        }} />
@@ -860,61 +860,61 @@ export default function AdminEventsManager() {
                     
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Academic Year</label>
+                        <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Academic Year</label>
                         <select
                           required
-                          className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center]"
+                          className="w-full px-5 py-4 bg-[#141414] border border-white/20 rounded-2xl font-mono text-[11px] text-white focus:outline-none focus:border-white/60 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC42IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center]"
                           value={formData.academicYear}
                           onChange={e => setFormData(prev => ({ ...prev, academicYear: e.target.value }))}
                         >
-                          <option value="" disabled className="text-black">Select Academic Year</option>
+                          <option value="" disabled className="text-white bg-black">Select Academic Year</option>
                           {academicYearOptions.map((year) => (
-                            <option key={year} value={year} className="text-black">{year}</option>
+                            <option key={year} value={year} className="text-white bg-black">{year}</option>
                           ))}
                         </select>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Category</label>
-                        <select className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center]" value={formData.category} onChange={e => setFormData(prev => ({ ...prev, category: e.target.value as EventData["category"] }))}>
-                          <option value="workshop" className="text-black">Workshop</option>
-                          <option value="talk" className="text-black">Talk</option>
-                          <option value="hackathon" className="text-black">Hackathon</option>
-                          <option value="meetup" className="text-black">Meetup</option>
-                          <option value="other" className="text-black">Other</option>
+                        <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Category</label>
+                        <select className="w-full px-5 py-4 bg-[#141414] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC42IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center]" value={formData.category} onChange={e => setFormData(prev => ({ ...prev, category: e.target.value as EventData["category"] }))}>
+                          <option value="workshop" className="text-white bg-black">Workshop</option>
+                          <option value="talk" className="text-white bg-black">Talk</option>
+                          <option value="hackathon" className="text-white bg-black">Hackathon</option>
+                          <option value="meetup" className="text-white bg-black">Meetup</option>
+                          <option value="other" className="text-white bg-black">Other</option>
                         </select>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Status</label>
-                        <select className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center]" value={formData.status} onChange={e => setFormData(prev => ({ ...prev, status: e.target.value as EventData["status"] }))}>
-                          <option value="upcoming" className="text-black">Upcoming</option>
-                          <option value="completed" className="text-black">Completed</option>
-                          <option value="draft" className="text-black">Draft</option>
+                        <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Status</label>
+                        <select className="w-full px-5 py-4 bg-[#141414] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC42IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center]" value={formData.status} onChange={e => setFormData(prev => ({ ...prev, status: e.target.value as EventData["status"] }))}>
+                          <option value="upcoming" className="text-white bg-black">Upcoming</option>
+                          <option value="completed" className="text-white bg-black">Completed</option>
+                          <option value="draft" className="text-white bg-black">Draft</option>
                         </select>
                       </div>
                     </div>
                     
-                    <div className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+                    <div className="flex items-center justify-between p-4 bg-white/[0.04] border border-white/15 rounded-2xl">
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-1.5">
                           <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                          <label className="text-[10px] font-mono text-white/90 uppercase tracking-widest font-bold">Featured on Home Terminal</label>
+                          <label className="text-[10px] font-mono text-white uppercase tracking-widest font-bold">Featured on Home Terminal</label>
                         </div>
-                        <p className="text-[9px] font-mono text-white/40 leading-snug">Showcase this event in the home page terminal carousel and prioritize it at the top of the events list.</p>
+                        <p className="text-[10px] font-mono text-white/70 leading-snug">Showcase this event in the home page terminal carousel and prioritize it at the top of the events list.</p>
                       </div>
-                      <button type="button" onClick={() => setFormData(p => ({ ...p, isFeatured: !p.isFeatured }))} className={`relative flex items-center shrink-0 w-12 h-6 rounded-full transition-colors ${formData.isFeatured ? 'bg-amber-500' : 'bg-white/10 border border-white/10'}`}>
+                      <button type="button" onClick={() => setFormData(p => ({ ...p, isFeatured: !p.isFeatured }))} className={`relative flex items-center shrink-0 w-12 h-6 rounded-full transition-colors ${formData.isFeatured ? 'bg-amber-500' : 'bg-white/20 border border-white/20'}`}>
                         <span className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform mx-1 ${formData.isFeatured ? 'translate-x-6' : 'translate-x-0'}`} />
                       </button>
                     </div>
 
                     <div className="space-y-2">
-                       <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Description</label>
-                       <textarea required rows={5} className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 transition-all resize-none placeholder:text-white/10" placeholder="Describe the mission scope..." value={formData.description} onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))} />
+                       <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Description</label>
+                       <textarea required rows={5} className="w-full px-5 py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 transition-all resize-none placeholder:text-white/40" placeholder="Describe the mission scope..." value={formData.description} onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))} />
                     </div>
 
-                    <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+                    <div className="space-y-3 rounded-2xl border border-white/15 bg-white/[0.03] p-4">
                       <div className="space-y-1">
-                        <label className="text-[10px] font-mono text-white/70 uppercase tracking-widest font-bold">Registration Source</label>
-                        <p className="text-[9px] font-mono text-white/35 uppercase leading-relaxed">Choose one source for this event. Public pages will show only that registration action.</p>
+                        <label className="text-[10px] font-mono text-white/90 uppercase tracking-widest font-bold">Registration Source</label>
+                        <p className="text-[10px] font-mono text-white/60 uppercase leading-relaxed">Choose one source for this event. Public pages will show only that registration action.</p>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         {[
@@ -927,8 +927,8 @@ export default function AdminEventsManager() {
                             onClick={() => setFormData(prev => ({ ...prev, registrationMode: option.value as EventData["registrationMode"] }))}
                             className={`px-3 py-3 rounded-xl border font-pixel text-[9px] uppercase transition-all ${
                               formData.registrationMode === option.value
-                                ? "bg-white text-black border-white"
-                                : "bg-white/[0.03] text-white/45 border-white/10 hover:text-white hover:bg-white/[0.06]"
+                                ? "bg-white text-black border-white font-bold"
+                                : "bg-white/[0.04] text-white/70 border-white/15 hover:text-white hover:bg-white/10"
                             }`}
                           >
                             {option.label}
@@ -942,7 +942,7 @@ export default function AdminEventsManager() {
                           value={formData.externalRsvpUrl || ""}
                           placeholder="https://fossunited.org/c/.../rsvp"
                           onChange={e => setFormData(prev => ({ ...prev, externalRsvpUrl: e.target.value }))}
-                          className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 placeholder:text-white/10"
+                          className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/60 placeholder:text-white/40"
                         />
                       )}
                     </div>
@@ -950,24 +950,24 @@ export default function AdminEventsManager() {
                     {/* Agenda builder */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Event Agenda</label>
+                        <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Event Agenda</label>
                         <button
                           type="button"
                           onClick={() => setFormData(prev => ({ ...prev, agenda: [...(prev.agenda || []), { time: "", title: "", description: "" }] }))}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[9px] font-mono text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 text-[9px] font-mono text-white hover:bg-white/20 transition-all font-semibold"
                         >
                           <Plus className="w-3 h-3" /> Add Item
                         </button>
                       </div>
                       {(formData.agenda || []).length === 0 ? (
-                        <p className="font-mono text-[9px] text-white/20 italic pl-1">No agenda items yet. Click &quot;Add Item&quot; to define the schedule.</p>
+                        <p className="font-mono text-[10px] text-white/50 italic pl-1">No agenda items yet. Click &quot;Add Item&quot; to define the schedule.</p>
                       ) : (
                         <div className="space-y-3">
                           {(formData.agenda || []).map((item, i) => (
-                            <div key={i} className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 space-y-3">
+                            <div key={i} className="rounded-2xl border border-white/15 bg-white/[0.03] p-4 space-y-3">
                               <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr_auto] gap-3">
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Time</label>
+                                  <label className="text-[9px] font-mono text-white/60 uppercase tracking-widest font-semibold">Time</label>
                                   <input
                                     type="text"
                                     value={item.time}
@@ -977,11 +977,11 @@ export default function AdminEventsManager() {
                                       updated[i] = { ...updated[i], time: e.target.value };
                                       setFormData(prev => ({ ...prev, agenda: updated }));
                                     }}
-                                    className="w-full px-3 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 placeholder:text-white/10"
+                                    className="w-full px-3 py-3 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/60 placeholder:text-white/40"
                                   />
                                 </div>
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Title</label>
+                                  <label className="text-[9px] font-mono text-white/60 uppercase tracking-widest font-semibold">Title</label>
                                   <input
                                     type="text"
                                     value={item.title || item.topic || ""}
@@ -991,7 +991,7 @@ export default function AdminEventsManager() {
                                       updated[i] = { ...updated[i], title: e.target.value, topic: undefined };
                                       setFormData(prev => ({ ...prev, agenda: updated }));
                                     }}
-                                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 placeholder:text-white/10"
+                                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/60 placeholder:text-white/40"
                                   />
                                 </div>
                               <button
@@ -1000,13 +1000,13 @@ export default function AdminEventsManager() {
                                   const updated = (formData.agenda || []).filter((_, j) => j !== i);
                                   setFormData(prev => ({ ...prev, agenda: updated }));
                                 }}
-                                  className="self-end p-3 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-all shrink-0"
+                                  className="self-end p-3 rounded-xl border border-red-500/30 bg-red-500/10 text-red-300 hover:text-red-200 hover:bg-red-500/20 transition-all shrink-0 cursor-pointer"
                               >
                                 <X className="w-3.5 h-3.5" />
                               </button>
                               </div>
                               <div className="space-y-1">
-                                <label className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Description</label>
+                                <label className="text-[9px] font-mono text-white/60 uppercase tracking-widest font-semibold">Description</label>
                                 <textarea
                                   rows={2}
                                   value={item.description || ""}
@@ -1016,7 +1016,7 @@ export default function AdminEventsManager() {
                                     updated[i] = { ...updated[i], description: e.target.value };
                                     setFormData(prev => ({ ...prev, agenda: updated }));
                                   }}
-                                  className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 placeholder:text-white/10 resize-none"
+                                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/60 placeholder:text-white/40 resize-none"
                                 />
                               </div>
                             </div>
@@ -1028,16 +1028,16 @@ export default function AdminEventsManager() {
                     {/* Outcomes — shown when status is completed */}
                     {formData.status === "completed" && (
                       <div className="space-y-2">
-                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Event Outcomes / Takeaways</label>
-                        <textarea rows={4} className="w-full px-5 py-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-emerald-500/40 transition-all resize-none placeholder:text-white/10" placeholder="Summarise what was achieved, key learnings, attendance numbers, highlights..." value={formData.outcomes || ""} onChange={e => setFormData(prev => ({ ...prev, outcomes: e.target.value }))} />
+                        <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Event Outcomes / Takeaways</label>
+                        <textarea rows={4} className="w-full px-5 py-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-emerald-500/50 transition-all resize-none placeholder:text-white/40" placeholder="Summarise what was achieved, key learnings, attendance numbers, highlights..." value={formData.outcomes || ""} onChange={e => setFormData(prev => ({ ...prev, outcomes: e.target.value }))} />
                       </div>
                     )}
 
                     {/* Gallery Link — shown when status is completed */}
                     {formData.status === "completed" && (
-                      <div className="flex flex-col gap-2 p-5 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
-                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Event Photos (Ente Album Link)</label>
-                        <p className="text-[9px] font-mono text-white/20 pl-1 -mt-1 uppercase">
+                      <div className="flex flex-col gap-2 p-5 rounded-2xl bg-white/[0.03] border border-white/15">
+                        <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Event Photos (Ente Album Link)</label>
+                        <p className="text-[9px] font-mono text-white/50 pl-1 -mt-1 uppercase">
                           Paste the Ente album link below. The public page will show a button to open the gallery.
                         </p>
                         <input
@@ -1045,7 +1045,7 @@ export default function AdminEventsManager() {
                           value={formData.galleryLink || ""}
                           placeholder="https://albums.ente.com/..."
                           onChange={e => setFormData(prev => ({ ...prev, galleryLink: e.target.value }))}
-                          className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/30 placeholder:text-white/10"
+                          className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/60 placeholder:text-white/40"
                         />
                       </div>
                     )}
@@ -1055,47 +1055,47 @@ export default function AdminEventsManager() {
                   <div className="space-y-8">
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Start Date</label>
+                        <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Start Date</label>
                         <div className="relative">
-                          <input required type="date" className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 [color-scheme:dark]" value={formData.startDate} onChange={e => setFormData(prev => ({ ...prev, startDate: e.target.value }))} />
+                          <input required type="date" className="w-full px-5 py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 [color-scheme:dark]" value={formData.startDate} onChange={e => setFormData(prev => ({ ...prev, startDate: e.target.value }))} />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">End Date</label>
+                        <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">End Date</label>
                         <div className="relative">
-                          <input required type="date" className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 [color-scheme:dark]" value={formData.endDate} onChange={e => setFormData(prev => ({ ...prev, endDate: e.target.value }))} />
+                          <input required type="date" className="w-full px-5 py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 [color-scheme:dark]" value={formData.endDate} onChange={e => setFormData(prev => ({ ...prev, endDate: e.target.value }))} />
                         </div>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Start Time (IST/24h)</label>
-                        <input required type="time" className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 [color-scheme:dark]" value={formData.startTime} onChange={e => setFormData(prev => ({ ...prev, startTime: e.target.value }))} />
+                        <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Start Time (IST/24h)</label>
+                        <input required type="time" className="w-full px-5 py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 [color-scheme:dark]" value={formData.startTime} onChange={e => setFormData(prev => ({ ...prev, startTime: e.target.value }))} />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">End Time (IST/24h)</label>
-                        <input required type="time" className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 [color-scheme:dark]" value={formData.endTime} onChange={e => setFormData(prev => ({ ...prev, endTime: e.target.value }))} />
+                        <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">End Time (IST/24h)</label>
+                        <input required type="time" className="w-full px-5 py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 [color-scheme:dark]" value={formData.endTime} onChange={e => setFormData(prev => ({ ...prev, endTime: e.target.value }))} />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                       <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Venue / Sector</label>
-                       <input required type="text" placeholder="e.g. LAB_03 · GMEET" className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 uppercase" value={formData.venue} onChange={e => setFormData(prev => ({ ...prev, venue: e.target.value }))} />
+                       <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Venue / Sector</label>
+                       <input required type="text" placeholder="e.g. LAB_03 · GMEET" className="w-full px-5 py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-white/60 uppercase" value={formData.venue} onChange={e => setFormData(prev => ({ ...prev, venue: e.target.value }))} />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                         <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Handled By / Lead</label>
+                         <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Handled By / Lead</label>
                          <div className="relative">
-                            <input required type="text" placeholder="e.g. BHARATH · IT · 3RD" className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 uppercase" value={formData.handledBy} onChange={e => setFormData(prev => ({ ...prev, handledBy: e.target.value }))} />
+                            <input required type="text" placeholder="e.g. BHARATH · IT · 3RD" className="w-full px-5 py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-white/60 uppercase" value={formData.handledBy} onChange={e => setFormData(prev => ({ ...prev, handledBy: e.target.value }))} />
                          </div>
                       </div>
 
                       <div className="space-y-2">
-                         <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Speaker(s) / Guest(s) (Comma separated. Prefix with * to skip feedback)</label>
+                         <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Speaker(s) / Guest(s)</label>
                          <div className="relative">
-                            <input type="text" placeholder="e.g. DR. SUNDAR (ARCHITECT), PROF. ANITA (HOD)" className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/30 uppercase" value={formData.speaker || ""} onChange={e => setFormData(prev => ({ ...prev, speaker: e.target.value }))} />
+                            <input type="text" placeholder="e.g. DR. SUNDAR, PROF. ANITA" className="w-full px-5 py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-white/60 uppercase" value={formData.speaker || ""} onChange={e => setFormData(prev => ({ ...prev, speaker: e.target.value }))} />
                          </div>
                       </div>
                     </div>

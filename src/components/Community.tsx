@@ -18,7 +18,6 @@ import {
   Terminal,
   ChevronLeft,
   ChevronRight,
-  Star,
   ExternalLink,
 } from "lucide-react";
 
@@ -305,12 +304,7 @@ export default function Community() {
                       {/* Title: Fixed height container */}
                       <div className="sm:col-span-2">
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="text-[10px] uppercase tracking-widest text-muted">TITLE:</p>
-                          {featured.isFeatured && (
-                            <span className="inline-flex items-center gap-1 font-mono text-[9px] px-2 py-0.2 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                              <Star className="w-2.5 h-2.5 fill-amber-400" /> Featured
-                            </span>
-                          )}
+                          <p className="text-[10px] uppercase tracking-widest text-text/60">TITLE:</p>
                         </div>
                         <p className="text-base sm:text-lg font-bold text-text line-clamp-2 leading-snug">
                           {featured.title}
@@ -454,24 +448,19 @@ export default function Community() {
                       <div className="absolute -left-[22px] top-3 w-3 h-3 rounded-full border-2 border-muted bg-surface-2 transition-colors group-hover:border-text" />
                       <div className="glass-card p-5 group-hover:-translate-x-0.5 transition-transform">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="font-mono text-[10px] text-text flex items-center gap-1">
-                            <Calendar className="w-3 h-3" /> {fmt(ev.startDate)}
+                          <span className="font-mono text-[10px] text-text font-medium flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-text/70" /> {fmt(ev.startDate)}
                           </span>
-                          <span className="font-mono text-[9px] px-2 py-0.5 rounded-full bg-surface text-muted-2 border border-border capitalize">
+                          <span className="font-mono text-[9px] px-2 py-0.5 rounded-full bg-surface text-text/70 border border-border capitalize font-medium">
                             {ev.category}
                           </span>
-                          {ev.isFeatured && (
-                            <span className="font-mono text-[9px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1">
-                              <Star className="w-2.5 h-2.5 fill-amber-400" /> featured
-                            </span>
-                          )}
                         </div>
                         <p className="font-semibold text-sm text-text mb-1">{ev.title}</p>
-                        <p className="text-xs text-muted-2 flex items-center gap-1.5 flex-wrap">
-                          <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {ev.venue}</span>
+                        <p className="text-xs text-text/70 flex items-center gap-1.5 flex-wrap">
+                          <span className="flex items-center gap-1"><MapPin className="w-3 h-3 text-text/60" /> {ev.venue}</span>
                           {ev.registrationsCount > 0 && (
-                            <span className="ml-2 flex items-center gap-1">
-                              <Users className="w-3 h-3" /> {ev.registrationsCount} attended
+                            <span className="ml-2 flex items-center gap-1 text-text/80 font-medium">
+                              <Users className="w-3 h-3 text-emerald-500" /> {ev.registrationsCount} attended
                             </span>
                           )}
                         </p>
@@ -519,13 +508,8 @@ export default function Community() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1.5">
                           <p className="font-semibold text-sm text-text truncate">{ev.title}</p>
-                          {ev.isFeatured && (
-                            <span className="font-mono text-[9px] px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-0.5 shrink-0">
-                              <Star className="w-2.5 h-2.5 fill-amber-400" /> featured
-                            </span>
-                          )}
                         </div>
-                        <p className="font-mono text-xs text-muted-2 flex items-center gap-3 flex-wrap">
+                        <p className="font-mono text-xs text-text/75 flex items-center gap-3 flex-wrap">
                           <span className="flex items-center gap-1">
                             <Calendar className="w-3 h-3 text-text/60" />
                             {fmt(ev.startDate)}

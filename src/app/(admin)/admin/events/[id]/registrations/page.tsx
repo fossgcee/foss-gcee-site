@@ -450,7 +450,7 @@ export default function AdminEventRegistrationsPage() {
         <div className="space-y-3">
           <Link
             href="/admin/events"
-            className="inline-flex items-center gap-2 text-[11px] text-white/40 hover:text-white uppercase tracking-widest transition-colors py-1"
+            className="inline-flex items-center gap-2 text-[11px] text-white/70 hover:text-white uppercase tracking-widest transition-colors py-1 font-medium"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Return to Events
           </Link>
@@ -465,16 +465,16 @@ export default function AdminEventRegistrationsPage() {
               </span>
             </div>
 
-            <div className="flex items-center gap-x-4 gap-y-1.5 text-[10px] text-white/40 uppercase tracking-wider flex-wrap">
+            <div className="flex items-center gap-x-4 gap-y-1.5 text-[10px] text-white/70 uppercase tracking-wider flex-wrap font-mono">
               <span className="truncate max-w-[280px]">/events/{event.slug}</span>
               {event.startDate && (
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-3 h-3 text-white/30" /> {event.startDate}
+                <span className="flex items-center gap-1 text-white/80">
+                  <Calendar className="w-3 h-3 text-white/60" /> {event.startDate}
                 </span>
               )}
               {event.venue && (
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-white/30" /> {event.venue}
+                <span className="flex items-center gap-1 text-white/80">
+                  <MapPin className="w-3 h-3 text-white/60" /> {event.venue}
                 </span>
               )}
             </div>
@@ -588,18 +588,18 @@ export default function AdminEventRegistrationsPage() {
       {/* Search & Attendance Filter Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="relative sm:col-span-2">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search name, email, department, phone..."
-            className="w-full pl-10 pr-9 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-all"
+            className="w-full pl-10 pr-9 py-3 bg-white/[0.04] border border-white/20 rounded-xl text-xs text-white placeholder:text-white/50 focus:outline-none focus:border-white/60 transition-all font-mono"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/50 hover:text-white cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -611,7 +611,7 @@ export default function AdminEventRegistrationsPage() {
           <select
             value={selectedDept}
             onChange={(e) => setSelectedDept(e.target.value)}
-            className="w-full px-3.5 py-3 bg-[#0e0e0e] border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-white/40 transition-all cursor-pointer"
+            className="w-full px-3.5 py-3 bg-[#111111] border border-white/20 rounded-xl text-xs text-white focus:outline-none focus:border-white/60 transition-all cursor-pointer font-mono font-medium"
           >
             <option value="all">All Departments ({registrations.length})</option>
             {departments.map((dept) => (
@@ -627,7 +627,7 @@ export default function AdminEventRegistrationsPage() {
           <select
             value={attendanceFilter}
             onChange={(e) => setAttendanceFilter(e.target.value as any)}
-            className="w-full px-3.5 py-3 bg-[#0e0e0e] border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-white/40 transition-all cursor-pointer"
+            className="w-full px-3.5 py-3 bg-[#111111] border border-white/20 rounded-xl text-xs text-white focus:outline-none focus:border-white/60 transition-all cursor-pointer font-mono font-medium"
           >
             <option value="all">All Statuses ({totalCount})</option>
             <option value="checkedin">Checked In Only ({checkedInCount})</option>
@@ -644,7 +644,7 @@ export default function AdminEventRegistrationsPage() {
             className={`px-3 py-1.5 rounded-xl text-xs font-mono uppercase transition-all cursor-pointer ${
               attendanceFilter === "all"
                 ? "bg-white text-black font-bold shadow-md"
-                : "bg-white/[0.04] border border-white/10 text-white/50 hover:text-white hover:bg-white/10"
+                : "bg-white/[0.04] border border-white/20 text-white/75 hover:text-white hover:bg-white/10 font-medium"
             }`}
           >
             All ({totalCount})
@@ -654,7 +654,7 @@ export default function AdminEventRegistrationsPage() {
             className={`px-3 py-1.5 rounded-xl text-xs font-mono uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
               attendanceFilter === "checkedin"
                 ? "bg-white text-black font-bold shadow-md"
-                : "bg-white/[0.04] border border-white/10 text-white/50 hover:text-white hover:bg-white/10"
+                : "bg-white/[0.04] border border-white/20 text-white/75 hover:text-white hover:bg-white/10 font-medium"
             }`}
           >
             <span className="w-2 h-2 rounded-full bg-emerald-400" />
@@ -665,22 +665,22 @@ export default function AdminEventRegistrationsPage() {
             className={`px-3 py-1.5 rounded-xl text-xs font-mono uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
               attendanceFilter === "pending"
                 ? "bg-white text-black font-bold shadow-md"
-                : "bg-white/[0.04] border border-white/10 text-white/50 hover:text-white hover:bg-white/10"
+                : "bg-white/[0.04] border border-white/20 text-white/75 hover:text-white hover:bg-white/10 font-medium"
             }`}
           >
-            <span className="w-2 h-2 rounded-full bg-amber-400/80" />
+            <span className="w-2 h-2 rounded-full bg-amber-400" />
             Pending ({Math.max(0, totalCount - checkedInCount)})
           </button>
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 text-[10px] text-white/50 uppercase font-mono tracking-wider">
+          <span className="flex items-center gap-1.5 text-[10px] text-white/75 uppercase font-mono tracking-wider font-medium">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             Live Sync
           </span>
           <button
             onClick={() => fetchRegistrations(true)}
-            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white border border-white/10 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/20 transition-colors cursor-pointer"
             title="Refresh check-ins list"
           >
             <RefreshCw className="w-3.5 h-3.5" />
@@ -689,30 +689,30 @@ export default function AdminEventRegistrationsPage() {
       </div>
 
       {/* Participants Counter Status */}
-      <div className="flex items-center justify-between text-xs text-white/40 uppercase tracking-widest px-1">
+      <div className="flex items-center justify-between text-xs text-white/70 uppercase tracking-widest px-1 font-mono font-medium">
         <span>Showing {filteredRegistrations.length} of {registrations.length}</span>
         <span className="text-white font-bold">{checkedInCount} Present</span>
       </div>
 
       {/* ── Empty State ── */}
       {registrations.length === 0 ? (
-        <div className="py-20 px-4 rounded-3xl border border-dashed border-white/10 bg-white/[0.01] flex flex-col items-center justify-center space-y-4 text-center">
-          <Users className="w-12 h-12 text-white/10" />
-          <p className="font-pixel text-sm text-white/40 uppercase">NO_REGISTRATIONS_YET</p>
-          <p className="text-xs text-white/30 max-w-sm">
+        <div className="py-20 px-4 rounded-3xl border border-dashed border-white/20 bg-white/[0.01] flex flex-col items-center justify-center space-y-4 text-center">
+          <Users className="w-12 h-12 text-white/30" />
+          <p className="font-pixel text-sm text-white/80 uppercase">NO_REGISTRATIONS_YET</p>
+          <p className="text-xs text-white/60 max-w-sm">
             Add participants manually or upload a CSV export from Google Forms / FOSS United RSVP.
           </p>
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-pixel text-xs uppercase hover:bg-white/20 transition-all cursor-pointer"
+            className="px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-pixel text-xs uppercase hover:bg-white/20 transition-all cursor-pointer font-bold"
           >
             + ADD_FIRST_PARTICIPANT
           </button>
         </div>
       ) : filteredRegistrations.length === 0 ? (
-        <div className="py-16 px-4 rounded-3xl border border-dashed border-white/10 bg-white/[0.01] flex flex-col items-center justify-center space-y-2 text-center">
-          <p className="font-pixel text-xs text-white/40 uppercase">NO_MATCHING_PARTICIPANTS</p>
-          <p className="text-[11px] text-white/20">Try clearing your search query or department filter.</p>
+        <div className="py-16 px-4 rounded-3xl border border-dashed border-white/20 bg-white/[0.01] flex flex-col items-center justify-center space-y-2 text-center">
+          <p className="font-pixel text-xs text-white/80 uppercase">NO_MATCHING_PARTICIPANTS</p>
+          <p className="text-[11px] text-white/50">Try clearing your search query or department filter.</p>
         </div>
       ) : (
         <>
@@ -734,7 +734,7 @@ export default function AdminEventRegistrationsPage() {
                         className={`w-9 h-9 rounded-xl font-pixel text-xs flex items-center justify-center shrink-0 border ${
                           isChecked
                             ? "bg-white text-black font-bold border-white"
-                            : "bg-white/5 border-white/10 text-white/40"
+                            : "bg-white/5 border-white/20 text-white/80"
                         }`}
                       >
                         {isChecked ? "✓" : participant.name.charAt(0).toUpperCase()}
@@ -743,7 +743,7 @@ export default function AdminEventRegistrationsPage() {
                         <p className="font-bold text-white uppercase text-xs truncate">{participant.name}</p>
                         <a
                           href={`mailto:${participant.email}`}
-                          className="text-[10px] text-white/40 truncate block hover:text-white transition-colors"
+                          className="text-[10px] text-white/70 truncate block hover:text-white transition-colors"
                         >
                           {participant.email}
                         </a>
@@ -755,41 +755,41 @@ export default function AdminEventRegistrationsPage() {
                         <CheckCircle2 className="w-3 h-3" /> PRESENT
                       </span>
                     ) : (
-                      <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white/[0.02] border border-white/10 text-white/30 text-[9px] uppercase tracking-wider">
-                        <CircleDot className="w-3 h-3 opacity-40" /> PENDING
+                      <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/15 text-white/60 text-[9px] uppercase tracking-wider font-medium">
+                        <CircleDot className="w-3 h-3 opacity-60" /> PENDING
                       </span>
                     )}
                   </div>
 
                   {/* Badges: Dept, Year, College */}
-                  <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-white/60">
-                    <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10">
+                  <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-white/80 font-medium">
+                    <span className="px-2 py-0.5 rounded bg-white/5 border border-white/15 text-white/90">
                       {participant.department || "General"}
                     </span>
                     {participant.year > 0 && (
-                      <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10">
+                      <span className="px-2 py-0.5 rounded bg-white/5 border border-white/15 text-white/80">
                         Year {participant.year}
                       </span>
                     )}
                     {participant.college && (
-                      <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 truncate max-w-[200px]">
+                      <span className="px-2 py-0.5 rounded bg-white/5 border border-white/15 text-white/75 truncate max-w-[200px]">
                         {participant.college}
                       </span>
                     )}
                   </div>
 
                   {/* Bottom: Contact & Touch Action Buttons */}
-                  <div className="flex items-center justify-between gap-3 pt-2.5 border-t border-white/5 text-[11px]">
+                  <div className="flex items-center justify-between gap-3 pt-2.5 border-t border-white/10 text-[11px]">
                     {participant.mobile ? (
                       <a
                         href={`tel:${participant.mobile}`}
-                        className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors"
+                        className="flex items-center gap-1.5 text-white/80 hover:text-white transition-colors font-medium"
                       >
-                        <Phone className="w-3.5 h-3.5 text-white/40" />
+                        <Phone className="w-3.5 h-3.5 text-white/60" />
                         <span>{participant.mobile}</span>
                       </a>
                     ) : (
-                      <span className="text-white/20 text-[10px]">—</span>
+                      <span className="text-white/40 text-[10px]">—</span>
                     )}
 
                     <div className="flex items-center gap-2">
@@ -813,7 +813,7 @@ export default function AdminEventRegistrationsPage() {
                       <button
                         onClick={() => handleDeleteParticipant(participant.email)}
                         disabled={isDeletingEmail === participant.email}
-                        className="p-2 rounded-xl text-white/30 hover:text-red-400 hover:bg-red-500/10 border border-white/5 transition-all"
+                        className="p-2 rounded-xl text-white/60 hover:text-red-400 hover:bg-red-500/10 border border-white/10 transition-all cursor-pointer"
                         title="Remove attendee"
                       >
                         {isDeletingEmail === participant.email ? (
@@ -834,7 +834,7 @@ export default function AdminEventRegistrationsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-white/10 bg-white/[0.02] text-[10px] text-white/40 uppercase tracking-widest">
+                  <tr className="border-b border-white/10 bg-white/[0.04] text-[10px] text-white/75 font-semibold uppercase tracking-widest font-mono">
                     <th className="py-4 px-6">#</th>
                     <th className="py-4 px-6">Participant</th>
                     <th className="py-4 px-6">Department</th>
@@ -850,15 +850,15 @@ export default function AdminEventRegistrationsPage() {
                     const isToggling = isTogglingEmail === participant.email.toLowerCase();
 
                     return (
-                      <tr key={participant.email} className="hover:bg-white/[0.02] transition-colors group">
-                        <td className="py-4 px-6 text-white/30 text-[11px]">{index + 1}</td>
+                      <tr key={participant.email} className="hover:bg-white/[0.03] transition-colors group">
+                        <td className="py-4 px-6 text-white/60 text-[11px] font-mono">{index + 1}</td>
                         <td className="py-4 px-6">
                           <div className="flex items-center gap-3">
                             <div
                               className={`w-8 h-8 rounded-lg font-pixel text-xs flex items-center justify-center shrink-0 border ${
                                 isChecked
                                   ? "bg-white text-black font-bold border-white"
-                                  : "bg-white/5 border-white/10 text-white/40"
+                                  : "bg-white/5 border-white/20 text-white/70"
                               }`}
                             >
                               {isChecked ? "✓" : participant.name.charAt(0).toUpperCase()}
@@ -867,7 +867,7 @@ export default function AdminEventRegistrationsPage() {
                               <p className="font-bold text-white uppercase truncate">{participant.name}</p>
                               <a
                                 href={`mailto:${participant.email}`}
-                                className="text-white/40 hover:text-white transition-colors text-[11px] truncate block"
+                                className="text-white/70 hover:text-white transition-colors text-[11px] truncate block"
                               >
                                 {participant.email}
                               </a>
@@ -875,12 +875,12 @@ export default function AdminEventRegistrationsPage() {
                           </div>
                         </td>
                         <td className="py-4 px-6">
-                          <span className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/10 text-white/70 text-[11px]">
+                          <span className="px-2.5 py-1 rounded-md bg-white/[0.05] border border-white/15 text-white/90 text-[11px] font-medium">
                             {participant.department || "—"}
                           </span>
                         </td>
                         <td className="py-4 px-6">
-                          <span className="text-white/60">
+                          <span className="text-white/80 font-medium">
                             {participant.year ? `Year ${participant.year}` : "—"}
                           </span>
                         </td>
@@ -890,8 +890,8 @@ export default function AdminEventRegistrationsPage() {
                               <CheckCircle2 className="w-3 h-3 text-white" /> PRESENT
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.02] border border-white/10 text-white/30 text-[10px] uppercase tracking-wider">
-                              <CircleDot className="w-3 h-3 opacity-40" /> PENDING
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/15 text-white/60 text-[10px] uppercase tracking-wider font-medium">
+                              <CircleDot className="w-3 h-3 opacity-60" /> PENDING
                             </span>
                           )}
                         </td>
@@ -899,13 +899,13 @@ export default function AdminEventRegistrationsPage() {
                           {participant.mobile ? (
                             <a
                               href={`tel:${participant.mobile}`}
-                              className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors"
+                              className="flex items-center gap-1.5 text-white/80 hover:text-white transition-colors font-medium"
                             >
-                              <Phone className="w-3 h-3 text-white/40" />
+                              <Phone className="w-3 h-3 text-white/60" />
                               <span>{participant.mobile}</span>
                             </a>
                           ) : (
-                            <span className="text-white/20">—</span>
+                            <span className="text-white/40">—</span>
                           )}
                         </td>
                         <td className="py-4 px-6 text-right">
@@ -916,7 +916,7 @@ export default function AdminEventRegistrationsPage() {
                               className={`p-2 rounded-lg transition-all cursor-pointer ${
                                 isChecked
                                   ? "bg-white text-black hover:bg-white/90 border border-white font-bold"
-                                  : "bg-white/[0.03] text-white/30 hover:text-white hover:bg-white/[0.08] border border-white/10"
+                                  : "bg-white/[0.05] text-white/70 hover:text-white hover:bg-white/[0.1] border border-white/15"
                               }`}
                               title={isChecked ? "Mark as un-checked in" : "Mark as checked in"}
                             >
@@ -930,7 +930,7 @@ export default function AdminEventRegistrationsPage() {
                             <button
                               onClick={() => handleDeleteParticipant(participant.email)}
                               disabled={isDeletingEmail === participant.email}
-                              className="p-2 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 cursor-pointer"
+                              className="p-2 rounded-lg text-white/50 hover:text-red-400 hover:bg-red-500/10 border border-white/10 transition-all disabled:opacity-50 cursor-pointer"
                               title="Remove attendee"
                             >
                               {isDeletingEmail === participant.email ? (
@@ -971,13 +971,13 @@ export default function AdminEventRegistrationsPage() {
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div className="space-y-1 min-w-0 pr-2">
                   <h3 className="font-pixel text-sm sm:text-base text-white uppercase truncate">ADD_WALK_IN</h3>
-                  <p className="text-[10px] text-white/40 uppercase tracking-widest truncate">
+                  <p className="text-[10px] text-white/70 uppercase tracking-widest truncate font-medium">
                     {event.title}
                   </p>
                 </div>
                 <button
                   onClick={() => setIsAddModalOpen(false)}
-                  className="p-2 rounded-xl text-white/40 hover:text-white shrink-0"
+                  className="p-2 rounded-xl text-white/50 hover:text-white shrink-0 cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -991,47 +991,47 @@ export default function AdminEventRegistrationsPage() {
 
               <form onSubmit={handleSaveParticipant} className="space-y-3.5 text-xs">
                 <div className="space-y-1">
-                  <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1 block">Full Name *</label>
+                  <label className="text-[10px] text-white/85 uppercase tracking-wider pl-1 block font-semibold">Full Name *</label>
                   <input
                     type="text"
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. Bharath Kumar P"
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-sm sm:text-xs focus:outline-none focus:border-white/40"
+                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl text-white placeholder:text-white/45 text-sm sm:text-xs focus:outline-none focus:border-white/60"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1 block">Email Address *</label>
+                  <label className="text-[10px] text-white/85 uppercase tracking-wider pl-1 block font-semibold">Email Address *</label>
                   <input
                     type="email"
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="e.g. bharath@gmail.com"
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-sm sm:text-xs focus:outline-none focus:border-white/40"
+                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl text-white placeholder:text-white/45 text-sm sm:text-xs focus:outline-none focus:border-white/60"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1 block">Department</label>
+                    <label className="text-[10px] text-white/85 uppercase tracking-wider pl-1 block font-semibold">Department</label>
                     <input
                       type="text"
                       value={formData.department}
                       onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                       placeholder="CSE, IT, ECE..."
-                      className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-sm sm:text-xs focus:outline-none focus:border-white/40"
+                      className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl text-white placeholder:text-white/45 text-sm sm:text-xs focus:outline-none focus:border-white/60"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1 block">Year</label>
+                    <label className="text-[10px] text-white/85 uppercase tracking-wider pl-1 block font-semibold">Year</label>
                     <select
                       value={formData.year}
                       onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#0f0f0f] border border-white/10 rounded-xl text-white text-sm sm:text-xs focus:outline-none focus:border-white/40"
+                      className="w-full px-4 py-3 bg-[#111111] border border-white/20 rounded-xl text-white font-medium text-sm sm:text-xs focus:outline-none focus:border-white/60 cursor-pointer"
                     >
                       <option value="1">1st Year</option>
                       <option value="2">2nd Year</option>
@@ -1042,24 +1042,24 @@ export default function AdminEventRegistrationsPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1 block">College / Institution</label>
+                  <label className="text-[10px] text-white/85 uppercase tracking-wider pl-1 block font-semibold">College / Institution</label>
                   <input
                     type="text"
                     value={formData.college}
                     onChange={(e) => setFormData({ ...formData, college: e.target.value })}
                     placeholder="Government College of Engineering, Erode"
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-sm sm:text-xs focus:outline-none focus:border-white/40"
+                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl text-white placeholder:text-white/45 text-sm sm:text-xs focus:outline-none focus:border-white/60"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1 block">Phone Number</label>
+                  <label className="text-[10px] text-white/85 uppercase tracking-wider pl-1 block font-semibold">Phone Number</label>
                   <input
                     type="text"
                     value={formData.mobile}
                     onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
                     placeholder="e.g. 9876543210"
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-sm sm:text-xs focus:outline-none focus:border-white/40"
+                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl text-white placeholder:text-white/45 text-sm sm:text-xs focus:outline-none focus:border-white/60"
                   />
                 </div>
 
@@ -1067,7 +1067,7 @@ export default function AdminEventRegistrationsPage() {
                   <button
                     type="button"
                     onClick={() => setIsAddModalOpen(false)}
-                    className="w-full sm:flex-1 py-3 bg-white/[0.04] border border-white/10 text-white/60 hover:text-white rounded-xl font-pixel text-[10px] uppercase transition-all"
+                    className="w-full sm:flex-1 py-3 bg-white/[0.04] border border-white/10 text-white/70 hover:text-white rounded-xl font-pixel text-[10px] uppercase transition-all cursor-pointer font-medium"
                   >
                     CANCEL
                   </button>
@@ -1106,61 +1106,61 @@ export default function AdminEventRegistrationsPage() {
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div className="space-y-1 min-w-0 pr-2">
                   <h3 className="font-pixel text-sm sm:text-base text-white uppercase truncate">BROADCAST_EMAIL</h3>
-                  <p className="text-[10px] text-white/40 uppercase tracking-widest truncate">
+                  <p className="text-[10px] text-white/70 uppercase tracking-widest truncate font-medium">
                     Notify {registrations.length} attendees of {event.title}
                   </p>
                 </div>
                 <button
                   onClick={() => setIsEmailModalOpen(false)}
-                  className="p-2 rounded-xl text-white/40 hover:text-white shrink-0"
+                  className="p-2 rounded-xl text-white/50 hover:text-white shrink-0 cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {emailStatus && (
-                <div className="p-3 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs">
+                <div className="p-3 rounded-xl bg-white/[0.04] border border-white/20 text-white text-xs">
                   {emailStatus}
                 </div>
               )}
 
               <div className="space-y-3.5 text-xs">
                 <div className="space-y-1">
-                  <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1 block">Email Subject</label>
+                  <label className="text-[10px] text-white/85 uppercase tracking-wider pl-1 block font-semibold">Email Subject</label>
                   <input
                     type="text"
                     value={emailSubject}
                     onChange={(e) => setEmailSubject(e.target.value)}
                     placeholder="e.g. Schedule & Venue update for tomorrow"
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-sm sm:text-xs focus:outline-none focus:border-white/30"
+                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl text-white placeholder:text-white/45 text-sm sm:text-xs focus:outline-none focus:border-white/60"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] text-white/40 uppercase tracking-wider pl-1 block">Message Content</label>
+                  <label className="text-[10px] text-white/85 uppercase tracking-wider pl-1 block font-semibold">Message Content</label>
                   <textarea
                     rows={5}
                     value={emailMessage}
                     onChange={(e) => setEmailMessage(e.target.value)}
                     placeholder="Write announcement, instructions, or meeting links..."
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-sm sm:text-xs focus:outline-none focus:border-white/30 resize-y"
+                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl text-white placeholder:text-white/45 text-sm sm:text-xs focus:outline-none focus:border-white/60 resize-y"
                   />
                 </div>
 
-                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2.5">
-                  <p className="text-[10px] text-white/40 uppercase tracking-wider">Test Before Sending</p>
+                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-2.5">
+                  <p className="text-[10px] text-white/70 uppercase tracking-wider font-semibold">Test Before Sending</p>
                   <div className="flex flex-col sm:flex-row gap-2">
                     <input
                       type="email"
                       value={testEmail}
                       onChange={(e) => setTestEmail(e.target.value)}
                       placeholder="your.email@example.com"
-                      className="flex-1 px-4 py-2.5 bg-black/40 border border-white/10 rounded-xl text-white text-sm sm:text-xs focus:outline-none"
+                      className="flex-1 px-4 py-2.5 bg-black/40 border border-white/20 rounded-xl text-white placeholder:text-white/45 text-sm sm:text-xs focus:outline-none focus:border-white/60 font-mono"
                     />
                     <button
                       onClick={handleSendTestEmail}
                       disabled={isTestEmailing || !testEmail.trim()}
-                      className="h-10 px-4 bg-white/10 border border-white/20 text-white rounded-xl font-pixel text-[9px] uppercase hover:bg-white/20 disabled:opacity-40"
+                      className="h-10 px-4 bg-white/10 border border-white/20 text-white rounded-xl font-pixel text-[9px] uppercase hover:bg-white/20 disabled:opacity-40 cursor-pointer font-bold"
                     >
                       {isTestEmailing ? "SENDING..." : "TEST.SYS"}
                     </button>
@@ -1171,7 +1171,7 @@ export default function AdminEventRegistrationsPage() {
                   <button
                     type="button"
                     onClick={() => setIsEmailModalOpen(false)}
-                    className="w-full sm:flex-1 py-3 bg-white/[0.04] border border-white/10 text-white/60 hover:text-white rounded-xl font-pixel text-[10px] uppercase"
+                    className="w-full sm:flex-1 py-3 bg-white/[0.04] border border-white/10 text-white/70 hover:text-white rounded-xl font-pixel text-[10px] uppercase cursor-pointer font-medium"
                   >
                     CLOSE
                   </button>

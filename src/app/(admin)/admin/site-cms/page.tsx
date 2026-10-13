@@ -99,8 +99,8 @@ function ImageUrlInput({
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <input
-            className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-4 py-2.5 font-mono text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/20 placeholder:text-white/20 transition-all pr-10"
-            style={{ borderColor: needsConversion ? "rgba(251,191,36,0.4)" : undefined }}
+            className="w-full bg-white/[0.04] border border-white/20 rounded-xl px-4 py-2.5 font-mono text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/40 placeholder:text-white/45 transition-all pr-10"
+            style={{ borderColor: needsConversion ? "rgba(251,191,36,0.6)" : undefined }}
             value={raw}
             onChange={handleChange}
             placeholder={placeholder}
@@ -116,7 +116,7 @@ function ImageUrlInput({
           <button
             onClick={handleConvert}
             title="Auto-convert Drive link to embeddable URL"
-            className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 font-mono text-[10px] text-amber-400 hover:bg-amber-500/20 transition-all whitespace-nowrap"
+            className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 font-mono text-[10px] text-amber-400 hover:bg-amber-500/20 transition-all whitespace-nowrap cursor-pointer font-bold"
           >
             <Wand2 className="w-3.5 h-3.5" /> Convert
           </button>
@@ -125,7 +125,7 @@ function ImageUrlInput({
 
       {/* Drive link hint */}
       {needsConversion && (
-        <p className="font-mono text-[10px] text-amber-400/80 flex items-center gap-1.5">
+        <p className="font-mono text-[10px] text-amber-300 flex items-center gap-1.5 font-medium">
           <AlertCircle className="w-3 h-3 shrink-0" />
           This looks like a Google Drive share link — click <strong>Convert</strong> to make it embeddable.
         </p>
@@ -133,7 +133,7 @@ function ImageUrlInput({
 
       {/* Converted confirmation */}
       {wasDriveLink && !needsConversion && (
-        <p className="font-mono text-[10px] text-emerald-400/80 flex items-center gap-1.5">
+        <p className="font-mono text-[10px] text-emerald-400 flex items-center gap-1.5 font-medium">
           <Check className="w-3 h-3 shrink-0" /> Drive link auto-converted to direct image URL.
         </p>
       )}
@@ -146,29 +146,29 @@ function ImageUrlInput({
             key={value}
             src={value}
             alt="preview"
-            className="w-20 h-16 object-cover rounded-lg bg-white/5 border border-white/10"
+            className="w-20 h-16 object-cover rounded-lg bg-white/5 border border-white/20"
             onLoad={() => setPreviewOk(true)}
             onError={() => setPreviewOk(false)}
           />
           <div className="flex-1 min-w-0">
             {previewOk === true && (
-              <p className="font-mono text-[10px] text-emerald-400 flex items-center gap-1">
+              <p className="font-mono text-[10px] text-emerald-400 flex items-center gap-1 font-medium">
                 <CheckCircle2 className="w-3 h-3" /> Image loaded successfully
               </p>
             )}
             {previewOk === false && (
               <div className="space-y-1">
-                <p className="font-mono text-[10px] text-red-400 flex items-center gap-1">
+                <p className="font-mono text-[10px] text-red-400 flex items-center gap-1 font-medium">
                   <AlertCircle className="w-3 h-3" /> Image failed to load
                 </p>
-                <p className="font-mono text-[9px] text-white/30 leading-relaxed">
+                <p className="font-mono text-[9px] text-white/70 leading-relaxed">
                   Make sure the file is publicly shared and the URL points directly to an image.
                   For Drive: set sharing to &quot;Anyone with the link&quot;.
                 </p>
               </div>
             )}
             {previewOk === null && value && (
-              <p className="font-mono text-[10px] text-white/30">Loading preview…</p>
+              <p className="font-mono text-[10px] text-white/70">Loading preview…</p>
             )}
           </div>
         </div>
@@ -230,20 +230,20 @@ function Field({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="font-mono text-[10px] uppercase tracking-widest text-white/40 ml-1 block">
+      <label className="font-mono text-[10px] uppercase tracking-widest text-white/85 ml-1 block font-semibold">
         {label}
       </label>
       {children}
-      {hint && <p className="font-mono text-[9px] text-white/25 ml-1">{hint}</p>}
+      {hint && <p className="font-mono text-[9px] text-white/60 ml-1 font-medium">{hint}</p>}
     </div>
   );
 }
 
 const inputCls =
-  "w-full bg-white/[0.03] border border-white/8 rounded-xl px-4 py-2.5 font-mono text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/20 placeholder:text-white/20 transition-all";
+  "w-full bg-white/[0.04] border border-white/20 rounded-xl px-4 py-2.5 font-mono text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/40 focus:border-white/50 placeholder:text-white/45 transition-all";
 
 const textareaCls =
-  "w-full bg-white/[0.03] border border-white/8 rounded-xl px-4 py-3 font-mono text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/20 placeholder:text-white/20 transition-all resize-none";
+  "w-full bg-white/[0.04] border border-white/20 rounded-xl px-4 py-3 font-mono text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/40 focus:border-white/50 placeholder:text-white/45 transition-all resize-none";
 
 // ──────────────────────────────────────────────────────────────────
 // Save button with status
@@ -320,18 +320,18 @@ function Accordion({
             className={`p-2.5 rounded-xl border transition-all ${
               open
                 ? "bg-white text-black border-white"
-                : "bg-white/5 text-white/50 border-white/10 group-hover:border-white/20"
+                : "bg-white/5 text-white/70 border-white/15 group-hover:border-white/30"
             }`}
           >
             <Icon className="w-4 h-4" />
           </div>
           <div>
             <p className="font-pixel text-sm text-white">{label}</p>
-            <p className="font-mono text-[10px] text-white/30 mt-0.5">{desc}</p>
+            <p className="font-mono text-[10px] text-white/70 mt-0.5 font-medium">{desc}</p>
           </div>
         </div>
         <div
-          className={`text-white/40 transition-transform ${open ? "rotate-90" : ""}`}
+          className={`text-white/60 transition-transform ${open ? "rotate-90" : ""}`}
         >
           <ChevronRight className="w-4 h-4" />
         </div>
@@ -430,7 +430,7 @@ function AboutEditor({
   return (
     <div className="space-y-6 mt-4">
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-white/40 mb-3">Stats</p>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-white/85 mb-3 font-semibold">Stats</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {data.stats.map((s, i) => (
             <div key={i} className="space-y-2 p-4 rounded-xl bg-white/[0.02] border border-white/5">
@@ -452,7 +452,7 @@ function AboutEditor({
       </div>
 
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-white/40 mb-3">Cards</p>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-white/85 mb-3 font-semibold">Cards</p>
         <div className="space-y-4">
           {data.cards.map((c, i) => (
             <div key={i} className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-3">
@@ -512,10 +512,10 @@ function WhatWeDoEditor({
       {data.activities.map((a, i) => (
         <div key={i} className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-xs text-white/40">Activity {i + 1}</span>
+            <span className="font-mono text-xs text-white/85 font-semibold">Activity {i + 1}</span>
             <button
               onClick={() => removeActivity(i)}
-              className="p-1.5 rounded-lg text-red-500/40 hover:text-red-400 hover:bg-red-500/10 transition-all"
+              className="p-1.5 rounded-lg text-red-500/60 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -540,7 +540,7 @@ function WhatWeDoEditor({
       ))}
       <button
         onClick={addActivity}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/10 font-mono text-xs text-white/40 hover:text-white hover:border-white/30 transition-all"
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/20 font-mono text-xs text-white/75 hover:text-white hover:border-white/40 transition-all font-medium cursor-pointer"
       >
         <Plus className="w-4 h-4" /> Add Activity
       </button>
@@ -669,45 +669,45 @@ function BoardMembersEditor({
 
       {/* Staff Advisors Section */}
       <div className="pt-2">
-        <h3 className="font-mono text-[10px] uppercase tracking-widest text-white/40 mb-3">Staff Advisors</h3>
+        <h3 className="font-mono text-[10px] uppercase tracking-widest text-white/85 mb-3 font-semibold">Staff Advisors</h3>
         {filteredAdvisors.length === 0 && (
-          <p className="font-mono text-xs text-white/30 text-center py-4 border border-dashed border-white/10 rounded-2xl mb-4">
+          <p className="font-mono text-xs text-white/60 text-center py-4 border border-dashed border-white/15 rounded-2xl mb-4 font-medium">
             No staff advisors for {selectedYear || "this year"}. Add one below.
           </p>
         )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
           {filteredAdvisors.map((m, idx) => (
-            <div key={m.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center gap-4 transition-colors hover:bg-white/[0.04]">
+            <div key={m.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/10 flex items-center gap-4 transition-colors hover:bg-white/[0.04]">
               <div className="flex flex-col gap-1 shrink-0">
                 <button 
                   onClick={() => movePerson(m.id, -1, "advisor")} 
                   disabled={idx === 0}
-                  className="p-1 rounded text-white/40 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent"
+                  className="p-1 rounded text-white/60 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer"
                 >
                   <ChevronUp className="w-3 h-3" />
                 </button>
                 <button 
                   onClick={() => movePerson(m.id, 1, "advisor")} 
                   disabled={idx === filteredAdvisors.length - 1}
-                  className="p-1 rounded text-white/40 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent"
+                  className="p-1 rounded text-white/60 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer"
                 >
                   <ChevronDown className="w-3 h-3" />
                 </button>
               </div>
-              <div className="w-12 h-12 rounded-lg bg-black/20 overflow-hidden shrink-0 flex items-center justify-center relative border border-white/5">
+              <div className="w-12 h-12 rounded-lg bg-black/20 overflow-hidden shrink-0 flex items-center justify-center relative border border-white/10">
                  {m.imageUrl ? (
                    <img src={m.imageUrl} alt={m.name} className="w-full h-full object-cover" />
                  ) : (
-                   <Users className="w-5 h-5 text-white/20" />
+                   <Users className="w-5 h-5 text-white/40" />
                  )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-mono text-sm text-white truncate font-bold">{m.name || "Unnamed Advisor"}</p>
-                <p className="font-mono text-xs text-white/50 truncate">{m.role || "No role specified"}</p>
+                <p className="font-mono text-xs text-white/70 truncate font-medium">{m.role || "No role specified"}</p>
               </div>
               <button
                 onClick={() => { setEditingId(m.id); setEditingType("advisor"); }}
-                className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white font-mono text-xs transition-colors shrink-0 border border-white/5 hover:border-white/20 shadow-sm"
+                className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white font-mono text-xs transition-colors shrink-0 border border-white/10 hover:border-white/30 shadow-sm cursor-pointer font-medium"
               >
                 Edit
               </button>
@@ -716,7 +716,7 @@ function BoardMembersEditor({
         </div>
         <button
           onClick={() => addPerson("advisor")}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/10 font-mono text-xs text-white/40 hover:text-white hover:border-white/30 transition-all bg-white/[0.01] hover:bg-white/[0.03]"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/20 font-mono text-xs text-white/75 hover:text-white hover:border-white/40 transition-all bg-white/[0.01] hover:bg-white/[0.03] font-medium cursor-pointer"
         >
           <Plus className="w-4 h-4" /> Add Staff Advisor
         </button>
@@ -726,45 +726,45 @@ function BoardMembersEditor({
 
       {/* Board Members Section */}
       <div>
-        <h3 className="font-mono text-[10px] uppercase tracking-widest text-white/40 mb-3">Board Members</h3>
+        <h3 className="font-mono text-[10px] uppercase tracking-widest text-white/85 mb-3 font-semibold">Board Members</h3>
         {filteredMembers.length === 0 && (
-          <p className="font-mono text-xs text-white/30 text-center py-8 border border-dashed border-white/10 rounded-2xl mb-4">
+          <p className="font-mono text-xs text-white/60 text-center py-8 border border-dashed border-white/15 rounded-2xl mb-4 font-medium">
             No board members for {selectedYear || "this year"}. Add one below.
           </p>
         )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
           {filteredMembers.map((m, idx) => (
-            <div key={m.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center gap-4 transition-colors hover:bg-white/[0.04]">
+            <div key={m.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/10 flex items-center gap-4 transition-colors hover:bg-white/[0.04]">
               <div className="flex flex-col gap-1 shrink-0">
                 <button 
                   onClick={() => movePerson(m.id, -1, "member")} 
                   disabled={idx === 0}
-                  className="p-1 rounded text-white/40 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent"
+                  className="p-1 rounded text-white/60 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer"
                 >
                   <ChevronUp className="w-3 h-3" />
                 </button>
                 <button 
                   onClick={() => movePerson(m.id, 1, "member")} 
                   disabled={idx === filteredMembers.length - 1}
-                  className="p-1 rounded text-white/40 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent"
+                  className="p-1 rounded text-white/60 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer"
                 >
                   <ChevronDown className="w-3 h-3" />
                 </button>
               </div>
-              <div className="w-12 h-12 rounded-lg bg-black/20 overflow-hidden shrink-0 flex items-center justify-center relative border border-white/5">
+              <div className="w-12 h-12 rounded-lg bg-black/20 overflow-hidden shrink-0 flex items-center justify-center relative border border-white/10">
                  {m.imageUrl ? (
                    <img src={m.imageUrl} alt={m.name} className="w-full h-full object-cover" />
                  ) : (
-                   <Users className="w-5 h-5 text-white/20" />
+                   <Users className="w-5 h-5 text-white/40" />
                  )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-mono text-sm text-white truncate font-bold">{m.name || "Unnamed Member"}</p>
-                <p className="font-mono text-xs text-white/50 truncate">{m.role || "No role specified"}</p>
+                <p className="font-mono text-xs text-white/70 truncate font-medium">{m.role || "No role specified"}</p>
               </div>
               <button
                 onClick={() => { setEditingId(m.id); setEditingType("member"); }}
-                className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white font-mono text-xs transition-colors shrink-0 border border-white/5 hover:border-white/20 shadow-sm"
+                className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white font-mono text-xs transition-colors shrink-0 border border-white/10 hover:border-white/30 shadow-sm cursor-pointer font-medium"
               >
                 Edit
               </button>
@@ -773,7 +773,7 @@ function BoardMembersEditor({
         </div>
         <button
           onClick={() => addPerson("member")}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/10 font-mono text-xs text-white/40 hover:text-white hover:border-white/30 transition-all bg-white/[0.01] hover:bg-white/[0.03]"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/20 font-mono text-xs text-white/75 hover:text-white hover:border-white/40 transition-all bg-white/[0.01] hover:bg-white/[0.03] font-medium cursor-pointer"
         >
           <Plus className="w-4 h-4" /> Add Board Member
         </button>
@@ -784,10 +784,10 @@ function BoardMembersEditor({
       {/* MODAL */}
       {editingPerson && editingType && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-xl bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
-            <div className="px-5 py-4 border-b border-white/5 flex justify-between items-center shrink-0">
+          <div className="w-full max-w-xl bg-[#0a0a0a] border border-white/15 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+            <div className="px-5 py-4 border-b border-white/10 flex justify-between items-center shrink-0">
               <h2 className="font-mono text-sm text-white font-bold">Edit {editingType === "member" ? "Member" : "Staff Advisor"}</h2>
-              <button onClick={() => { setEditingId(null); setEditingType(null); }} className="p-1.5 text-white/40 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-lg">
+              <button onClick={() => { setEditingId(null); setEditingType(null); }} className="p-1.5 text-white/60 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-lg cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -898,10 +898,10 @@ function GalleryEditor({
             <button
               key={y!}
               onClick={() => setSelectedYear(y!)}
-              className={`px-4 py-2 rounded-xl font-mono text-xs transition-colors whitespace-nowrap border ${
+              className={`px-4 py-2 rounded-xl font-mono text-xs transition-colors whitespace-nowrap border cursor-pointer ${
                 selectedYear === y 
-                  ? "bg-white text-black border-white" 
-                  : "bg-transparent text-white/50 border-white/10 hover:text-white hover:border-white/30"
+                  ? "bg-white text-black border-white font-bold" 
+                  : "bg-transparent text-white/70 border-white/15 hover:text-white hover:border-white/30 font-medium"
               }`}
             >
               {y}
@@ -911,23 +911,23 @@ function GalleryEditor({
       )}
 
       {filteredImages.length === 0 && (
-        <p className="font-mono text-xs text-white/30 text-center py-8 border border-dashed border-white/10 rounded-2xl">
+        <p className="font-mono text-xs text-white/60 text-center py-8 border border-dashed border-white/15 rounded-2xl font-medium">
           No gallery images for {selectedYear || "this year"}. Add photos below.
         </p>
       )}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         {filteredImages.map((img) => (
-          <div key={img.id} className="relative aspect-video rounded-xl overflow-hidden bg-white/5 border border-white/5 group">
+          <div key={img.id} className="relative aspect-video rounded-xl overflow-hidden bg-white/5 border border-white/10 group">
              {img.src ? (
                <img src={img.src} alt={img.alt || ""} className="w-full h-full object-cover" />
              ) : (
-               <div className="w-full h-full flex items-center justify-center"><ImageIcon className="w-6 h-6 text-white/20" /></div>
+               <div className="w-full h-full flex items-center justify-center"><ImageIcon className="w-6 h-6 text-white/40" /></div>
              )}
              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">
                 <button
                   onClick={() => setEditingId(img.id)}
-                  className="px-4 py-2 rounded-lg bg-white text-black font-mono text-[10px] font-bold hover:bg-white/90 shadow-lg"
+                  className="px-4 py-2 rounded-lg bg-white text-black font-mono text-[10px] font-bold hover:bg-white/90 shadow-lg cursor-pointer"
                 >
                   Edit Image
                 </button>
@@ -938,7 +938,7 @@ function GalleryEditor({
 
       <button
         onClick={addImage}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/10 font-mono text-xs text-white/40 hover:text-white hover:border-white/30 transition-all bg-white/[0.01] hover:bg-white/[0.03]"
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/20 font-mono text-xs text-white/75 hover:text-white hover:border-white/40 transition-all bg-white/[0.01] hover:bg-white/[0.03] font-medium cursor-pointer"
       >
         <Plus className="w-4 h-4" /> Add Image
       </button>
@@ -948,10 +948,10 @@ function GalleryEditor({
       {/* MODAL */}
       {editingImage && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-xl bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
-            <div className="px-5 py-4 border-b border-white/5 flex justify-between items-center shrink-0">
+          <div className="w-full max-w-xl bg-[#0a0a0a] border border-white/15 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+            <div className="px-5 py-4 border-b border-white/10 flex justify-between items-center shrink-0">
               <h2 className="font-mono text-sm text-white font-bold">Edit Gallery Image</h2>
-              <button onClick={() => setEditingId(null)} className="p-1.5 text-white/40 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-lg">
+              <button onClick={() => setEditingId(null)} className="p-1.5 text-white/60 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-lg cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -1042,11 +1042,11 @@ function FooterEditor({
       </div>
 
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-white/40 mb-3">Social Links</p>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-white/85 mb-3 font-semibold">Social Links</p>
         <div className="space-y-2">
           {data.socials.map((s, i) => (
-            <div key={s.platform} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
-              <span className="font-mono text-xs text-white/60 w-20 shrink-0">{s.platform}</span>
+            <div key={s.platform} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/10">
+              <span className="font-mono text-xs text-white/80 w-20 shrink-0 font-medium">{s.platform}</span>
               <input
                 className={`${inputCls} flex-1`}
                 value={s.href}
@@ -1058,9 +1058,9 @@ function FooterEditor({
                   type="checkbox"
                   checked={s.active}
                   onChange={e => setSocial(i, "active", e.target.checked)}
-                  className="w-4 h-4 rounded"
+                  className="w-4 h-4 rounded cursor-pointer"
                 />
-                <span className="font-mono text-xs text-white/50">Active</span>
+                <span className="font-mono text-xs text-white/75 font-medium">Active</span>
               </label>
             </div>
           ))}
@@ -1068,18 +1068,18 @@ function FooterEditor({
       </div>
 
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-white/40 mb-3">Quick Links</p>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-white/85 mb-3 font-semibold">Quick Links</p>
         <div className="space-y-2">
           {data.quickLinks.map((l, i) => (
             <div key={i} className="flex items-center gap-2">
               <input className={`${inputCls} flex-1`} value={l.label} onChange={e => setLink(i, "label", e.target.value)} placeholder="Label" />
               <input className={`${inputCls} flex-1`} value={l.href} onChange={e => setLink(i, "href", e.target.value)} placeholder="/#section" />
-              <button onClick={() => removeQuickLink(i)} className="p-2 text-red-500/40 hover:text-red-400 transition-colors">
+              <button onClick={() => removeQuickLink(i)} className="p-2 text-red-500/60 hover:text-red-400 transition-colors cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
           ))}
-          <button onClick={addQuickLink} className="flex items-center gap-2 font-mono text-xs text-white/40 hover:text-white transition-colors mt-1">
+          <button onClick={addQuickLink} className="flex items-center gap-2 font-mono text-xs text-white/75 hover:text-white transition-colors mt-1 font-medium cursor-pointer">
             <Plus className="w-3.5 h-3.5" /> Add Link
           </button>
         </div>
@@ -1161,7 +1161,7 @@ export default function SiteCMSPage() {
       <div className="space-y-8 py-10">
         <div className="flex flex-col gap-1">
           <h1 className="font-pixel text-white whitespace-nowrap text-[clamp(1.1rem,4vw,1.875rem)]">SITE_CMS</h1>
-          <p className="font-mono text-xs text-white/40">Loading site content…</p>
+          <p className="font-mono text-xs text-white/70">Loading site content…</p>
         </div>
         <div className="space-y-3">
           {[1, 2, 3, 4].map(i => (
@@ -1180,7 +1180,7 @@ export default function SiteCMSPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div className="space-y-1">
           <h1 className="font-pixel text-white whitespace-nowrap text-[clamp(1.1rem,4vw,1.875rem)]">SITE_CMS</h1>
-          <p className="font-mono text-xs text-white/40">
+          <p className="font-mono text-xs text-white/75 font-medium">
             Edit every section of the public website — changes go live immediately on save
           </p>
         </div>
@@ -1189,14 +1189,14 @@ export default function SiteCMSPage() {
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 font-mono text-xs text-white/60 hover:text-white hover:bg-white/5 transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/20 font-mono text-xs text-white/80 hover:text-white hover:bg-white/5 transition-all font-medium cursor-pointer"
           >
             <Eye className="w-3.5 h-3.5" /> Preview Site
             <ExternalLink className="w-3 h-3" />
           </a>
           <button
             onClick={fetchAll}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 font-mono text-xs text-white/60 hover:text-white hover:bg-white/5 transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/20 font-mono text-xs text-white/80 hover:text-white hover:bg-white/5 transition-all font-medium cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" /> Reload
           </button>
@@ -1204,9 +1204,9 @@ export default function SiteCMSPage() {
       </div>
 
       {/* Notice banner */}
-      <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
+      <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
         <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-        <p className="font-mono text-xs text-amber-400/80">
+        <p className="font-mono text-xs text-amber-200 leading-relaxed font-medium">
           Changes are saved to MongoDB and reflect live on the public website. For Hero, About, WhatWeDo and Footer, the public components must be updated to fetch from the API — see the integration guide.
         </p>
       </div>
