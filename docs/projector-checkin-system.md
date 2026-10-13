@@ -41,10 +41,19 @@ This document outlines the **Live QR Check-In** and **Projector Display System**
    `https://fossgcee.org/events/[slug]/checkin/projector`
 4. Connect your laptop to the **Projector / TV** in the seminar hall and click the **Maximize (Fullscreen)** icon (or press **F**).
 5. The presentation display features:
-   - **Enlarged High-Definition Event Poster**: Prominently framed on the main stage with event date, time, venue, and category badge (with graceful procedural fallback if no poster is uploaded).
-   - **High-Contrast Scannable QR Code**: Large, crisp black & white QR code with corner reticles, 3-step scanning guide, and direct browser URL pill.
-   - **No Public Attendance Tickers**: Attendance counters, percentages, and attendee ticker streams are cleanly omitted from the public presentation screen for a clean cinematic look.
+   - **Enlarged High-Definition Event Poster**: Spans up to `84vh` and fills the available stage column cleanly with full aspect-ratio fidelity and subtle ambient backlighting.
+   - **Stage Themes Engine**: Real-time atmospheric background with 60fps canvas particles:
+     - 🌸 **Cherry Blossom (Sakura)** (Default): Gentle falling pink sakura petals with soft rose ambient glow.
+     - ⚡ **Cyber Matrix**: Neon emerald digital grid and high-tech terminal particles.
+     - 🌌 **Celestial Aurora**: Ethereal northern lights with cosmic stardust particles.
+     - 🌅 **Sunset Synth**: Warm retrowave dusk and amber horizon particles.
+     - 🪨 **Minimal Noir**: Deep pitch-black contrast for minimal keynotes.
+     - *Cycle themes quickly by pressing **T** or using the top header dropdown (persists in localStorage).*
+   - **Streamlined Minimal Header**: Uncluttered, low-profile header without clumsy oversized duplicate titles, letting the poster and QR code command full stage focus.
+   - **High-Contrast Scannable QR Code**: Crisp, high-contrast QR code with corner reticles, 3-step scanning guide, and direct browser URL pill.
+   - **No Public Attendance Tickers**: Audience view remains cinematic and clean.
    - **Organizer Attendee Desk**: Press **A** or tap **Check-in Desk** in the header to open a private slide-over drawer showing live verified attendees, timestamps, search, and direct portal link.
+   - **Key Shortcuts**: <kbd>T</kbd> for Theme, <kbd>F</kbd> for Fullscreen, <kbd>A</kbd> for Attendee Desk, <kbd>Esc</kbd> to close overlays.
 
 ---
 
