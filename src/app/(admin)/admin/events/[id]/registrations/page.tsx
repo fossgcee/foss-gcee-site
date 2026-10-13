@@ -19,7 +19,8 @@ import {
   MapPin,
   CheckCircle2,
   QrCode,
-  CircleDot
+  CircleDot,
+  RefreshCw
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -87,9 +88,9 @@ export default function AdminEventRegistrationsPage() {
   const [emailStatus, setEmailStatus] = useState<string | null>(null);
 
   // Fetch Event, Registrations & Live Check-ins
-  const fetchRegistrations = async () => {
+  const fetchRegistrations = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const [regRes, checkinRes] = await Promise.all([
         fetch(`/api/admin/events/registrations?id=${id}`),
         fetch(`/api/events/checkin?id=${id}`),
@@ -101,7 +102,9 @@ export default function AdminEventRegistrationsPage() {
       if (regData.success) {
         setEvent(regData.event);
         setRegistrations(regData.data || []);
-        setEmailSubject(`Important Update: ${regData.event?.title || "FOSS GCEE Event"}`);
+        if (!silent) {
+          setEmailSubject(`Important Update: ${regData.event?.title || "FOSS GCEE Event"}`);
+        }
       }
 
       if (checkinData.success && checkinData.checkedInEmails) {
@@ -110,13 +113,27 @@ export default function AdminEventRegistrationsPage() {
     } catch {
       console.error("Failed to load registrations");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   useEffect(() => {
     if (id) {
       fetchRegistrations();
+
+      // Silent live check-in polling every 3.5s
+      const interval = setInterval(() => {
+        fetch(`/api/events/checkin?id=${id}`)
+          .then((res) => res.json())
+          .then((checkinData) => {
+            if (checkinData.success && checkinData.checkedInEmails) {
+              setCheckedInEmails(new Set(checkinData.checkedInEmails.map((e: string) => e.toLowerCase())));
+            }
+          })
+          .catch(() => {});
+      }, 3500);
+
+      return () => clearInterval(interval);
     }
   }, [id]);
 
@@ -616,6 +633,58 @@ export default function AdminEventRegistrationsPage() {
             <option value="checkedin">Checked In Only ({checkedInCount})</option>
             <option value="pending">Pending Arrival ({Math.max(0, totalCount - checkedInCount)})</option>
           </select>
+        </div>
+      </div>
+
+      {/* Quick Status Filter Tabs & Live Sync Badge */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => setAttendanceFilter("all")}
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono uppercase transition-all cursor-pointer ${
+              attendanceFilter === "all"
+                ? "bg-white text-black font-bold shadow-md"
+                : "bg-white/[0.04] border border-white/10 text-white/50 hover:text-white hover:bg-white/10"
+            }`}
+          >
+            All ({totalCount})
+          </button>
+          <button
+            onClick={() => setAttendanceFilter("checkedin")}
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
+              attendanceFilter === "checkedin"
+                ? "bg-white text-black font-bold shadow-md"
+                : "bg-white/[0.04] border border-white/10 text-white/50 hover:text-white hover:bg-white/10"
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            Checked In ({checkedInCount})
+          </button>
+          <button
+            onClick={() => setAttendanceFilter("pending")}
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
+              attendanceFilter === "pending"
+                ? "bg-white text-black font-bold shadow-md"
+                : "bg-white/[0.04] border border-white/10 text-white/50 hover:text-white hover:bg-white/10"
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-amber-400/80" />
+            Pending ({Math.max(0, totalCount - checkedInCount)})
+          </button>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1.5 text-[10px] text-white/50 uppercase font-mono tracking-wider">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            Live Sync
+          </span>
+          <button
+            onClick={() => fetchRegistrations(true)}
+            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white border border-white/10 transition-colors cursor-pointer"
+            title="Refresh check-ins list"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 

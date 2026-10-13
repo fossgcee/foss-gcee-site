@@ -120,7 +120,7 @@ export default function Contributions() {
   return (
     <section id="contributions" ref={sectionRef} className="py-16 sm:py-28 relative">
       <div className="section-divider" />
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+      <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 pt-8">
         
         {/* Heading & Navigation */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 sm:mb-16 gap-6">

@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Event slug or ID is required" }, { status: 400 });
     }
 
-    let query = supabase.from("events").select("id, title, slug, venue, start_date, start_time, registrations_count");
+    let query = supabase.from("events").select("id, title, slug, venue, start_date, start_time, poster, category, description, registrations_count");
     if (eventId) {
       query = query.eq("id", eventId);
     } else if (eventSlug) {
@@ -76,6 +76,9 @@ export async function GET(req: NextRequest) {
         venue: event.venue,
         startDate: event.start_date,
         startTime: event.start_time,
+        poster: event.poster,
+        category: event.category,
+        description: event.description,
         registrationsCount: totalRegs ?? event.registrations_count ?? 0,
       },
       totalRegistrations: totalRegs ?? event.registrations_count ?? 0,
@@ -109,7 +112,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Event slug or ID is required." }, { status: 400 });
     }
 
-    let query = supabase.from("events").select("id, title, slug, venue, start_date, start_time");
+    let query = supabase.from("events").select("id, title, slug, venue, start_date, start_time, poster");
     if (eventId) {
       query = query.eq("id", eventId);
     } else {

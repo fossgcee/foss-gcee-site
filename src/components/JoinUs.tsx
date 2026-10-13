@@ -48,7 +48,7 @@ export default function JoinUs() {
     <section id="join" ref={sectionRef} className="py-16 sm:py-28 relative bg-bg-2">
       <div className="section-divider" />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+      <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 pt-8">
         <div className="join-heading text-center mb-10 sm:mb-16">
           <span className="tag-badge mb-4 inline-block">{"// join us"}</span>
           <h2 className="text-3xl sm:text-4xl font-bold mt-3 text-muted">
@@ -59,7 +59,7 @@ export default function JoinUs() {
           </p>
         </div>
 
-        <div className="max-w-3xl mx-auto items-start">
+        <div className="max-w-4xl 2xl:max-w-5xl mx-auto items-start">
 
           {/* Steps + Socials Centered */}
           <div className="space-y-12">

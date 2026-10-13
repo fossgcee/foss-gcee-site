@@ -152,7 +152,7 @@ export default function Hero() {
       />
 
       {/* ── Two-column layout ────────────────────────────── */}
-      <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-10 lg:px-12 xl:px-16 w-full py-16 lg:py-24 grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-6 lg:gap-8 items-center">
+      <div className="relative z-10 max-w-7xl 2xl:max-w-[1440px] mx-auto px-3 sm:px-10 lg:px-12 xl:px-16 2xl:px-12 w-full py-16 lg:py-24 2xl:py-28 grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-6 lg:gap-8 items-center">
 
         {/* ── LEFT: Text content ──────────────────────────── */}
         <div ref={leftRef} className="flex flex-col items-start gap-4 sm:gap-6 pt-2 lg:pt-0">
@@ -176,7 +176,7 @@ export default function Hero() {
 
           {/* Description */}
           <p
-            className="text-base md:text-lg lg:text-lg leading-relaxed max-w-lg font-mono text-muted-2 mt-3"
+            className="text-base md:text-lg lg:text-lg 2xl:text-xl leading-relaxed max-w-lg xl:max-w-xl 2xl:max-w-2xl font-mono text-muted-2 mt-3"
           >
             {heroData.description.split("Linux").map((part, i, arr) => (
               <span key={i}>

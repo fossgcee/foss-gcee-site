@@ -9,7 +9,8 @@ import {
   ArrowRight, 
   Image as ImageIcon,
   Loader2,
-  ExternalLink
+  ExternalLink,
+  Star
 } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -85,7 +86,14 @@ export default function EventsPage() {
 
   const isPastEvent = (e: PublicEvent) => e.status === "completed";
 
-  const upcomingEvents = events.filter(e => e.status !== "draft" && !isPastEvent(e)).reverse();
+  const upcomingEvents = events
+    .filter(e => e.status !== "draft" && !isPastEvent(e))
+    .sort((a, b) => {
+      // Prioritize featured events at top
+      if (a.isFeatured && !b.isFeatured) return -1;
+      if (!a.isFeatured && b.isFeatured) return 1;
+      return a.startDate.localeCompare(b.startDate);
+    });
   const pastEvents = events.filter(e => e.status !== "draft" && isPastEvent(e));
 
   // 2. Get unique past years from API direct
@@ -143,8 +151,8 @@ export default function EventsPage() {
   }
 
   return (
-    <main ref={containerRef} className="min-h-screen bg-bg text-text pt-24 pb-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-20">
+    <main ref={containerRef} className="min-h-screen bg-bg text-text pt-24 pb-20 px-4 sm:px-6 lg:px-8 2xl:px-12">
+      <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto space-y-20">
         
         {/* ── Section Header ───────────────────────────────── */}
         <div className="event-hero text-center pt-8 mb-16">
@@ -172,9 +180,14 @@ export default function EventsPage() {
               {upcomingEvents.map((event) => (
                 <Link key={event._id} href={`/events/${event.slug}`} className="event-card block group">
                   <div className="bg-bg border border-border rounded-xl p-4 transition-all duration-300 hover:border-text/30 hover:bg-surface shadow-sm h-full flex flex-col">
-                      <div className="flex gap-2 mb-3">
+                      <div className="flex flex-wrap gap-2 mb-3 items-center">
                         <span className="text-[9px] uppercase font-mono bg-text text-bg px-2 py-0.5 rounded border border-text font-bold tracking-widest">{event.category}</span>
                         <span className="text-[9px] uppercase font-mono border border-border text-muted-2 px-2 py-0.5 rounded tracking-widest">{event.status}</span>
+                        {event.isFeatured && (
+                          <span className="text-[9px] uppercase font-mono bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded font-bold tracking-widest flex items-center gap-1">
+                            <Star className="w-2.5 h-2.5 fill-amber-400" /> Featured
+                          </span>
+                        )}
                       </div>
                       <div className="w-full aspect-[16/9] rounded-lg overflow-hidden bg-surface mb-4 relative border border-border/50">
                         {event.poster ? (

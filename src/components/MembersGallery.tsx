@@ -132,7 +132,7 @@ export default function MembersGallery() {
   // ── Render ───────────────────────────────────────────────────────
   return (
     <section ref={sectionRef} className="py-24 px-4 sm:px-6 lg:px-8 bg-bg-2 border-t border-border overflow-hidden">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto">
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-6">

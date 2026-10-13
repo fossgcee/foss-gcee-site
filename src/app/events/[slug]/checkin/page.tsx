@@ -257,7 +257,7 @@ export default function AttendeeCheckinPage() {
             </div>
 
             <p className="text-[11px] text-white/40 leading-relaxed">
-              Your attendance has been registered on the projector display. Please proceed into the hall.
+              Your attendance has been confirmed. Please proceed into the hall.
             </p>
 
             <div className="pt-2 flex flex-col gap-3">

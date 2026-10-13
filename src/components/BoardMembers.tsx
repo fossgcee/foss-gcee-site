@@ -116,7 +116,7 @@ export default function BoardMembers() {
       id="members"
       className="min-h-screen pt-32 pb-24 px-4 sm:px-6 lg:px-8 bg-bg"
     >
-      <div className="max-w-6xl mx-auto flex flex-col items-center">
+      <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto flex flex-col items-center">
 
         {/* Title */}
         <h1 className="board-header text-4xl md:text-5xl font-bold mb-8 text-center text-black dark:text-white">

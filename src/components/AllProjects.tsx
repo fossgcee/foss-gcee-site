@@ -74,7 +74,7 @@ export default function AllProjects() {
 
   return (
     <section id="all-projects" ref={sectionRef} className="py-24 sm:py-32 relative min-h-screen">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12">
         
         {/* Heading */}
         <div className="contrib-heading text-center mb-16 sm:mb-24">
@@ -106,7 +106,7 @@ export default function AllProjects() {
 
         {/* Contributions Grid/List */}
         {!loading && contributions.length > 0 && (
-          <div ref={listRef} className="w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div ref={listRef} className="w-full max-w-6xl 2xl:max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
             {contributions.map((c) => (
               <div
                 key={c._id}

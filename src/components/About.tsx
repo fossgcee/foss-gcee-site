@@ -102,7 +102,7 @@ export default function About() {
   return (
     <section id="about" ref={sectionRef} className="py-16 sm:py-28 relative">
       <div className="section-divider" />
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+      <div className="max-w-7xl 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 pt-8">
 
         {/* Heading */}
         <div className="about-heading text-center mb-10 sm:mb-16">

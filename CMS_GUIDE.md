@@ -26,11 +26,16 @@ Events are the heart of the club's activity. You can create new events from the 
 - **Upcoming:** The event is live on the public site! Users can see it on the Home page and Events page, and they can click "Register".
 - **Completed:** The event is moved to the "Past Academic Years" archive on the public Events page. 
 
-### Event Lifecycle (What to do when an event finishes)
-1. When an event is done, change its status from `Upcoming` to `Completed`.
-2. This stops registrations automatically.
-3. You should then fill in the **Outcomes / Report** field to summarize how it went.
-4. **Photo Gallery:** You can paste an **Ente.io Album Link** in the "Gallery Link" field. We use Ente.io for event albums because they handle large batches of photos cleanly without cluttering our database.
+### Controlling Events on the Home Page (Featured Events)
+- In the Admin **Events** tab (`/admin/events`), each event card has a quick **★ FEATURE / FEATURED** button.
+- You can filter all currently featured events using the **★ FEATURED** tab in the control bar.
+- Events with **★ FEATURED** enabled appear in the Home Page terminal slider and are pinned to the top of the public `/events` page.
+- In the Home Page terminal:
+  - **Upcoming events** stay on screen longer (~8.5s) so users have plenty of time to view dates and register.
+  - **Completed events** stay for ~4s as quick archive highlights.
+  - Hovering pauses auto-cycling so users can read without rushing.
+  - Users can manually switch events with the `< PREV` and `NEXT >` buttons or slide selector pills.
+- If no events are marked as featured, the site automatically falls back to all active upcoming events.
 
 ---
 

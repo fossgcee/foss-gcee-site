@@ -37,14 +37,14 @@ This document outlines the **Live QR Check-In** and **Projector Display System**
 
 1. Go to **Admin Dashboard** $\rightarrow$ **Events** $\rightarrow$ Click **RSVPS** for the event (e.g. `Linux Installation Fest`).
 2. In the top action bar, click **`PROJECTOR_QR`**.
-3. It opens the dedicated full-screen projector view:
+3. It opens the dedicated full-screen presentation view:
    `https://fossgcee.org/events/[slug]/checkin/projector`
-4. Connect your laptop to the **Projector / TV** in the seminar hall and click the **Maximize (Fullscreen)** icon.
-5. The screen displays:
-   - Event Title & Venue details.
-   - High-contrast glowing **QR code** for mobile phone cameras.
-   - Live counter: **`42 / 83 CHECKED IN (51%)`** with animated progress bar.
-   - Real-time animated attendee feed as students scan and check in.
+4. Connect your laptop to the **Projector / TV** in the seminar hall and click the **Maximize (Fullscreen)** icon (or press **F**).
+5. The presentation display features:
+   - **Enlarged High-Definition Event Poster**: Prominently framed on the main stage with event date, time, venue, and category badge (with graceful procedural fallback if no poster is uploaded).
+   - **High-Contrast Scannable QR Code**: Large, crisp black & white QR code with corner reticles, 3-step scanning guide, and direct browser URL pill.
+   - **No Public Attendance Tickers**: Attendance counters, percentages, and attendee ticker streams are cleanly omitted from the public presentation screen for a clean cinematic look.
+   - **Organizer Attendee Desk**: Press **A** or tap **Check-in Desk** in the header to open a private slide-over drawer showing live verified attendees, timestamps, search, and direct portal link.
 
 ---
 
@@ -60,7 +60,7 @@ They have two quick options:
 - Tap **`CONFIRM_CHECK_IN`**.
 - Instantly verifies their registration, marks attendance, and displays their **Digital Event Pass / Badge**.
 
-### Tab B: "Spot / New" (Walk-ins & Last-minute arrivals)
+### Tab B: "Spot / Walk-in" (Walk-ins & Last-minute arrivals)
 - If a student walked in without registering in advance:
   - Enters Full Name, Email, Department, Year, Mobile.
   - Taps **`REGISTER_AND_CHECK_IN`**.
@@ -68,10 +68,12 @@ They have two quick options:
 
 ---
 
-## 🎛️ 3. Admin Registrations Desk Controls
+## 🎛️ 3. Admin Registrations & Attendance Desk
 
-Organizers sitting at the registration desk can:
-- View live attendance stats (**`Checked In Only`** vs **`Pending Arrival`**).
-- Toggle check-in status manually with a single click on the checkmark button if an attendee doesn't have a smartphone.
-- Click **`+ ADD_WALK_IN`** to register anyone by hand.
-- Click **`EXPORT_CSV`** to download the final attendance sheet with the `Attendance` column (`CHECKED_IN` / `PENDING`).
+Organizers sitting at the registration desk or viewing on mobile at `/admin/events/[id]/registrations`:
+- **Real-Time Live Auto-Sync**: The dashboard silently syncs check-in status every 3.5 seconds as participants scan the projector screen.
+- **1-Click Attendance Filter Tabs**: Switch instantly between **`ALL`**, **`CHECKED IN`** (with green indicator), and **`PENDING`** (with amber indicator).
+- **Search & Filter**: Search by name, email, department, or phone number.
+- **1-Click Toggle**: Mark attendees present or un-checked in manually if they don't have a phone.
+- **Walk-in Registration**: Click **`+ ADD_WALK_IN`** to manually register walk-in attendees.
+- **CSV Export**: Click **`EXPORT_CSV`** to download the complete attendance sheet with verified check-in status (`CHECKED_IN` / `PENDING`).

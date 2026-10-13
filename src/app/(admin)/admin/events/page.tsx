@@ -24,7 +24,8 @@ import {
   Phone,
   Image as ImageIcon,
   Send,
-  MessageSquare
+  MessageSquare,
+  Star
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
@@ -362,6 +363,28 @@ export default function AdminEventsManager() {
     }
   };
 
+  const handleToggleFeatured = async (event: EventData) => {
+    const nextFeatured = !event.isFeatured;
+    // Optimistic local state update
+    setEvents(prev => prev.map(e => e._id === event._id ? { ...e, isFeatured: nextFeatured } : e));
+    try {
+      const res = await fetch(`/api/admin/events?id=${event._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isFeatured: nextFeatured }),
+      });
+      const d = await res.json();
+      if (!d.success) {
+        // Revert on error
+        setEvents(prev => prev.map(e => e._id === event._id ? { ...e, isFeatured: event.isFeatured } : e));
+        alert(d.error || "Failed to update featured status");
+      }
+    } catch {
+      setEvents(prev => prev.map(e => e._id === event._id ? { ...e, isFeatured: event.isFeatured } : e));
+      alert("Failed to update featured status");
+    }
+  };
+
   const buildBlobPath = (file: File, kind: "poster") => {
     const slugRaw = (formData.slug || "draft").toLowerCase();
     const safeSlug = slugRaw.replace(/[^a-z0-9-]+/g, "-").replace(/(^-|-$)/g, "") || "draft";
@@ -428,7 +451,12 @@ export default function AdminEventsManager() {
   const filteredEvents = events.filter(e => {
     const matchesSearch = e.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           e.slug.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filter === "all" || e.status === filter;
+    const matchesFilter =
+      filter === "all"
+        ? true
+        : filter === "featured"
+        ? Boolean(e.isFeatured)
+        : e.status === filter;
     return matchesSearch && matchesFilter;
   });
 
@@ -496,13 +524,13 @@ export default function AdminEventsManager() {
         
         <div className="flex items-center gap-2">
           <div className="p-1 bg-white/[0.02] border border-white/5 rounded-2xl flex items-center">
-            {["all", "upcoming", "completed", "draft"].map((tab) => (
+            {["all", "upcoming", "completed", "featured", "draft"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setFilter(tab)}
                 className={`px-4 py-2 rounded-xl text-[10px] font-pixel transition-all ${filter === tab ? "bg-white/10 text-white" : "text-white/30 hover:text-white/60"}`}
               >
-                {tab.toUpperCase()}
+                {tab === "featured" ? "★ FEATURED" : tab.toUpperCase()}
               </button>
             ))}
           </div>
@@ -531,6 +559,11 @@ export default function AdminEventsManager() {
                         <StatusIcon className="w-3 h-3" /> {event.status.toUpperCase()}
                       </span>
                       <span className="px-2 py-0.5 rounded-lg border border-white/5 bg-white/5 text-[9px] font-mono text-white/50">{event.category.toUpperCase()}</span>
+                      {event.isFeatured && (
+                        <span className="px-2 py-0.5 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-300 text-[9px] font-mono flex items-center gap-1 font-semibold">
+                          <Star className="w-3 h-3 fill-amber-300" /> FEATURED ON HOME
+                        </span>
+                      )}
                     </div>
                     <div>
                       <h3 className="text-lg font-pixel text-white mb-1 uppercase tracking-tight break-words">{event.title}</h3>
@@ -557,6 +590,18 @@ export default function AdminEventsManager() {
                     </div>
                   </Link>
                   <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+                    <button
+                      onClick={() => handleToggleFeatured(event)}
+                      className={`flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl border text-[9px] sm:text-[10px] font-pixel transition-all ${
+                        event.isFeatured
+                          ? "border-amber-500/40 bg-amber-500/15 text-amber-300 hover:bg-amber-500/25"
+                          : "border-white/5 bg-white/[0.02] text-white/40 hover:text-white hover:bg-white/10"
+                      }`}
+                      title={event.isFeatured ? "Unpin from home page terminal" : "Feature on home page terminal"}
+                    >
+                      <Star className={`w-3.5 h-3.5 ${event.isFeatured ? "fill-amber-300 text-amber-300" : ""}`} />
+                      {event.isFeatured ? "FEATURED" : "FEATURE"}
+                    </button>
                     <Link href={`/events/${event.slug}`} target="_blank" className="p-2 sm:p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all" title="View Public Page"><ExternalLink className="w-4 h-4" /></Link>
                     <Link href={`/admin/events/${event._id}/registrations`} className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-all text-[9px] sm:text-[10px] font-pixel"><Users className="w-3.5 h-3.5" /> RSVPS</Link>
                     <Link href={`/admin/events/${event._id}`} className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white hover:bg-white/10 transition-all text-[9px] sm:text-[10px] font-pixel"><ImageIcon className="w-3.5 h-3.5" /> CONTENT</Link>
@@ -850,10 +895,13 @@ export default function AdminEventsManager() {
                     
                     <div className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
                       <div className="space-y-0.5">
-                        <label className="text-[10px] font-mono text-white/80 uppercase tracking-widest font-bold">Featured Event Override</label>
-                        <p className="text-[9px] font-mono text-white/40 leading-snug">Manually pin this event to the top of the events page, bypassing the default date-based chronological sorting.</p>
+                        <div className="flex items-center gap-1.5">
+                          <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                          <label className="text-[10px] font-mono text-white/90 uppercase tracking-widest font-bold">Featured on Home Terminal</label>
+                        </div>
+                        <p className="text-[9px] font-mono text-white/40 leading-snug">Showcase this event in the home page terminal carousel and prioritize it at the top of the events list.</p>
                       </div>
-                      <button type="button" onClick={() => setFormData(p => ({ ...p, isFeatured: !p.isFeatured }))} className={`relative flex items-center shrink-0 w-12 h-6 rounded-full transition-colors ${formData.isFeatured ? 'bg-emerald-500' : 'bg-white/10 border border-white/10'}`}>
+                      <button type="button" onClick={() => setFormData(p => ({ ...p, isFeatured: !p.isFeatured }))} className={`relative flex items-center shrink-0 w-12 h-6 rounded-full transition-colors ${formData.isFeatured ? 'bg-amber-500' : 'bg-white/10 border border-white/10'}`}>
                         <span className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform mx-1 ${formData.isFeatured ? 'translate-x-6' : 'translate-x-0'}`} />
                       </button>
                     </div>

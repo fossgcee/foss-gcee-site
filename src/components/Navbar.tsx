@@ -45,7 +45,7 @@ export default function Navbar() {
       <div
         ref={navRef}
         style={{ opacity: 0, transform: "translateY(-80px)" }}
-        className={`w-full max-w-5xl transition duration-500 border ${menuOpen ? "rounded-2xl" : "rounded-full"} ${scrolled ? "bg-bg-2/85 backdrop-blur-3xl shadow-2xl border-border-2" : "glass border-border/50"}`}
+        className={`w-full max-w-5xl xl:max-w-6xl 2xl:max-w-7xl transition duration-500 border ${menuOpen ? "rounded-2xl" : "rounded-full"} ${scrolled ? "bg-bg-2/85 backdrop-blur-3xl shadow-2xl border-border-2" : "glass border-border/50"}`}
       >
         <nav className="px-5 h-[52px] flex items-center justify-between gap-4">
 
