@@ -21,6 +21,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 interface Category {
   _id: string;
+  id?: string;
   name: string;
   slug: string;
 }
@@ -81,10 +82,15 @@ export default function AdminBlogsManager() {
       const pData = await pRes.json();
       const cData = await cRes.json();
       if (pData.success) setPosts(pData.data);
-      if (cData.success) {
-        setCategories(cData.data);
-        if (cData.data.length > 0 && !formData.category) {
-          setFormData(prev => ({ ...prev, category: cData.data[0]._id }));
+      if (cData.success && Array.isArray(cData.data)) {
+        const normalized = cData.data.map((c: any) => ({
+          ...c,
+          _id: c.id || c._id,
+          id: c.id || c._id
+        }));
+        setCategories(normalized);
+        if (normalized.length > 0 && !formData.category) {
+          setFormData(prev => ({ ...prev, category: normalized[0]._id }));
         }
       }
     } finally {
@@ -98,12 +104,13 @@ export default function AdminBlogsManager() {
 
   const handleCreateNew = () => {
     setEditingPost(null);
+    const defaultCatId = categories[0]?._id || (categories[0] as any)?.id || "";
     setFormData({
       title: "",
       slug: "",
       content: "",
       excerpt: "",
-      category: categories[0]?._id || "",
+      category: defaultCatId,
       author: "FOSS GCEE Core Team",
       status: "draft"
     });
@@ -118,7 +125,7 @@ export default function AdminBlogsManager() {
       content: post.content,
       excerpt: post.excerpt || "",
       coverImage: post.coverImage || "",
-      category: post.category?._id || post.category || "",
+      category: post.category_id || post.category?._id || post.category?.id || (typeof post.category === "string" ? post.category : "") || "",
       author: post.author,
       status: post.status
     });
@@ -229,29 +236,34 @@ export default function AdminBlogsManager() {
 
   const filteredPosts = posts.filter(p => {
     const matchesSearch = p.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || p.category?._id === categoryFilter;
+    const matchesCategory =
+      categoryFilter === "all" ||
+      p.category_id === categoryFilter ||
+      p.category?._id === categoryFilter ||
+      p.category?.id === categoryFilter;
     const matchesStatus = statusFilter === "all" || p.status === statusFilter;
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
   return (
-    <div className="space-y-8 py-10">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div className="space-y-6 sm:space-y-8 py-6 sm:py-10 max-w-7xl mx-auto px-1 sm:px-0">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2 border-b border-white/10 sm:border-0 sm:pb-0">
         <div className="space-y-1">
           <h1 className="font-pixel text-white whitespace-nowrap text-[clamp(1.1rem,4vw,1.875rem)]">BLOGS_MANAGER</h1>
-          <p className="font-mono text-xs text-white/40 italic">Compose, publish, and categorise blog articles</p>
+          <p className="font-mono text-xs text-white/70">Compose, publish, and categorise blog articles</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 w-full sm:w-auto">
           <button
             onClick={() => setIsCatModalOpen(true)}
-            className="flex items-center justify-center gap-2 px-5 py-3 bg-white/5 border border-white/10 text-white rounded-xl font-pixel text-[10px] hover:bg-white/10 transition-all active:scale-95 shrink-0"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 bg-white/5 border border-white/20 text-white rounded-xl font-pixel text-[10px] hover:bg-white/10 transition-all active:scale-95 cursor-pointer font-bold"
           >
-            <FolderPlus className="w-4 h-4" />
+            <FolderPlus className="w-4 h-4 text-white/70" />
             CATEGORIES
           </button>
           <button
             onClick={handleCreateNew}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-black rounded-xl font-pixel text-[10px] hover:bg-white/90 transition-all active:scale-95 shrink-0 shadow-[0_4px_20px_rgba(255,255,255,0.1)]"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 bg-white text-black rounded-xl font-pixel text-[10px] hover:bg-white/90 transition-all active:scale-95 shadow-[0_4px_20px_rgba(255,255,255,0.15)] cursor-pointer font-bold"
           >
             <Plus className="w-4 h-4" />
             NEW_POST
@@ -259,70 +271,84 @@ export default function AdminBlogsManager() {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
+      {/* Search and Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
           <input
             type="text"
             placeholder="Search by title..."
-            className="w-full pl-12 pr-4 py-3 bg-white/[0.02] border border-white/5 rounded-2xl font-mono text-xs text-white focus:outline-none"
+            className="w-full pl-12 pr-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-xs text-white placeholder:text-white/45 focus:outline-none focus:border-white/60 transition-all"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
           <select
-            className="px-4 py-2.5 bg-white/[0.02] border border-white/5 rounded-xl font-mono text-xs text-white"
+            className="px-3.5 py-3 bg-[#111111] border border-white/20 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-white/60 cursor-pointer font-medium"
             value={categoryFilter}
             onChange={(e) => startTransition(() => setCategoryFilter(e.target.value))}
           >
-            <option value="all" className="text-black">All Categories</option>
+            <option value="all">All Categories</option>
             {categories.map(c => (
-              <option key={c._id} value={c._id} className="text-black">{c.name}</option>
+              <option key={c._id || (c as any).id} value={c._id || (c as any).id}>{c.name}</option>
             ))}
           </select>
           <select
-            className="px-4 py-2.5 bg-white/[0.02] border border-white/5 rounded-xl font-mono text-xs text-white"
+            className="px-3.5 py-3 bg-[#111111] border border-white/20 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-white/60 cursor-pointer font-medium"
             value={statusFilter}
             onChange={(e) => startTransition(() => setStatusFilter(e.target.value))}
           >
-            <option value="all" className="text-black">All Statuses</option>
-            <option value="draft" className="text-black">Draft</option>
-            <option value="published" className="text-black">Published</option>
+            <option value="all">All Statuses</option>
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
           </select>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
+      {/* Posts List */}
+      <div className="grid grid-cols-1 gap-3 sm:gap-4">
         {loading && posts.length === 0 ? (
           <div className="py-20 flex flex-col items-center justify-center space-y-4">
-            <Loader2 className="w-8 h-8 text-white/20 animate-spin" />
-            <p className="font-mono text-xs text-white/20 italic tracking-widest uppercase">Fetching logs...</p>
+            <Loader2 className="w-8 h-8 text-white/50 animate-spin" />
+            <p className="font-mono text-xs text-white/60 tracking-widest uppercase">Fetching logs...</p>
+          </div>
+        ) : filteredPosts.length === 0 ? (
+          <div className="py-16 text-center border border-dashed border-white/15 rounded-3xl p-6 bg-white/[0.01] space-y-2">
+            <p className="font-pixel text-xs text-white/70 uppercase">NO_ARTICLES_FOUND</p>
+            <p className="font-mono text-[11px] text-white/40">Try adjusting your search query or filters.</p>
           </div>
         ) : filteredPosts.map((post) => (
-          <div key={post._id} className="p-5 rounded-3xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.03] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="flex items-start gap-4 min-w-0 flex-1">
-              <div className={`p-4 rounded-2xl border shrink-0 flex items-center justify-center ${post.status === "published" ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400" : "border-amber-500/20 bg-amber-500/10 text-amber-400"}`}>
-                <FileText className="w-6 h-6" />
+          <div key={post._id} className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-white/15 bg-white/[0.02] hover:border-white/30 transition-all space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between gap-4">
+            <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
+              <div className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border shrink-0 flex items-center justify-center ${post.status === "published" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-amber-500/30 bg-amber-500/10 text-amber-400"}`}>
+                <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div className="space-y-1 min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className={`px-2 py-0.5 rounded-lg border text-[8px] font-mono ${post.status === "published" ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400" : "border-amber-500/20 bg-amber-500/10 text-amber-400"}`}>{post.status.toUpperCase()}</span>
-                  <span className="px-2 py-0.5 rounded-lg border border-white/5 bg-white/5 text-[8px] font-mono text-white/50">{post.category?.name || "Uncategorized"}</span>
+              <div className="space-y-1.5 min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className={`px-2 py-0.5 rounded-md border text-[9px] font-mono font-bold ${post.status === "published" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" : "border-amber-500/30 bg-amber-500/10 text-amber-300"}`}>
+                    {post.status.toUpperCase()}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-md border border-white/15 bg-white/5 text-[9px] font-mono text-white/80 font-medium">
+                    {post.category?.name || "General"}
+                  </span>
                 </div>
-                <h3 className="text-md font-pixel text-white uppercase break-words">{post.title}</h3>
-                <p className="font-mono text-[10px] text-white/30">By {post.author} · {new Date(post.createdAt).toLocaleDateString()}</p>
+                <h3 className="text-sm sm:text-base font-pixel text-white uppercase break-words leading-snug">{post.title}</h3>
+                <p className="font-mono text-[10px] text-white/60">
+                  By {post.author} · {new Date(post.createdAt || post.publishedAt || Date.now()).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-              <Link href={`/blog/${post.slug}`} target="_blank" className="p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all"><ExternalLink className="w-4 h-4" /></Link>
-              <button onClick={() => handleEdit(post)} className="p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 hover:text-white transition-all"><Edit3 className="w-4 h-4" /></button>
+            <div className="flex items-center justify-end gap-2 pt-2.5 sm:pt-0 border-t sm:border-t-0 border-white/10 shrink-0">
+              <Link href={`/blog/${post.slug}`} target="_blank" className="p-2 sm:p-2.5 rounded-xl border border-white/15 bg-white/5 text-white/70 hover:text-white transition-all cursor-pointer" title="View Article"><ExternalLink className="w-4 h-4" /></Link>
+              <button onClick={() => handleEdit(post)} className="p-2 sm:p-2.5 rounded-xl border border-white/15 bg-white/5 text-white/70 hover:text-white transition-all cursor-pointer" title="Edit Post"><Edit3 className="w-4 h-4" /></button>
               <button
                 onClick={() => handleDelete(post._id!)}
                 disabled={isDeleting === post._id}
-                className="p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-red-400/40 hover:text-red-400 transition-all disabled:opacity-50"
+                className="p-2 sm:p-2.5 rounded-xl border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all disabled:opacity-50 cursor-pointer"
+                title="Delete Post"
               >
-                {isDeleting === post._id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                {isDeleting === post._id ? <Loader2 className="w-4 h-4 animate-spin text-red-400" /> : <Trash2 className="w-4 h-4" />}
               </button>
             </div>
           </div>
@@ -332,12 +358,12 @@ export default function AdminBlogsManager() {
       {/* Category Manager Modal */}
       <AnimatePresence>
         {isCatModalOpen && (
-          <div className="fixed inset-0 z-[101] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[101] flex items-end sm:items-center justify-center p-0 sm:p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsCatModalOpen(false)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative w-full max-w-md bg-[#0a0a0a] border border-white/10 rounded-[28px] p-6 shadow-2xl space-y-6">
-              <div className="flex justify-between items-center border-b border-white/5 pb-4">
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 30 }} className="relative w-full sm:max-w-md bg-[#0a0a0a] border border-white/15 rounded-t-[28px] sm:rounded-3xl p-5 sm:p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center border-b border-white/10 pb-4">
                 <h3 className="font-pixel text-xs text-white">MANAGE_CATEGORIES</h3>
-                <button onClick={() => setIsCatModalOpen(false)} className="text-white/40 hover:text-white"><X className="w-5 h-5" /></button>
+                <button onClick={() => setIsCatModalOpen(false)} className="text-white/60 hover:text-white p-1 cursor-pointer"><X className="w-5 h-5" /></button>
               </div>
 
               <form onSubmit={handleCreateCategory} className="flex gap-2">
@@ -345,14 +371,14 @@ export default function AdminBlogsManager() {
                   required
                   type="text"
                   placeholder="New Category Name..."
-                  className="flex-1 px-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-xs text-white focus:outline-none"
+                  className="flex-1 px-4 py-2.5 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-xs text-white placeholder:text-white/45 focus:outline-none focus:border-white/50"
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
                 />
                 <button
                   type="submit"
                   disabled={isSavingCat}
-                  className="px-4 py-2.5 bg-white text-black font-mono text-xs font-bold rounded-xl disabled:opacity-50"
+                  className="px-5 py-2.5 bg-white text-black font-mono text-xs font-bold rounded-xl disabled:opacity-50 cursor-pointer"
                 >
                   {isSavingCat ? "..." : "ADD"}
                 </button>
@@ -360,9 +386,9 @@ export default function AdminBlogsManager() {
 
               <div className="max-h-60 overflow-y-auto space-y-2">
                 {categories.map(c => (
-                  <div key={c._id} className="flex justify-between items-center p-3 bg-white/[0.02] border border-white/5 rounded-xl">
-                    <span className="font-mono text-xs text-white">{c.name}</span>
-                    <button type="button" onClick={() => handleDeleteCategory(c._id)} className="text-red-400/60 hover:text-red-400 p-1"><Trash className="w-4 h-4" /></button>
+                  <div key={c._id || (c as any).id} className="flex justify-between items-center p-3 bg-white/[0.03] border border-white/10 rounded-xl">
+                    <span className="font-mono text-xs text-white font-medium">{c.name}</span>
+                    <button type="button" onClick={() => handleDeleteCategory(c._id || (c as any).id)} className="text-red-400/70 hover:text-red-400 p-1.5 cursor-pointer"><Trash className="w-4 h-4" /></button>
                   </div>
                 ))}
               </div>
@@ -374,87 +400,87 @@ export default function AdminBlogsManager() {
       {/* Editor Modal */}
       <AnimatePresence>
         {isPostModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsPostModalOpen(false)} className="absolute inset-0 bg-black/90 backdrop-blur-md" />
-            <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-[#0a0a0a] border border-white/10 rounded-[32px] shadow-2xl">
-              <div className="p-8 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#0a0a0a] z-10">
-                <div className="space-y-1">
-                  <h3 className="text-xl font-pixel text-white uppercase">{editingPost ? "EDIT_POST" : "NEW_POST"}</h3>
-                  <p className="font-mono text-[9px] text-white/30 uppercase tracking-[0.2em]">sector: ./blogs_manager</p>
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 30 }} className="relative w-full sm:max-w-4xl max-h-[92vh] overflow-y-auto bg-[#0a0a0a] border border-white/15 rounded-t-[28px] sm:rounded-3xl shadow-2xl">
+              <div className="p-4 sm:p-6 border-b border-white/10 flex items-center justify-between sticky top-0 bg-[#0a0a0a] z-10">
+                <div className="space-y-0.5">
+                  <h3 className="text-base sm:text-lg font-pixel text-white uppercase">{editingPost ? "EDIT_POST" : "NEW_POST"}</h3>
+                  <p className="font-mono text-[9px] text-white/50 uppercase tracking-[0.2em]">sector: ./blogs_manager</p>
                 </div>
-                <button onClick={() => setIsPostModalOpen(false)} className="p-2 rounded-xl text-white/40 hover:text-white"><X className="w-5 h-5" /></button>
+                <button onClick={() => setIsPostModalOpen(false)} className="p-2 rounded-xl text-white/50 hover:text-white cursor-pointer"><X className="w-5 h-5" /></button>
               </div>
 
-              <form onSubmit={handleSavePost} className="p-8 space-y-8">
+              <form onSubmit={handleSavePost} className="p-4 sm:p-8 space-y-5 sm:space-y-6">
                 {/* Poster Preview */}
-                <div className="space-y-2">
-                  <label className="text-[10px] font-mono text-white/20 uppercase pl-1 tracking-[0.2em]">Cover Image</label>
-                  <div className="relative group aspect-video md:aspect-[21/9] rounded-[24px] bg-white/[0.02] border border-dashed border-white/10 overflow-hidden flex items-center justify-center">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-mono text-white/70 uppercase pl-1 tracking-[0.2em] font-semibold">Cover Image</label>
+                  <div className="relative group aspect-video md:aspect-[21/9] rounded-2xl bg-white/[0.02] border border-dashed border-white/20 overflow-hidden flex items-center justify-center">
                     {formData.coverImage ? (
                       <>
-                        <img src={formData.coverImage} alt="Cover image" className="w-full h-full object-cover opacity-60" />
-                        <button type="button" onClick={() => setFormData(prev => ({ ...prev, coverImage: "" }))} className="absolute top-4 right-4 p-3 rounded-full bg-red-500/80 text-white"><Trash className="w-4 h-4" /></button>
+                        <img src={formData.coverImage} alt="Cover image" className="w-full h-full object-cover" />
+                        <button type="button" onClick={() => setFormData(prev => ({ ...prev, coverImage: "" }))} className="absolute top-4 right-4 p-2.5 rounded-full bg-red-500/80 hover:bg-red-500 text-white cursor-pointer transition-transform"><Trash className="w-4 h-4" /></button>
                       </>
                     ) : (
-                      <label className="flex flex-col items-center justify-center gap-3 cursor-pointer p-10 text-center hover:bg-white/5 transition-colors w-full h-full">
-                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                          {isUploading ? <Loader2 className="w-8 h-8 animate-spin text-white/40" /> : <Upload className="w-8 h-8 text-white/20" />}
+                      <label className="flex flex-col items-center justify-center gap-2 cursor-pointer p-6 sm:p-10 text-center hover:bg-white/5 transition-colors w-full h-full">
+                        <div className="p-3 sm:p-4 rounded-2xl bg-white/5 border border-white/10">
+                          {isUploading ? <Loader2 className="w-6 h-6 animate-spin text-white/60" /> : <Upload className="w-6 h-6 text-white/50" />}
                         </div>
-                        <span className="font-pixel text-[10px] text-white/40 uppercase">UPLOAD_COVER_IMAGE</span>
-                        {coverUploadError && <p className="text-red-500 font-mono text-[10px] mt-1">{coverUploadError}</p>}
+                        <span className="font-pixel text-[10px] text-white/70 uppercase">UPLOAD_COVER_IMAGE</span>
+                        {coverUploadError && <p className="text-red-400 font-mono text-[10px] mt-1">{coverUploadError}</p>}
                         <input type="file" className="hidden" accept="image/*" onChange={handleUploadCover} disabled={isUploading} />
                       </label>
                     )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2 col-span-full">
-                    <label className="text-[10px] font-mono text-white/40 uppercase pl-1">Blog Title</label>
-                    <input required type="text" className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white" value={formData.title} onChange={e => {
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="space-y-1.5 col-span-full">
+                    <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1">Blog Title *</label>
+                    <input required type="text" className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-white/50" value={formData.title} onChange={e => {
                       const t = e.target.value;
                       setFormData(prev => ({ ...prev, title: t, slug: t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") }));
                     }} />
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-mono text-white/40 uppercase pl-1">Category</label>
-                    <select required className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white" value={formData.category} onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))}>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1">Category *</label>
+                    <select required className="w-full px-4 py-3 bg-[#111111] border border-white/20 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-white/50 cursor-pointer font-medium" value={formData.category} onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))}>
                       {categories.map(c => (
-                        <option key={c._id} value={c._id} className="text-black">{c.name}</option>
+                        <option key={c._id || (c as any).id} value={c._id || (c as any).id}>{c.name}</option>
                       ))}
                     </select>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-mono text-white/40 uppercase pl-1">Author</label>
-                    <input required type="text" className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white" value={formData.author} onChange={e => setFormData(prev => ({ ...prev, author: e.target.value }))} />
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1">Author *</label>
+                    <input required type="text" className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-white/50" value={formData.author} onChange={e => setFormData(prev => ({ ...prev, author: e.target.value }))} />
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-mono text-white/40 uppercase pl-1">Status</label>
-                    <select className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white" value={formData.status} onChange={e => setFormData(prev => ({ ...prev, status: e.target.value as any }))}>
-                      <option value="draft" className="text-black">Draft</option>
-                      <option value="published" className="text-black">Published</option>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1">Status</label>
+                    <select className="w-full px-4 py-3 bg-[#111111] border border-white/20 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-white/50 cursor-pointer font-medium" value={formData.status} onChange={e => setFormData(prev => ({ ...prev, status: e.target.value as any }))}>
+                      <option value="draft">Draft</option>
+                      <option value="published">Published</option>
                     </select>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-mono text-white/40 uppercase pl-1">Excerpt / Summary</label>
-                    <input type="text" placeholder="Short description..." className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white" value={formData.excerpt || ""} onChange={e => setFormData(prev => ({ ...prev, excerpt: e.target.value }))} />
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1">Excerpt / Summary</label>
+                    <input type="text" placeholder="Short description..." className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-white/50" value={formData.excerpt || ""} onChange={e => setFormData(prev => ({ ...prev, excerpt: e.target.value }))} />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-mono text-white/40 uppercase pl-1">Content (Markdown supported)</label>
-                  <textarea required rows={10} className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl font-mono text-xs text-white resize-none" value={formData.content} onChange={e => setFormData(prev => ({ ...prev, content: e.target.value }))} />
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1">Content (Markdown supported) *</label>
+                  <textarea required rows={8} className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-white/50 resize-y" value={formData.content} onChange={e => setFormData(prev => ({ ...prev, content: e.target.value }))} />
                 </div>
 
-                <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row gap-4">
-                  <button type="submit" disabled={loading} className="flex-1 py-5 bg-white text-black rounded-[24px] font-pixel text-xs hover:scale-[1.01] transition-all flex items-center justify-center gap-3">
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>EXECUTE::<span className="opacity-40">{editingPost ? "UPDATE" : "CREATE"}</span></>}
+                <div className="pt-4 sm:pt-6 border-t border-white/10 flex flex-col-reverse sm:flex-row gap-2.5 sm:gap-4">
+                  <button type="button" onClick={() => setIsPostModalOpen(false)} className="w-full sm:w-auto px-8 py-3.5 bg-white/5 border border-white/15 text-white/70 hover:text-white rounded-xl font-pixel text-[10px] uppercase cursor-pointer">CANCEL</button>
+                  <button type="submit" disabled={loading} className="w-full sm:flex-1 py-3.5 sm:py-4 bg-white text-black font-bold rounded-xl font-pixel text-[10px] uppercase hover:bg-white/90 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_4px_20px_rgba(255,255,255,0.15)]">
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin text-black" /> : <>EXECUTE::<span className="opacity-60">{editingPost ? "UPDATE" : "CREATE"}</span></>}
                   </button>
-                  <button type="button" onClick={() => setIsPostModalOpen(false)} className="px-12 py-5 bg-white/5 text-white/40 rounded-[24px] font-pixel text-xs">CANCEL</button>
                 </div>
               </form>
             </motion.div>

@@ -502,7 +502,7 @@ export default function AdminEventsManager() {
 
         <button 
           onClick={handleCreateNew}
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-black rounded-xl font-pixel text-[11px] hover:bg-white/90 transition-all active:scale-95 shrink-0 group shadow-[0_4px_20px_rgba(255,255,255,0.1)] cursor-pointer"
+          className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white text-black rounded-xl font-pixel text-[11px] hover:bg-white/90 transition-all active:scale-95 shrink-0 group shadow-[0_4px_20px_rgba(255,255,255,0.1)] cursor-pointer w-full sm:w-auto min-h-[44px]"
         >
           <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
           CREATE_NEW_RECORD
@@ -510,25 +510,25 @@ export default function AdminEventsManager() {
       </div>
 
       {/* Control Bar */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <div className="relative flex-1 group">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
           <input 
             type="text" 
             placeholder="Search events by title or slug..." 
-            className="w-full pl-12 pr-4 py-3 bg-white/[0.04] border border-white/15 rounded-2xl font-mono text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-white/50 transition-all"
+            className="w-full pl-12 pr-4 py-3 bg-white/[0.04] border border-white/15 rounded-2xl font-mono text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-white/50 transition-all min-h-[44px]"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         
-        <div className="flex items-center gap-2">
-          <div className="p-1 bg-white/[0.04] border border-white/15 rounded-2xl flex items-center">
+        <div className="overflow-x-auto no-scrollbar py-1 max-w-full -mx-1 px-1">
+          <div className="p-1 bg-white/[0.04] border border-white/15 rounded-2xl flex items-center gap-1 min-w-max">
             {["all", "upcoming", "completed", "featured", "draft"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setFilter(tab)}
-                className={`px-4 py-2 rounded-xl text-[10px] font-pixel transition-all cursor-pointer ${filter === tab ? "bg-white/20 text-white font-bold border border-white/30" : "text-white/60 hover:text-white hover:bg-white/5"}`}
+                className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[10px] font-pixel transition-all cursor-pointer whitespace-nowrap shrink-0 min-h-[38px] ${filter === tab ? "bg-white/20 text-white font-bold border border-white/30" : "text-white/70 hover:text-white hover:bg-white/5"}`}
               >
                 {tab === "featured" ? "★ FEATURED" : tab.toUpperCase()}
               </button>
@@ -541,17 +541,17 @@ export default function AdminEventsManager() {
       <div className="grid grid-cols-1 gap-4">
         {loading && events.length === 0 ? (
           <div className="py-20 flex flex-col items-center justify-center space-y-4">
-            <Loader2 className="w-8 h-8 text-white/40 animate-spin" />
-            <p className="font-mono text-xs text-white/40 italic tracking-widest uppercase">Fetching logs...</p>
+            <Loader2 className="w-8 h-8 text-white/60 animate-spin" />
+            <p className="font-mono text-xs text-white/60 italic tracking-widest uppercase">Fetching logs...</p>
           </div>
         ) : filteredEvents.map((event) => {
           const StatusIcon = statusIcons[event.status];
           return (
             <div key={event._id} className="group relative p-1 rounded-3xl border border-white/15 bg-white/[0.03] hover:border-white/30 transition-all">
-              <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="flex items-start gap-5 min-w-0 flex-1">
-                  <div className={`p-4 rounded-2xl border ${statusColors[event.status]} shrink-0 flex items-center justify-center`}>
-                    <CalendarIcon className="w-6 h-6" />
+              <div className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
+                <div className="flex items-start gap-3.5 sm:gap-5 min-w-0 flex-1">
+                  <div className={`p-3 sm:p-4 rounded-2xl border ${statusColors[event.status]} shrink-0 flex items-center justify-center`}>
+                    <CalendarIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                   <div className="space-y-2 min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
@@ -566,7 +566,7 @@ export default function AdminEventsManager() {
                       )}
                     </div>
                     <div>
-                      <h3 className="text-lg font-pixel text-white mb-1 uppercase tracking-tight break-words">{event.title}</h3>
+                      <h3 className="text-base sm:text-lg font-pixel text-white mb-1 uppercase tracking-tight break-words">{event.title}</h3>
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] text-white/70">
                         <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-white/50" /> {event.venue}</span>
                         <span className="flex items-center gap-1.5 font-bold text-white/80 lowercase italic">{event.startDate} → {event.endDate}</span>
@@ -575,15 +575,15 @@ export default function AdminEventsManager() {
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between md:justify-end gap-4 pt-4 md:pt-0 border-t md:border-t-0 border-white/10 shrink-0">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between md:justify-end gap-3 sm:gap-4 pt-3 sm:pt-4 md:pt-0 border-t md:border-t-0 border-white/10 shrink-0 w-full md:w-auto">
                   <Link 
                     href={`/admin/events/${event._id}/registrations`}
-                    className="flex items-center gap-3 sm:gap-4 group/reg"
+                    className="flex items-center justify-between sm:justify-start gap-3 sm:gap-4 group/reg p-2.5 sm:p-0 rounded-xl bg-white/[0.03] sm:bg-transparent border sm:border-0 border-white/10"
                     title="Manage Attendees & RSVP Logs"
                   >
                     <div className="space-y-0.5 text-left sm:text-right shrink-0">
-                      <p className="text-[9px] font-mono text-white/60 uppercase tracking-[0.2em] font-semibold">REGISTERED</p>
-                      <p className="text-lg sm:text-xl font-pixel text-white">{event.registrationsCount}</p>
+                      <p className="text-[9px] font-mono text-white/70 uppercase tracking-[0.2em] font-semibold">REGISTERED</p>
+                      <p className="text-base sm:text-xl font-pixel text-white">{event.registrationsCount}</p>
                     </div>
                     <div className="p-2 sm:p-2.5 rounded-xl border border-white/20 bg-white/10 text-white group-hover/reg:bg-white/20 transition-all">
                       <Users className="w-4 h-4" />
@@ -592,7 +592,7 @@ export default function AdminEventsManager() {
                   <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
                     <button
                       onClick={() => handleToggleFeatured(event)}
-                      className={`flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl border text-[9px] sm:text-[10px] font-pixel transition-all cursor-pointer ${
+                      className={`flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl border text-[9px] sm:text-[10px] font-pixel transition-all cursor-pointer min-h-[38px] ${
                         event.isFeatured
                           ? "border-amber-500/40 bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"
                           : "border-white/15 bg-white/5 text-white/70 hover:text-white hover:bg-white/15"
@@ -602,10 +602,10 @@ export default function AdminEventsManager() {
                       <Star className={`w-3.5 h-3.5 ${event.isFeatured ? "fill-amber-300 text-amber-300" : ""}`} />
                       {event.isFeatured ? "FEATURED" : "FEATURE"}
                     </button>
-                    <Link href={`/events/${event.slug}`} target="_blank" className="p-2 sm:p-2.5 rounded-xl border border-white/15 bg-white/5 text-white/70 hover:text-white transition-all" title="View Public Page"><ExternalLink className="w-4 h-4" /></Link>
-                    <Link href={`/admin/events/${event._id}/registrations`} className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-all text-[9px] sm:text-[10px] font-pixel"><Users className="w-3.5 h-3.5" /> RSVPS</Link>
-                    <Link href={`/admin/events/${event._id}`} className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl border border-white/15 bg-white/5 text-white/70 hover:text-white hover:bg-white/15 transition-all text-[9px] sm:text-[10px] font-pixel"><ImageIcon className="w-3.5 h-3.5" /> CONTENT</Link>
-                    <button onClick={() => handleEdit(event)} className="p-2 sm:p-2.5 rounded-xl border border-white/15 bg-white/5 text-white/70 hover:text-white transition-all cursor-pointer" title="Edit Event"><Edit3 className="w-4 h-4" /></button>
+                    <Link href={`/events/${event.slug}`} target="_blank" className="p-2 sm:p-2.5 rounded-xl border border-white/15 bg-white/5 text-white/70 hover:text-white transition-all min-h-[38px] min-w-[38px] flex items-center justify-center" title="View Public Page"><ExternalLink className="w-4 h-4" /></Link>
+                    <Link href={`/admin/events/${event._id}/registrations`} className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-all text-[9px] sm:text-[10px] font-pixel min-h-[38px]"><Users className="w-3.5 h-3.5" /> RSVPS</Link>
+                    <Link href={`/admin/events/${event._id}`} className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl border border-white/15 bg-white/5 text-white/70 hover:text-white hover:bg-white/15 transition-all text-[9px] sm:text-[10px] font-pixel min-h-[38px]"><ImageIcon className="w-3.5 h-3.5" /> CONTENT</Link>
+                    <button onClick={() => handleEdit(event)} className="p-2 sm:p-2.5 rounded-xl border border-white/15 bg-white/5 text-white/70 hover:text-white transition-all cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center" title="Edit Event"><Edit3 className="w-4 h-4" /></button>
                     {event.status === "completed" && (
                       <button
                         onClick={() => {
@@ -615,7 +615,7 @@ export default function AdminEventsManager() {
                           setMailAttendeesStatus(null);
                           setIsMailAttendeesOpen(true);
                         }}
-                        className="p-2 sm:p-2.5 rounded-xl border border-white/15 bg-white/5 text-white/60 hover:text-white transition-all"
+                        className="p-2 sm:p-2.5 rounded-xl border border-white/15 bg-white/5 text-white/60 hover:text-white transition-all min-h-[38px] min-w-[38px] flex items-center justify-center"
                         title="Mail Attendees"
                       >
                         <MailOpen className="w-4 h-4" />
@@ -624,7 +624,7 @@ export default function AdminEventsManager() {
                     <button 
                       onClick={() => handleDelete(event._id!)} 
                       disabled={isDeleting === event._id}
-                      className="p-2 sm:p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-red-400/50 hover:text-red-400 transition-all disabled:opacity-50"
+                      className="p-2 sm:p-2.5 rounded-xl border border-white/5 bg-white/[0.02] text-red-400/50 hover:text-red-400 transition-all disabled:opacity-50 min-h-[38px] min-w-[38px] flex items-center justify-center"
                       title="Delete Event"
                     >
                       {isDeleting === event._id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
@@ -643,22 +643,22 @@ export default function AdminEventsManager() {
           <div className="fixed inset-0 z-[101] flex items-center justify-end">
              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsRegModalOpen(false)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
              <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="relative h-full w-full max-w-2xl bg-[#080808] border-l border-white/10 shadow-2xl flex flex-col">
-                <div className="p-8 border-b border-white/5 flex items-center justify-between">
+                <div className="p-5 sm:p-8 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
                    <div className="space-y-1">
-                      <h4 className="font-pixel text-white">REGISTRATION_LOGS</h4>
-                      <p className="font-mono text-[10px] text-white/40 uppercase tracking-widest">{selectedEventReg?.title}</p>
+                      <h4 className="font-pixel text-white text-base sm:text-lg">REGISTRATION_LOGS</h4>
+                      <p className="font-mono text-[10px] text-white/60 uppercase tracking-widest">{selectedEventReg?.title}</p>
                    </div>
-                   <button onClick={() => setIsRegModalOpen(false)} className="p-2 rounded-xl text-white/40 hover:text-white transition-all"><X className="w-6 h-6" /></button>
+                   <button onClick={() => setIsRegModalOpen(false)} className="p-2.5 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all"><X className="w-5 h-5 sm:w-6 sm:h-6" /></button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-8">
-                   <div className="mb-6 rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.03] p-4">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-8">
+                   <div className="mb-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] p-4">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="space-y-1">
-                          <p className="font-pixel text-[10px] text-white uppercase">IMPORT_RSVP_CSV</p>
-                          <p className="font-mono text-[9px] text-white/30 uppercase tracking-widest">FOSS United or external RSVP export</p>
+                          <p className="font-pixel text-[10px] text-white uppercase font-bold">IMPORT_RSVP_CSV</p>
+                          <p className="font-mono text-[9px] text-white/60 uppercase tracking-widest">FOSS United or external RSVP export</p>
                         </div>
-                        <label className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-pixel text-[10px] uppercase cursor-pointer hover:bg-emerald-500/15 transition-all">
+                        <label className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-pixel text-[10px] uppercase cursor-pointer hover:bg-emerald-500/20 transition-all min-h-[40px]">
                           {isImportingCsv ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                           {isImportingCsv ? "IMPORTING" : "UPLOAD_CSV"}
                           <input
@@ -671,29 +671,29 @@ export default function AdminEventsManager() {
                         </label>
                       </div>
                       {csvImportStatus && (
-                        <p className="mt-3 font-mono text-[9px] text-white/40 uppercase tracking-widest">{csvImportStatus}</p>
+                        <p className="mt-3 font-mono text-[9px] text-white/70 uppercase tracking-widest">{csvImportStatus}</p>
                       )}
                    </div>
 
                    {regLoading ? (
                      <div className="h-full flex flex-col items-center justify-center space-y-4">
-                        <Loader2 className="w-10 h-10 text-white/20 animate-spin" />
-                        <p className="font-mono text-[10px] text-white/20 uppercase tracking-[0.3em]">Querying Database...</p>
+                        <Loader2 className="w-10 h-10 text-white/40 animate-spin" />
+                        <p className="font-mono text-[10px] text-white/40 uppercase tracking-[0.3em]">Querying Database...</p>
                      </div>
                    ) : registrations.length === 0 ? (
-                     <div className="h-full flex flex-col items-center justify-center space-y-4 text-white/20">
-                        <Users className="w-16 h-16 opacity-10" />
+                     <div className="h-full flex flex-col items-center justify-center space-y-4 text-white/40">
+                        <Users className="w-16 h-16 opacity-30" />
                         <p className="font-pixel text-[10px] uppercase">No Registrations Yet</p>
                      </div>
                    ) : (
                      <div className="space-y-6">
                         {/* Search in registrations */}
                         <div className="relative group">
-                          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/20" />
+                          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" />
                           <input 
                             type="text" 
                             placeholder="Find participant by name or reg no..." 
-                            className="w-full pl-10 pr-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-[10px] text-white focus:outline-none focus:border-white/20 transition-all"
+                            className="w-full pl-10 pr-4 py-3 bg-white/[0.04] border border-white/15 rounded-xl font-mono text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-white/30 transition-all min-h-[44px]"
                             onChange={(e) => {
                               const val = e.target.value.toLowerCase();
                               const items = document.querySelectorAll<HTMLElement>(".reg-item");
@@ -705,34 +705,34 @@ export default function AdminEventsManager() {
                           />
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-3 sm:space-y-4">
                            {registrations.map((reg, idx) => (
-                              <div key={reg._id || idx} className="reg-item p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                                 <div className="space-y-3">
+                              <div key={reg._id || idx} className="reg-item p-4 sm:p-5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-white/20 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
+                                 <div className="space-y-2">
                                     <div>
                                        <div className="flex items-center gap-2 mb-1">
-                                          <h5 className="font-pixel text-sm text-white uppercase">{reg.name}</h5>
-                                          <span className="px-1.5 py-0.5 rounded bg-white/5 text-[8px] font-mono text-white/30">{new Date(reg.registeredAt).toLocaleDateString()}</span>
+                                          <h5 className="font-pixel text-xs sm:text-sm text-white uppercase">{reg.name}</h5>
+                                          <span className="px-1.5 py-0.5 rounded bg-white/10 text-[8px] font-mono text-white/60">{new Date(reg.registeredAt).toLocaleDateString()}</span>
                                        </div>
-                                       <p className="font-mono text-[10px] text-white/30 uppercase">{reg.department} · YEAR {reg.year}</p>
+                                       <p className="font-mono text-[10px] text-white/60 uppercase">{reg.department} · YEAR {reg.year}</p>
                                     </div>
-                                    <p className="font-mono text-[9px] text-white/40 italic uppercase">{reg.college}</p>
+                                    <p className="font-mono text-[9px] text-white/50 italic uppercase">{reg.college}</p>
                                  </div>
-                                 <div className="flex flex-col gap-2">
-                                    <a href={`mailto:${reg.email}`} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[9px] font-mono text-white/60 hover:text-white hover:bg-white/10 transition-all">
-                                       <Mail className="w-3 h-3" /> {reg.email}
+                                 <div className="flex flex-col gap-2 shrink-0">
+                                    <a href={`mailto:${reg.email}`} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-[10px] font-mono text-white/80 hover:text-white hover:bg-white/10 transition-all min-h-[36px]">
+                                       <Mail className="w-3.5 h-3.5" /> {reg.email}
                                     </a>
                                     <div className="flex items-center gap-2">
-                                      <a href={`https://wa.me/${reg.mobile}`} target="_blank" className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10 text-[9px] font-mono text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 transition-all">
-                                         <Phone className="w-3 h-3" /> {reg.mobile}
+                                      <a href={`https://wa.me/${reg.mobile}`} target="_blank" className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-mono text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/20 transition-all min-h-[36px]">
+                                         <Phone className="w-3.5 h-3.5" /> {reg.mobile}
                                       </a>
                                       <button 
                                         onClick={() => handleDeleteRegistration(reg.email)}
                                         disabled={isDeletingReg === reg.email}
-                                        className="p-1.5 rounded-lg border border-red-500/20 bg-red-500/5 text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 flex items-center justify-center"
+                                        className="p-2 rounded-lg border border-red-500/20 bg-red-500/5 text-red-400 hover:text-red-300 hover:bg-red-500/15 transition-all disabled:opacity-50 flex items-center justify-center min-h-[36px] min-w-[36px]"
                                         title="Remove participant"
                                       >
-                                        {isDeletingReg === reg.email ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                                        {isDeletingReg === reg.email ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                                       </button>
                                     </div>
                                  </div>
@@ -743,11 +743,11 @@ export default function AdminEventsManager() {
                    )}
                 </div>
                 
-                <div className="p-8 border-t border-white/5 bg-white/[0.01] space-y-4">
-                   <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 space-y-3">
+                <div className="p-4 sm:p-8 border-t border-white/10 bg-white/[0.01] space-y-4">
+                   <div className="rounded-2xl border border-white/15 bg-white/[0.02] p-4 space-y-3">
                       <div className="flex items-center justify-between">
-                         <p className="font-pixel text-[10px] text-white uppercase">EMAIL_REGISTRANTS</p>
-                         <p className="font-mono text-[9px] text-white/30 uppercase tracking-widest">{registrations.length} recipients</p>
+                         <p className="font-pixel text-[10px] text-white uppercase font-bold">EMAIL_REGISTRANTS</p>
+                         <p className="font-mono text-[9px] text-white/60 uppercase tracking-widest">{registrations.length} recipients</p>
                       </div>
                       <input
                         value={emailSubject}
@@ -807,22 +807,22 @@ export default function AdminEventsManager() {
       {/* Editor Modal */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsModalOpen(false)} className="absolute inset-0 bg-black/90 backdrop-blur-md" />
-            <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-[#0a0a0a] border border-white/10 rounded-[32px] shadow-2xl">
-              <div className="p-8 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#0a0a0a] z-10">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto bg-[#0a0a0a] border border-white/15 rounded-2xl sm:rounded-[32px] shadow-2xl">
+              <div className="p-5 sm:p-8 border-b border-white/10 flex items-center justify-between sticky top-0 bg-[#0a0a0a] z-10 backdrop-blur-md">
                 <div className="space-y-1">
-                   <h3 className="text-xl font-pixel text-white uppercase">{editingEvent ? "EDIT_RECORD" : "NEW_RECORD"}</h3>
-                   <p className="font-mono text-[9px] text-white/30 uppercase tracking-[0.2em] italic">Database Sector: ./events_log</p>
+                   <h3 className="text-lg sm:text-xl font-pixel text-white uppercase">{editingEvent ? "EDIT_RECORD" : "NEW_RECORD"}</h3>
+                   <p className="font-mono text-[9px] text-white/50 uppercase tracking-[0.2em] italic">Database Sector: ./events_log</p>
                 </div>
-                <button onClick={() => setIsModalOpen(false)} className="p-2 rounded-xl text-white/40 hover:text-white"><X className="w-5 h-5" /></button>
+                <button onClick={() => setIsModalOpen(false)} className="p-2.5 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-colors"><X className="w-5 h-5" /></button>
               </div>
 
-              <form onSubmit={handleSave} className="p-8 space-y-10">
+              <form onSubmit={handleSave} className="p-5 sm:p-8 space-y-6 sm:space-y-10">
                 {/* Visual Header / Poster Preview */}
-                <div className="space-y-4">
-                   <label className="text-[10px] font-mono text-white/20 uppercase pl-1 tracking-[0.2em]">Media Asset :: Poster</label>
-                   <div className="relative group aspect-video md:aspect-[21/9] rounded-[24px] bg-white/[0.02] border border-dashed border-white/10 overflow-hidden flex items-center justify-center">
+                <div className="space-y-3 sm:space-y-4">
+                   <label className="text-[10px] font-mono text-white/70 font-semibold uppercase pl-1 tracking-[0.2em]">Media Asset :: Poster</label>
+                   <div className="relative group aspect-video md:aspect-[21/9] rounded-2xl sm:rounded-[24px] bg-white/[0.02] border border-dashed border-white/20 overflow-hidden flex items-center justify-center">
                       {formData.poster ? (
                         <>
                            <img src={formData.poster} alt={formData.title ? `${formData.title} poster` : "Event poster"} className="w-full h-full object-cover opacity-60" />
@@ -830,40 +830,40 @@ export default function AdminEventsManager() {
                            <button type="button" onClick={() => setFormData(prev => ({ ...prev, poster: "" }))} className="absolute top-4 right-4 p-3 rounded-full bg-red-500/80 text-white backdrop-blur shadow-lg hover:scale-110 transition-transform"><Trash className="w-4 h-4" /></button>
                         </>
                       ) : (
-                        <label className="flex flex-col items-center justify-center gap-3 cursor-pointer p-10 text-center hover:bg-white/5 transition-colors w-full h-full group">
-                           <div className="p-5 rounded-3xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform">
-                              {isUploading ? <Loader2 className="w-10 h-10 animate-spin text-white/40" /> : <Upload className="w-10 h-10 text-white/20" />}
+                        <label className="flex flex-col items-center justify-center gap-3 cursor-pointer p-6 sm:p-10 text-center hover:bg-white/5 transition-colors w-full h-full group">
+                           <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform">
+                              {isUploading ? <Loader2 className="w-8 sm:w-10 h-8 sm:h-10 animate-spin text-white/40" /> : <Upload className="w-8 sm:w-10 h-8 sm:h-10 text-white/40" />}
                            </div>
                            <div className="space-y-1">
-                              <span className="font-pixel text-[10px] text-white/40 uppercase tracking-widest block">CHOOSE_POSTER_FILE</span>
-                              <span className="font-mono text-[9px] text-white/20 uppercase">Uploads to Vercel Blob</span>
+                              <span className="font-pixel text-[10px] text-white/60 uppercase tracking-widest block">CHOOSE_POSTER_FILE</span>
+                              <span className="font-mono text-[9px] text-white/40 uppercase">Uploads to Vercel Blob</span>
                            </div>
                            <input type="file" className="hidden" accept="image/*" onChange={handleUploadPoster} disabled={isUploading} />
                         </label>
                       )}
                    </div>
                    {posterUploadError && (
-                     <p className="font-mono text-[9px] text-red-400/80 pl-1">{posterUploadError}</p>
+                     <p className="font-mono text-[9px] text-red-400 pl-1">{posterUploadError}</p>
                    )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 lg:gap-x-12 gap-y-6 sm:gap-y-10">
                   {/* General Details */}
-                  <div className="space-y-8">
+                  <div className="space-y-6 sm:space-y-8">
                     <div className="space-y-2">
                        <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Event Title</label>
-                       <input required type="text" placeholder="e.g. Building AI Tools" className="w-full px-5 py-4 bg-white/[0.05] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 transition-all font-bold placeholder:text-white/40 uppercase" value={formData.title} onChange={e => {
+                       <input required type="text" placeholder="e.g. Building AI Tools" className="w-full px-4 sm:px-5 py-3.5 sm:py-4 bg-white/[0.05] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 transition-all font-bold placeholder:text-white/40 uppercase min-h-[44px]" value={formData.title} onChange={e => {
                          const title = e.target.value;
                          setFormData(prev => ({ ...prev, title, slug: title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") }));
                        }} />
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-4">
                       <div className="space-y-2">
                         <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Academic Year</label>
                         <select
                           required
-                          className="w-full px-5 py-4 bg-[#141414] border border-white/20 rounded-2xl font-mono text-[11px] text-white focus:outline-none focus:border-white/60 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC42IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center]"
+                          className="w-full px-4 sm:px-5 py-3.5 sm:py-4 bg-[#141414] border border-white/20 rounded-2xl font-mono text-[11px] text-white focus:outline-none focus:border-white/60 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC42IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center] min-h-[44px]"
                           value={formData.academicYear}
                           onChange={e => setFormData(prev => ({ ...prev, academicYear: e.target.value }))}
                         >
@@ -875,7 +875,7 @@ export default function AdminEventsManager() {
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Category</label>
-                        <select className="w-full px-5 py-4 bg-[#141414] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC42IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center]" value={formData.category} onChange={e => setFormData(prev => ({ ...prev, category: e.target.value as EventData["category"] }))}>
+                        <select className="w-full px-4 sm:px-5 py-3.5 sm:py-4 bg-[#141414] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC42IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center] min-h-[44px]" value={formData.category} onChange={e => setFormData(prev => ({ ...prev, category: e.target.value as EventData["category"] }))}>
                           <option value="workshop" className="text-white bg-black">Workshop</option>
                           <option value="talk" className="text-white bg-black">Talk</option>
                           <option value="hackathon" className="text-white bg-black">Hackathon</option>
@@ -885,7 +885,7 @@ export default function AdminEventsManager() {
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Status</label>
-                        <select className="w-full px-5 py-4 bg-[#141414] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC42IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center]" value={formData.status} onChange={e => setFormData(prev => ({ ...prev, status: e.target.value as EventData["status"] }))}>
+                        <select className="w-full px-4 sm:px-5 py-3.5 sm:py-4 bg-[#141414] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw1IDVMOSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utb3BhY2l0eT0iMC42IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_1.25rem_center] min-h-[44px]" value={formData.status} onChange={e => setFormData(prev => ({ ...prev, status: e.target.value as EventData["status"] }))}>
                           <option value="upcoming" className="text-white bg-black">Upcoming</option>
                           <option value="completed" className="text-white bg-black">Completed</option>
                           <option value="draft" className="text-white bg-black">Draft</option>
@@ -908,7 +908,7 @@ export default function AdminEventsManager() {
 
                     <div className="space-y-2">
                        <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Description</label>
-                       <textarea required rows={5} className="w-full px-5 py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 transition-all resize-none placeholder:text-white/40" placeholder="Describe the mission scope..." value={formData.description} onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))} />
+                       <textarea required rows={5} className="w-full px-4 sm:px-5 py-3.5 sm:py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 transition-all resize-none placeholder:text-white/40" placeholder="Describe the mission scope..." value={formData.description} onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))} />
                     </div>
 
                     <div className="space-y-3 rounded-2xl border border-white/15 bg-white/[0.03] p-4">
@@ -925,7 +925,7 @@ export default function AdminEventsManager() {
                             key={option.value}
                             type="button"
                             onClick={() => setFormData(prev => ({ ...prev, registrationMode: option.value as EventData["registrationMode"] }))}
-                            className={`px-3 py-3 rounded-xl border font-pixel text-[9px] uppercase transition-all ${
+                            className={`px-3 py-3 rounded-xl border font-pixel text-[9px] uppercase transition-all min-h-[44px] ${
                               formData.registrationMode === option.value
                                 ? "bg-white text-black border-white font-bold"
                                 : "bg-white/[0.04] text-white/70 border-white/15 hover:text-white hover:bg-white/10"
@@ -942,7 +942,7 @@ export default function AdminEventsManager() {
                           value={formData.externalRsvpUrl || ""}
                           placeholder="https://fossunited.org/c/.../rsvp"
                           onChange={e => setFormData(prev => ({ ...prev, externalRsvpUrl: e.target.value }))}
-                          className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/60 placeholder:text-white/40"
+                          className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/60 placeholder:text-white/40 min-h-[44px]"
                         />
                       )}
                     </div>
@@ -954,7 +954,7 @@ export default function AdminEventsManager() {
                         <button
                           type="button"
                           onClick={() => setFormData(prev => ({ ...prev, agenda: [...(prev.agenda || []), { time: "", title: "", description: "" }] }))}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 text-[9px] font-mono text-white hover:bg-white/20 transition-all font-semibold"
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-[9px] font-mono text-white hover:bg-white/20 transition-all font-semibold min-h-[36px]"
                         >
                           <Plus className="w-3 h-3" /> Add Item
                         </button>
@@ -977,7 +977,7 @@ export default function AdminEventsManager() {
                                       updated[i] = { ...updated[i], time: e.target.value };
                                       setFormData(prev => ({ ...prev, agenda: updated }));
                                     }}
-                                    className="w-full px-3 py-3 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/60 placeholder:text-white/40"
+                                    className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/60 placeholder:text-white/40"
                                   />
                                 </div>
                                 <div className="space-y-1">
@@ -991,7 +991,7 @@ export default function AdminEventsManager() {
                                       updated[i] = { ...updated[i], title: e.target.value, topic: undefined };
                                       setFormData(prev => ({ ...prev, agenda: updated }));
                                     }}
-                                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/60 placeholder:text-white/40"
+                                    className="w-full px-4 py-2.5 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/60 placeholder:text-white/40"
                                   />
                                 </div>
                               <button
@@ -1000,7 +1000,7 @@ export default function AdminEventsManager() {
                                   const updated = (formData.agenda || []).filter((_, j) => j !== i);
                                   setFormData(prev => ({ ...prev, agenda: updated }));
                                 }}
-                                  className="self-end p-3 rounded-xl border border-red-500/30 bg-red-500/10 text-red-300 hover:text-red-200 hover:bg-red-500/20 transition-all shrink-0 cursor-pointer"
+                                className="self-end p-2.5 rounded-xl border border-red-500/30 bg-red-500/10 text-red-300 hover:text-red-200 hover:bg-red-500/20 transition-all shrink-0 cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
                               >
                                 <X className="w-3.5 h-3.5" />
                               </button>
@@ -1016,7 +1016,7 @@ export default function AdminEventsManager() {
                                     updated[i] = { ...updated[i], description: e.target.value };
                                     setFormData(prev => ({ ...prev, agenda: updated }));
                                   }}
-                                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/60 placeholder:text-white/40 resize-none"
+                                  className="w-full px-4 py-2.5 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/60 placeholder:text-white/40 resize-none"
                                 />
                               </div>
                             </div>
@@ -1029,13 +1029,13 @@ export default function AdminEventsManager() {
                     {formData.status === "completed" && (
                       <div className="space-y-2">
                         <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Event Outcomes / Takeaways</label>
-                        <textarea rows={4} className="w-full px-5 py-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-emerald-500/50 transition-all resize-none placeholder:text-white/40" placeholder="Summarise what was achieved, key learnings, attendance numbers, highlights..." value={formData.outcomes || ""} onChange={e => setFormData(prev => ({ ...prev, outcomes: e.target.value }))} />
+                        <textarea rows={4} className="w-full px-4 sm:px-5 py-3.5 sm:py-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-emerald-500/50 transition-all resize-none placeholder:text-white/40" placeholder="Summarise what was achieved, key learnings, attendance numbers, highlights..." value={formData.outcomes || ""} onChange={e => setFormData(prev => ({ ...prev, outcomes: e.target.value }))} />
                       </div>
                     )}
 
                     {/* Gallery Link — shown when status is completed */}
                     {formData.status === "completed" && (
-                      <div className="flex flex-col gap-2 p-5 rounded-2xl bg-white/[0.03] border border-white/15">
+                      <div className="flex flex-col gap-2 p-4 sm:p-5 rounded-2xl bg-white/[0.03] border border-white/15">
                         <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Event Photos (Ente Album Link)</label>
                         <p className="text-[9px] font-mono text-white/50 pl-1 -mt-1 uppercase">
                           Paste the Ente album link below. The public page will show a button to open the gallery.
@@ -1045,75 +1045,75 @@ export default function AdminEventsManager() {
                           value={formData.galleryLink || ""}
                           placeholder="https://albums.ente.com/..."
                           onChange={e => setFormData(prev => ({ ...prev, galleryLink: e.target.value }))}
-                          className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/60 placeholder:text-white/40"
+                          className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl font-mono text-[11px] text-white focus:outline-none focus:border-white/60 placeholder:text-white/40 min-h-[44px]"
                         />
                       </div>
                     )}
                   </div>
 
                   {/* Scheduling & Logic */}
-                  <div className="space-y-8">
-                    <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-6 sm:space-y-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                       <div className="space-y-2">
                         <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Start Date</label>
                         <div className="relative">
-                          <input required type="date" className="w-full px-5 py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 [color-scheme:dark]" value={formData.startDate} onChange={e => setFormData(prev => ({ ...prev, startDate: e.target.value }))} />
+                          <input required type="date" className="w-full px-4 sm:px-5 py-3.5 sm:py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 [color-scheme:dark] min-h-[44px]" value={formData.startDate} onChange={e => setFormData(prev => ({ ...prev, startDate: e.target.value }))} />
                         </div>
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">End Date</label>
                         <div className="relative">
-                          <input required type="date" className="w-full px-5 py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 [color-scheme:dark]" value={formData.endDate} onChange={e => setFormData(prev => ({ ...prev, endDate: e.target.value }))} />
+                          <input required type="date" className="w-full px-4 sm:px-5 py-3.5 sm:py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 [color-scheme:dark] min-h-[44px]" value={formData.endDate} onChange={e => setFormData(prev => ({ ...prev, endDate: e.target.value }))} />
                         </div>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                       <div className="space-y-2">
                         <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Start Time (IST/24h)</label>
-                        <input required type="time" className="w-full px-5 py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 [color-scheme:dark]" value={formData.startTime} onChange={e => setFormData(prev => ({ ...prev, startTime: e.target.value }))} />
+                        <input required type="time" className="w-full px-4 sm:px-5 py-3.5 sm:py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 [color-scheme:dark] min-h-[44px]" value={formData.startTime} onChange={e => setFormData(prev => ({ ...prev, startTime: e.target.value }))} />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">End Time (IST/24h)</label>
-                        <input required type="time" className="w-full px-5 py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 [color-scheme:dark]" value={formData.endTime} onChange={e => setFormData(prev => ({ ...prev, endTime: e.target.value }))} />
+                        <input required type="time" className="w-full px-4 sm:px-5 py-3.5 sm:py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white focus:outline-none focus:border-white/60 [color-scheme:dark] min-h-[44px]" value={formData.endTime} onChange={e => setFormData(prev => ({ ...prev, endTime: e.target.value }))} />
                       </div>
                     </div>
 
                     <div className="space-y-2">
                        <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Venue / Sector</label>
-                       <input required type="text" placeholder="e.g. LAB_03 · GMEET" className="w-full px-5 py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-white/60 uppercase" value={formData.venue} onChange={e => setFormData(prev => ({ ...prev, venue: e.target.value }))} />
+                       <input required type="text" placeholder="e.g. LAB_03 · GMEET" className="w-full px-4 sm:px-5 py-3.5 sm:py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-white/60 uppercase min-h-[44px]" value={formData.venue} onChange={e => setFormData(prev => ({ ...prev, venue: e.target.value }))} />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                       <div className="space-y-2">
                          <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Handled By / Lead</label>
                          <div className="relative">
-                            <input required type="text" placeholder="e.g. BHARATH · IT · 3RD" className="w-full px-5 py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-white/60 uppercase" value={formData.handledBy} onChange={e => setFormData(prev => ({ ...prev, handledBy: e.target.value }))} />
+                            <input required type="text" placeholder="e.g. BHARATH · IT · 3RD" className="w-full px-4 sm:px-5 py-3.5 sm:py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-white/60 uppercase min-h-[44px]" value={formData.handledBy} onChange={e => setFormData(prev => ({ ...prev, handledBy: e.target.value }))} />
                          </div>
                       </div>
 
                       <div className="space-y-2">
                          <label className="text-[10px] font-mono text-white/85 font-semibold uppercase pl-1 tracking-widest">Speaker(s) / Guest(s)</label>
                          <div className="relative">
-                            <input type="text" placeholder="e.g. DR. SUNDAR, PROF. ANITA" className="w-full px-5 py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-white/60 uppercase" value={formData.speaker || ""} onChange={e => setFormData(prev => ({ ...prev, speaker: e.target.value }))} />
+                            <input type="text" placeholder="e.g. DR. SUNDAR, PROF. ANITA" className="w-full px-4 sm:px-5 py-3.5 sm:py-4 bg-white/[0.04] border border-white/20 rounded-2xl font-mono text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-white/60 uppercase min-h-[44px]" value={formData.speaker || ""} onChange={e => setFormData(prev => ({ ...prev, speaker: e.target.value }))} />
                          </div>
                       </div>
                     </div>
                     
-                    <div className="space-y-2 opacity-30 select-none pointer-events-none">
-                       <label className="text-[10px] font-mono text-white/40 uppercase pl-1 tracking-widest">Slug Pointer</label>
-                       <div className="px-5 py-4 bg-white/[0.01] border border-white/5 rounded-2xl font-mono text-[10px] text-white/40">
+                    <div className="space-y-2 opacity-40 select-none pointer-events-none">
+                       <label className="text-[10px] font-mono text-white/60 uppercase pl-1 tracking-widest">Slug Pointer</label>
+                       <div className="px-4 sm:px-5 py-3 bg-white/[0.01] border border-white/10 rounded-2xl font-mono text-[10px] text-white/60">
                           {formData.slug || "auto-generated-from-title"}
                        </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-10 border-t border-white/10 flex flex-col sm:flex-row gap-6">
-                  <button type="submit" disabled={loading || isUploading} className="flex-1 py-5 bg-white text-black rounded-[24px] font-pixel text-xs hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 transition-all flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+                <div className="pt-6 sm:pt-10 border-t border-white/10 flex flex-col sm:flex-row gap-3 sm:gap-6">
+                  <button type="submit" disabled={loading || isUploading} className="flex-1 py-4 sm:py-5 min-h-[48px] bg-white text-black rounded-xl sm:rounded-[24px] font-pixel text-xs hover:scale-[1.01] active:scale-[0.98] disabled:opacity-50 transition-all flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
                     {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>EXECUTE::<span className="opacity-40">{editingEvent ? "UPDATE" : "CREATE"}</span></>}
                   </button>
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="px-12 py-5 bg-white/5 text-white/40 rounded-[24px] font-pixel text-xs hover:bg-white/10 hover:text-white transition-all uppercase">CANCEL</button>
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="px-8 sm:px-12 py-4 sm:py-5 min-h-[48px] bg-white/5 text-white/70 rounded-xl sm:rounded-[24px] font-pixel text-xs hover:bg-white/10 hover:text-white transition-all uppercase">CANCEL</button>
                 </div>
               </form>
             </motion.div>
@@ -1124,59 +1124,59 @@ export default function AdminEventsManager() {
       {/* ── Mail Attendees Modal ─────────────────────────────── */}
       <AnimatePresence>
         {isMailAttendeesOpen && mailAttendeesEvent && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4">
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setIsMailAttendeesOpen(false)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/85 backdrop-blur-md"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-lg bg-[#0f0f0f] border border-amber-500/20 rounded-[28px] shadow-2xl overflow-hidden"
+              className="relative w-full max-w-lg bg-[#0f0f0f] border border-amber-500/30 rounded-2xl sm:rounded-[28px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
             >
               {/* Header */}
-              <div className="p-6 border-b border-white/5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+              <div className="p-5 sm:p-6 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
                     <MailOpen className="w-5 h-5 text-amber-400" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="font-pixel text-sm text-white">MAIL ATTENDEES</h3>
-                    <p className="font-mono text-[10px] text-white/30 mt-0.5 truncate max-w-[240px]">{mailAttendeesEvent.title}</p>
+                    <p className="font-mono text-[10px] text-white/60 mt-0.5 truncate max-w-[200px] sm:max-w-[280px]">{mailAttendeesEvent.title}</p>
                   </div>
                 </div>
-                <button onClick={() => setIsMailAttendeesOpen(false)} className="p-2 rounded-xl hover:bg-white/5 text-white/30 hover:text-white transition-colors">
+                <button onClick={() => setIsMailAttendeesOpen(false)} className="p-2 rounded-xl hover:bg-white/10 text-white/60 hover:text-white transition-colors">
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="p-6 space-y-5">
-                <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/15 font-mono text-[11px] text-amber-400/80 flex items-start gap-2">
-                  <MessageSquare className="w-4 h-4 shrink-0 mt-0.5" />
+              <div className="p-5 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto">
+                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 font-mono text-[11px] text-amber-300 flex items-start gap-2.5">
+                  <MessageSquare className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
                   <span>This will send a thank-you email with your feedback link and photo album to all <strong>{mailAttendeesEvent.registrationsCount}</strong> registered attendees.</span>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest">Gallery / Photo Album Link</label>
+                <div className="space-y-1.5">
+                  <label className="font-mono text-[10px] text-white/70 uppercase tracking-widest font-semibold">Gallery / Photo Album Link</label>
                   <input
                     type="url"
                     placeholder="https://photos.google.com/... (optional)"
                     value={mailGalleryLink}
                     onChange={(e) => setMailGalleryLink(e.target.value)}
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all"
+                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/15 rounded-xl font-mono text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-white/30 transition-all min-h-[44px]"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest">Custom Message (Optional)</label>
+                <div className="space-y-1.5">
+                  <label className="font-mono text-[10px] text-white/70 uppercase tracking-widest font-semibold">Custom Message (Optional)</label>
                   <textarea
                     rows={3}
                     placeholder="e.g. It was wonderful having you with us! Thank you for your active participation..."
                     value={mailCustomMessage}
                     onChange={(e) => setMailCustomMessage(e.target.value)}
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl font-mono text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all resize-none"
+                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/15 rounded-xl font-mono text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-white/30 transition-all resize-none"
                   />
                 </div>
 
@@ -1186,7 +1186,10 @@ export default function AdminEventsManager() {
                   </div>
                 )}
 
-                <div className="flex gap-3 pt-2">
+                <div className="flex flex-col-reverse sm:flex-row gap-2.5 sm:gap-3 pt-2">
+                  <button onClick={() => setIsMailAttendeesOpen(false)} className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white/70 font-pixel text-[11px] hover:bg-white/10 hover:text-white transition-all text-center min-h-[44px]">
+                    CANCEL
+                  </button>
                   <button
                     disabled={isMailingSending || mailAttendeesEvent.registrationsCount === 0}
                     onClick={async () => {
@@ -1214,13 +1217,10 @@ export default function AdminEventsManager() {
                         setIsMailingSending(false);
                       }
                     }}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-amber-500 text-black font-pixel text-[11px] hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-amber-500 text-black font-pixel text-[11px] font-bold hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all min-h-[44px]"
                   >
                     {isMailingSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                     {isMailingSending ? "SENDING..." : "SEND EMAILS"}
-                  </button>
-                  <button onClick={() => setIsMailAttendeesOpen(false)} className="px-6 py-3 rounded-xl bg-white/5 text-white/40 font-pixel text-[11px] hover:bg-white/10 hover:text-white transition-all">
-                    CANCEL
                   </button>
                 </div>
               </div>
