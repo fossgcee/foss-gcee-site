@@ -224,6 +224,14 @@ export default function AdminEventRegistrationsPage() {
     });
   }, [registrations, checkedInEmails, searchQuery, selectedDept, selectedYear, attendanceFilter]);
 
+  const checkedInCount = useMemo(() => {
+    return registrations.filter((r) => checkedInEmails.has(r.email.toLowerCase())).length;
+  }, [registrations, checkedInEmails]);
+
+  const totalCount = registrations.length;
+  const checkinPercent = totalCount > 0 ? Math.round((checkedInCount / totalCount) * 100) : 0;
+  const pendingCount = Math.max(0, totalCount - checkedInCount);
+
   // Manual Add Participant Handler
   const handleSaveParticipant = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -521,14 +529,6 @@ export default function AdminEventRegistrationsPage() {
       </div>
     );
   }
-
-  const checkedInCount = useMemo(() => {
-    return registrations.filter((r) => checkedInEmails.has(r.email.toLowerCase())).length;
-  }, [registrations, checkedInEmails]);
-
-  const totalCount = registrations.length;
-  const checkinPercent = totalCount > 0 ? Math.round((checkedInCount / totalCount) * 100) : 0;
-  const pendingCount = Math.max(0, totalCount - checkedInCount);
 
   return (
     <div className="space-y-6 sm:space-y-8 py-4 sm:py-8 max-w-7xl mx-auto px-3 sm:px-6 font-mono">
@@ -917,12 +917,12 @@ export default function AdminEventRegistrationsPage() {
                     </div>
 
                     {isChecked ? (
-                      <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold uppercase tracking-wider">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> PRESENT
+                      <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
+                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> PRESENT
                       </span>
                     ) : (
-                      <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 border border-white/15 text-white/60 text-[10px] uppercase tracking-wider font-semibold">
-                        <CircleDot className="w-3.5 h-3.5 opacity-60" /> PENDING
+                      <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 border border-white/15 text-white/60 text-[10px] uppercase tracking-wider font-semibold whitespace-nowrap">
+                        <CircleDot className="w-3.5 h-3.5 opacity-60 shrink-0" /> PENDING
                       </span>
                     )}
                   </div>
@@ -956,11 +956,11 @@ export default function AdminEventRegistrationsPage() {
                       </a>
                     )}
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-1 sm:flex-none justify-end">
                       <button
                         onClick={() => handleToggleCheckin(participant.email)}
                         disabled={isToggling}
-                        className={`h-11 px-4 rounded-xl font-pixel text-xs uppercase transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer font-bold ${
+                        className={`flex-1 sm:flex-none h-11 px-4 rounded-xl font-pixel text-xs uppercase transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer font-bold whitespace-nowrap ${
                           isChecked
                             ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30"
                             : "bg-white text-black hover:bg-white/90 shadow-lg"

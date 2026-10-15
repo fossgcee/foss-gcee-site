@@ -297,38 +297,43 @@ export default function AttendeeCheckinPage() {
               <div className="w-14 h-14 rounded-2xl bg-white text-black flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(255,255,255,0.25)]">
                 <Check className="w-8 h-8 stroke-[3]" />
               </div>
-              <span className="inline-block text-[9px] uppercase tracking-[0.25em] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
-                {successData.already ? "ATTENDANCE_ALREADY_VERIFIED" : "CHECK_IN_CONFIRMED"}
-              </span>
-              <h2 className="text-xl sm:text-2xl font-pixel text-white uppercase tracking-tight break-words pt-1">
+              <div>
+                <span className="inline-block text-[10px] uppercase font-mono font-bold tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 rounded-full whitespace-nowrap">
+                  {successData.already ? "ATTENDANCE ALREADY VERIFIED" : "CHECK-IN CONFIRMED"}
+                </span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold font-mono text-white uppercase tracking-tight break-words pt-1 max-w-sm mx-auto leading-tight">
                 {successData.participant.name}
               </h2>
             </div>
 
             {/* Digital Pass Stub */}
-            <div className="p-4 rounded-2xl bg-white/[0.03] border border-dashed border-white/20 text-xs space-y-2.5">
-              <div className="flex justify-between items-center border-b border-white/10 pb-2">
-                <span className="text-white/40 uppercase text-[10px] tracking-wider">Pass ID</span>
-                <span className="font-mono text-white text-[11px] font-bold">
+            <div className="p-4 rounded-2xl bg-white/[0.03] border border-dashed border-white/20 text-xs space-y-3">
+              <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-2.5">
+                <span className="text-white/45 uppercase text-[10px] tracking-wider shrink-0 font-mono font-medium">Pass ID</span>
+                <span className="font-mono text-white text-xs font-bold shrink-0">
                   PASS-{event.slug.slice(0, 4).toUpperCase()}-{Math.abs(successData.participant.email.split("").reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0) % 9000 + 1000)}
                 </span>
               </div>
-              <div className="flex justify-between items-center border-b border-white/10 pb-2">
-                <span className="text-white/40 uppercase text-[10px] tracking-wider">Department</span>
-                <span className="text-white font-medium">
+
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 border-b border-white/10 pb-2.5">
+                <span className="text-white/45 uppercase text-[10px] tracking-wider shrink-0 font-mono font-medium">Department</span>
+                <span className="text-white font-medium text-xs sm:text-right leading-snug">
                   {successData.participant.department || "General"}
                   {successData.participant.year ? ` · Yr ${successData.participant.year}` : ""}
                 </span>
               </div>
-              <div className="flex justify-between items-center border-b border-white/10 pb-2">
-                <span className="text-white/40 uppercase text-[10px] tracking-wider">Email</span>
-                <span className="text-white/80 font-mono text-[11px] truncate max-w-[180px]">
+
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 border-b border-white/10 pb-2.5">
+                <span className="text-white/45 uppercase text-[10px] tracking-wider shrink-0 font-mono font-medium">Email</span>
+                <span className="text-white/80 font-mono text-xs sm:text-right truncate max-w-full sm:max-w-[220px]">
                   {successData.participant.email}
                 </span>
               </div>
-              <div className="flex justify-between items-center pt-0.5">
-                <span className="text-white/40 uppercase text-[10px] tracking-wider">Timestamp</span>
-                <span className="text-emerald-300 font-mono text-[11px] font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+
+              <div className="flex items-center justify-between gap-3 pt-0.5">
+                <span className="text-white/45 uppercase text-[10px] tracking-wider shrink-0 font-mono font-medium">Timestamp</span>
+                <span className="text-emerald-300 font-mono text-xs font-bold bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 shrink-0">
                   {new Date(successData.participant.checkedInAt).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -338,7 +343,7 @@ export default function AttendeeCheckinPage() {
             </div>
 
             {/* Instruction Notice */}
-            <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10 text-center text-[11px] text-white/50 leading-relaxed">
+            <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10 text-center text-xs text-white/60 leading-relaxed font-mono">
               🎉 You are verified! Please proceed into the hall and take your seat.
             </div>
 
@@ -346,20 +351,22 @@ export default function AttendeeCheckinPage() {
             <div className="pt-1 flex flex-col gap-2.5">
               <Link
                 href={`/events/${slug}`}
-                className="w-full py-3.5 rounded-xl bg-white text-black font-pixel text-[11px] uppercase font-bold hover:bg-white/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg"
+                className="w-full py-3.5 px-4 rounded-xl bg-white text-black font-mono text-xs uppercase font-bold hover:bg-white/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg"
               >
-                View Event Schedule & Materials <ArrowRight className="w-3.5 h-3.5" />
+                <span>View Event Schedule</span>
+                <ArrowRight className="w-4 h-4 shrink-0" />
               </Link>
               <button
+                type="button"
                 onClick={() => {
                   setSuccessData(null);
                   setEmail("");
                   setNotRegisteredHint(null);
                   setErrorMessage(null);
                 }}
-                className="w-full py-2.5 rounded-xl bg-white/[0.04] border border-white/10 hover:bg-white/10 text-white/60 hover:text-white text-[10px] uppercase tracking-widest transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3 rounded-xl bg-white/[0.04] border border-white/10 hover:bg-white/10 text-white/70 hover:text-white font-mono text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
               >
-                <RotateCcw className="w-3 h-3" /> Check In Another Attendee
+                <RotateCcw className="w-3.5 h-3.5" /> Check In Another Attendee
               </button>
             </div>
           </motion.div>
