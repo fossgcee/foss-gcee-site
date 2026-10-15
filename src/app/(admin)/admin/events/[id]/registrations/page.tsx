@@ -20,7 +20,14 @@ import {
   CheckCircle2,
   QrCode,
   CircleDot,
-  RefreshCw
+  RefreshCw,
+  ExternalLink,
+  GraduationCap,
+  Building2,
+  Sparkles,
+  Copy,
+  Check,
+  CheckCheck
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -47,6 +54,37 @@ interface MemberRegistration {
   registeredAt: string;
 }
 
+const formatDeptShort = (dept: string) => {
+  if (!dept) return "General";
+  const match = dept.match(/\(([^)]+)\)/);
+  if (match) return match[1];
+  return dept;
+};
+
+const getYearDisplay = (year: number) => {
+  if (!year || year <= 0) return null;
+  if (year === 1) return "1st Year";
+  if (year === 2) return "2nd Year";
+  if (year === 3) return "3rd Year";
+  if (year === 4) return "4th Year";
+  return `Year ${year}`;
+};
+
+const getYearBadgeColor = (year: number) => {
+  switch (year) {
+    case 1:
+      return "border-sky-500/30 bg-sky-500/10 text-sky-300";
+    case 2:
+      return "border-emerald-500/30 bg-emerald-500/10 text-emerald-300";
+    case 3:
+      return "border-amber-500/30 bg-amber-500/10 text-amber-300";
+    case 4:
+      return "border-purple-500/30 bg-purple-500/10 text-purple-300";
+    default:
+      return "border-white/20 bg-white/5 text-white/80";
+  }
+};
+
 export default function AdminEventRegistrationsPage() {
   const params = useParams();
   const id = params.id as string;
@@ -57,7 +95,9 @@ export default function AdminEventRegistrationsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDept, setSelectedDept] = useState("all");
+  const [selectedYear, setSelectedYear] = useState<string>("all");
   const [attendanceFilter, setAttendanceFilter] = useState<"all" | "checkedin" | "pending">("all");
+  const [copiedLink, setCopiedLink] = useState(false);
 
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -71,7 +111,7 @@ export default function AdminEventRegistrationsPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    department: "CSE",
+    department: "Information Technology (IT)",
     college: "Government College of Engineering, Erode",
     year: "2",
     mobile: "",
@@ -162,14 +202,19 @@ export default function AdminEventRegistrationsPage() {
 
       const matchDept = selectedDept === "all" || r.department === selectedDept;
 
+      const matchYear =
+        selectedYear === "all" ||
+        (selectedYear === "unknown" && (!r.year || r.year <= 0)) ||
+        r.year === Number(selectedYear);
+
       const matchAttendance =
         attendanceFilter === "all" ||
         (attendanceFilter === "checkedin" && isChecked) ||
         (attendanceFilter === "pending" && !isChecked);
 
-      return matchSearch && matchDept && matchAttendance;
+      return matchSearch && matchDept && matchYear && matchAttendance;
     });
-  }, [registrations, checkedInEmails, searchQuery, selectedDept, attendanceFilter]);
+  }, [registrations, checkedInEmails, searchQuery, selectedDept, selectedYear, attendanceFilter]);
 
   // Manual Add Participant Handler
   const handleSaveParticipant = async (e: React.FormEvent) => {
@@ -213,7 +258,7 @@ export default function AdminEventRegistrationsPage() {
       setFormData({
         name: "",
         email: "",
-        department: "CSE",
+        department: "Information Technology (IT)",
         college: "Government College of Engineering, Erode",
         year: "2",
         mobile: "",
@@ -278,9 +323,9 @@ export default function AdminEventRegistrationsPage() {
 
       setRegistrations(d.data.registrations);
       setEvent((prev) => (prev ? { ...prev, registrationsCount: d.data.count } : prev));
-      setCsvImportStatus(`${d.data.inserted} imported, ${d.data.updated} updated, ${d.data.skipped} skipped.`);
+      setCsvImportStatus(`✓ Success: ${d.data.inserted} added, ${d.data.updated} updated (with Year & Dept), ${d.data.skipped} skipped.`);
     } catch {
-      setCsvImportStatus("CSV import failed.");
+      setCsvImportStatus("CSV import failed. Please check the file formatting.");
     } finally {
       setIsImportingCsv(false);
       e.target.value = "";
@@ -307,7 +352,7 @@ export default function AdminEventRegistrationsPage() {
         escapeCell(r.email),
         escapeCell(r.department),
         escapeCell(r.college),
-        escapeCell(r.year),
+        escapeCell(r.year ? getYearDisplay(r.year) : ""),
         escapeCell(r.mobile),
         escapeCell(isChecked ? "CHECKED_IN" : "PENDING"),
         escapeCell(r.registeredAt ? new Date(r.registeredAt).toLocaleString() : ""),
@@ -319,7 +364,7 @@ export default function AdminEventRegistrationsPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${event.slug || "event"}-attendance-list.csv`;
+    link.download = `${event.slug || "event"}-registrations-attendance.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -375,7 +420,7 @@ export default function AdminEventRegistrationsPage() {
         setEmailStatus(d.error || "Failed to send email.");
         return;
       }
-      setEmailStatus(`Sent to ${d.data.recipients} registrants in ${d.data.batches} batches.`);
+      setEmailStatus(`✓ Sent to ${d.data.recipients} registrants in ${d.data.batches} batches.`);
     } catch {
       setEmailStatus("Failed to send email.");
     } finally {
@@ -411,7 +456,7 @@ export default function AdminEventRegistrationsPage() {
         setEmailStatus(d.error || "Failed to send test email.");
         return;
       }
-      setEmailStatus(`Test email sent successfully to ${tEmail}.`);
+      setEmailStatus(`✓ Test email sent successfully to ${tEmail}.`);
     } catch {
       setEmailStatus("Failed to send test email.");
     } finally {
@@ -419,11 +464,19 @@ export default function AdminEventRegistrationsPage() {
     }
   };
 
+  const handleCopyCheckinLink = () => {
+    if (!event) return;
+    const url = `${window.location.origin}/events/${event.slug}/checkin`;
+    navigator.clipboard.writeText(url);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
+
   if (loading) {
     return (
-      <div className="py-32 flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-10 h-10 text-white/30 animate-spin" />
-        <p className="font-mono text-xs text-white/30 tracking-[0.3em] uppercase">Loading Registration Logs...</p>
+      <div className="py-32 flex flex-col items-center justify-center space-y-4 font-mono">
+        <Loader2 className="w-10 h-10 text-emerald-400 animate-spin" />
+        <p className="text-xs text-white/60 tracking-[0.25em] uppercase font-semibold">Loading Registration Desk...</p>
       </div>
     );
   }
@@ -431,8 +484,8 @@ export default function AdminEventRegistrationsPage() {
   if (!event) {
     return (
       <div className="py-20 max-w-4xl mx-auto text-center space-y-4 font-mono">
-        <p className="font-pixel text-white">EVENT_RECORD_NOT_FOUND</p>
-        <Link href="/admin/events" className="inline-flex items-center gap-2 text-xs text-white/50 hover:text-white uppercase tracking-widest">
+        <p className="font-pixel text-white text-lg">EVENT_RECORD_NOT_FOUND</p>
+        <Link href="/admin/events" className="inline-flex items-center gap-2 text-xs text-white/70 hover:text-white uppercase tracking-widest">
           <ArrowLeft className="w-4 h-4" /> Return to Events
         </Link>
       </div>
@@ -442,113 +495,164 @@ export default function AdminEventRegistrationsPage() {
   const checkedInCount = checkedInEmails.size;
   const totalCount = registrations.length;
   const checkinPercent = totalCount > 0 ? Math.round((checkedInCount / totalCount) * 100) : 0;
+  const pendingCount = Math.max(0, totalCount - checkedInCount);
 
   return (
     <div className="space-y-6 sm:space-y-8 py-4 sm:py-8 max-w-7xl mx-auto px-3 sm:px-6 font-mono">
-      {/* Top Header */}
-      <div className="flex flex-col gap-5 pb-6 border-b border-white/10">
-        <div className="space-y-3">
+      {/* ── Breadcrumb & Top Bar ── */}
+      <div className="flex flex-col gap-4 pb-6 border-b border-white/10">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/admin/events"
-            className="inline-flex items-center gap-2 text-[11px] text-white/70 hover:text-white uppercase tracking-widest transition-colors py-1 font-medium"
+            className="inline-flex items-center gap-2 text-xs text-white/70 hover:text-white uppercase tracking-widest transition-colors py-1 font-semibold group"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Return to Events
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Events / {event.title}
           </Link>
-          
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-pixel text-white uppercase tracking-tight break-words">
-                {event.title}
-              </h1>
-              <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white font-pixel text-[9px] sm:text-[10px] uppercase font-bold whitespace-nowrap">
-                {checkedInCount} / {totalCount} CHECKED IN ({checkinPercent}%)
+
+          {/* Live Sync Pill */}
+          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/15">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[10px] uppercase font-mono tracking-wider text-emerald-300 font-bold">
+              Live Sync Active
+            </span>
+            <button
+              onClick={() => fetchRegistrations(true)}
+              className="p-1 rounded hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+              title="Refresh attendance records"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Title & Metadata */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="space-y-2 max-w-3xl">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-pixel text-white uppercase tracking-tight break-words">
+              {event.title}
+            </h1>
+            <div className="flex items-center gap-x-4 gap-y-1.5 text-xs text-white/70 flex-wrap font-mono">
+              <span className="flex items-center gap-1.5 text-white/80">
+                <MapPin className="w-3.5 h-3.5 text-white/50" /> {event.venue || "Campus Venue"}
               </span>
-            </div>
-
-            <div className="flex items-center gap-x-4 gap-y-1.5 text-[10px] text-white/70 uppercase tracking-wider flex-wrap font-mono">
-              <span className="truncate max-w-[280px]">/events/{event.slug}</span>
               {event.startDate && (
-                <span className="flex items-center gap-1 text-white/80">
-                  <Calendar className="w-3 h-3 text-white/60" /> {event.startDate}
+                <span className="flex items-center gap-1.5 text-white/80">
+                  <Calendar className="w-3.5 h-3.5 text-white/50" /> {event.startDate}
                 </span>
               )}
-              {event.venue && (
-                <span className="flex items-center gap-1 text-white/80">
-                  <MapPin className="w-3 h-3 text-white/60" /> {event.venue}
-                </span>
-              )}
+              <Link
+                href={`/events/${event.slug}`}
+                target="_blank"
+                className="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 transition-colors"
+              >
+                <span>/events/{event.slug}</span>
+                <ExternalLink className="w-3 h-3" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Quick Check-in Link Copy */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleCopyCheckinLink}
+              className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-white text-[11px] font-mono flex items-center gap-2 transition-all cursor-pointer"
+              title="Copy mobile self check-in link for students"
+            >
+              {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-white/60" />}
+              <span>{copiedLink ? "COPIED_URL!" : "COPY_CHECKIN_LINK"}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Executive Attendance KPI Cards (Grid of 4) ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* Total Registrations */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-2 hover:border-white/20 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] uppercase tracking-wider text-white/60 font-semibold">Total RSVPs</span>
+            <Users className="w-4 h-4 text-white/40" />
+          </div>
+          <div className="space-y-0.5">
+            <p className="text-2xl sm:text-3xl font-pixel text-white font-bold">{totalCount}</p>
+            <p className="text-[10px] text-white/50">Registered Attendees</p>
+          </div>
+        </div>
+
+        {/* Checked In / Present */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-emerald-500/[0.06] border border-emerald-500/25 flex flex-col justify-between space-y-2 hover:border-emerald-500/40 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] uppercase tracking-wider text-emerald-300 font-semibold flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              Checked In
+            </span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          </div>
+          <div className="space-y-0.5">
+            <p className="text-2xl sm:text-3xl font-pixel text-emerald-300 font-bold">{checkedInCount}</p>
+            <p className="text-[10px] text-emerald-400/70">Verified At Venue</p>
+          </div>
+        </div>
+
+        {/* Pending Arrival */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/[0.05] border border-amber-500/20 flex flex-col justify-between space-y-2 hover:border-amber-500/35 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] uppercase tracking-wider text-amber-300 font-semibold">Pending</span>
+            <CircleDot className="w-4 h-4 text-amber-400" />
+          </div>
+          <div className="space-y-0.5">
+            <p className="text-2xl sm:text-3xl font-pixel text-amber-300 font-bold">{pendingCount}</p>
+            <p className="text-[10px] text-amber-400/70">Awaiting Check-in</p>
+          </div>
+        </div>
+
+        {/* Attendance Rate & Progress Bar */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-2 hover:border-white/20 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] uppercase tracking-wider text-white/60 font-semibold">Attendance Rate</span>
+            <Sparkles className="w-4 h-4 text-white/40" />
+          </div>
+          <div className="space-y-1.5">
+            <div className="flex items-baseline justify-between">
+              <p className="text-2xl sm:text-3xl font-pixel text-white font-bold">{checkinPercent}%</p>
+              <span className="text-[10px] text-white/60 font-mono">{checkedInCount} of {totalCount}</span>
+            </div>
+            {/* Progress Meter Bar */}
+            <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-emerald-500 to-emerald-300 transition-all duration-500"
+                style={{ width: `${Math.min(100, Math.max(0, checkinPercent))}%` }}
+              />
             </div>
           </div>
         </div>
+      </div>
 
-        {/* ── Mobile Action Toolbar (< sm screens) ── */}
-        <div className="flex flex-col gap-2.5 sm:hidden">
-          <Link
-            href={`/events/${event.slug}/checkin/projector`}
-            target="_blank"
-            className="w-full h-12 rounded-xl bg-white text-black font-pixel text-[11px] uppercase font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-95 transition-all"
-          >
-            <QrCode className="w-4 h-4" /> PROJECTOR_QR
-          </Link>
+      {/* ── Main Action Bar (High Impact Toolbar) ── */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-white/[0.02] border border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        {/* Projector Kiosk Launcher */}
+        <Link
+          href={`/events/${event.slug}/checkin/projector`}
+          target="_blank"
+          className="flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-gradient-to-r from-white to-gray-200 text-black font-pixel text-xs uppercase font-bold hover:brightness-105 active:scale-98 transition-all shadow-[0_0_25px_rgba(255,255,255,0.15)] shrink-0"
+        >
+          <QrCode className="w-4 h-4" />
+          <span>PROJECTOR_KIOSK_QR</span>
+        </Link>
 
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="h-11 rounded-xl bg-white/[0.04] border border-white/15 text-white font-pixel text-[9px] uppercase hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center gap-1.5"
-            >
-              <Plus className="w-3.5 h-3.5 text-white/70" /> + WALK_IN
-            </button>
-
-            <label className="h-11 rounded-xl bg-white/[0.04] border border-white/15 text-white font-pixel text-[9px] uppercase hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
-              {isImportingCsv ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5 text-white/70" />}
-              {isImportingCsv ? "IMPORTING" : "UPLOAD_CSV"}
-              <input
-                type="file"
-                accept=".csv,text/csv"
-                className="hidden"
-                onChange={handleImportCsv}
-                disabled={isImportingCsv}
-              />
-            </label>
-
-            <button
-              onClick={handleExportCsv}
-              disabled={registrations.length === 0}
-              className="h-11 rounded-xl bg-white/[0.04] border border-white/15 text-white font-pixel text-[9px] uppercase hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center gap-1.5 disabled:opacity-40"
-            >
-              <Download className="w-3.5 h-3.5 text-white/70" /> EXPORT_CSV
-            </button>
-
-            <button
-              onClick={() => setIsEmailModalOpen(true)}
-              className="h-11 rounded-xl bg-white/[0.04] border border-white/15 text-white font-pixel text-[9px] uppercase hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center gap-1.5"
-            >
-              <Mail className="w-3.5 h-3.5 text-white/70" /> EMAIL_ALL
-            </button>
-          </div>
-        </div>
-
-        {/* ── Desktop Action Toolbar (sm+ screens) ── */}
-        <div className="hidden sm:flex items-center gap-3 flex-wrap">
-          <Link
-            href={`/events/${event.slug}/checkin/projector`}
-            target="_blank"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-black font-pixel text-[10px] uppercase font-bold hover:bg-white/90 transition-all cursor-pointer shadow-[0_0_20px_rgba(255,255,255,0.15)]"
-            title="Launch Projector Fullscreen QR Code"
-          >
-            <QrCode className="w-4 h-4" /> PROJECTOR_QR
-          </Link>
-
+        {/* Secondary Action Buttons */}
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 flex-wrap">
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/15 text-white font-pixel text-[10px] uppercase hover:bg-white/10 transition-all cursor-pointer"
+            className="flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-pixel text-[10px] uppercase transition-all"
           >
-            <Plus className="w-4 h-4 text-white/70" /> ADD_WALK_IN
+            <Plus className="w-3.5 h-3.5" />
+            <span>+ WALK_IN</span>
           </button>
 
-          <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-pixel text-[10px] uppercase hover:bg-white/[0.08] transition-all cursor-pointer">
-            {isImportingCsv ? <Loader2 className="w-4 h-4 animate-spin text-white/70" /> : <Upload className="w-4 h-4 text-white/70" />}
-            {isImportingCsv ? "IMPORTING..." : "UPLOAD_CSV"}
+          <label className="flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl bg-white/[0.05] hover:bg-white/10 border border-white/15 text-white font-pixel text-[10px] uppercase transition-all cursor-pointer">
+            {isImportingCsv ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+            <span>{isImportingCsv ? "IMPORTING..." : "IMPORT_CSV"}</span>
             <input
               type="file"
               accept=".csv,text/csv"
@@ -561,189 +665,207 @@ export default function AdminEventRegistrationsPage() {
           <button
             onClick={handleExportCsv}
             disabled={registrations.length === 0}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-pixel text-[10px] uppercase hover:bg-white/[0.08] transition-all cursor-pointer disabled:opacity-40"
+            className="flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl bg-white/[0.05] hover:bg-white/10 border border-white/15 text-white font-pixel text-[10px] uppercase transition-all disabled:opacity-40"
           >
-            <Download className="w-4 h-4 text-white/70" /> EXPORT_CSV
+            <Download className="w-3.5 h-3.5" />
+            <span>EXPORT_CSV</span>
           </button>
 
           <button
             onClick={() => setIsEmailModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-pixel text-[10px] uppercase hover:bg-white/[0.08] transition-all cursor-pointer"
+            className="flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl bg-white/[0.05] hover:bg-white/10 border border-white/15 text-white font-pixel text-[10px] uppercase transition-all"
           >
-            <Mail className="w-4 h-4 text-white/70" /> BROADCAST_EMAIL
+            <Mail className="w-3.5 h-3.5" />
+            <span>BROADCAST_EMAIL</span>
           </button>
         </div>
       </div>
 
       {/* CSV Import Notification Banner */}
       {csvImportStatus && (
-        <div className="p-4 rounded-xl bg-white/10 border border-white/20 text-white text-xs flex items-center justify-between">
-          <span>{csvImportStatus}</span>
-          <button onClick={() => setCsvImportStatus(null)} className="text-white/60 hover:text-white p-1">
+        <div className={`p-4 rounded-xl border text-xs flex items-center justify-between ${csvImportStatus.startsWith("✓") ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-300" : "bg-red-500/10 border-red-500/20 text-red-300"}`}>
+          <span className="font-mono">{csvImportStatus}</span>
+          <button onClick={() => setCsvImportStatus(null)} className="p-1 hover:opacity-80">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
-      {/* Search & Attendance Filter Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="relative sm:col-span-2">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search name, email, department, phone..."
-            className="w-full pl-10 pr-9 py-3 bg-white/[0.04] border border-white/20 rounded-xl text-xs text-white placeholder:text-white/50 focus:outline-none focus:border-white/60 transition-all font-mono"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/50 hover:text-white cursor-pointer"
+      {/* ── Filter & Search Control Panel ── */}
+      <div className="space-y-3 p-4 sm:p-5 rounded-2xl bg-white/[0.02] border border-white/10">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+          {/* Search box (spanning 6 cols on md) */}
+          <div className="relative md:col-span-6">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by student name, email, roll no, mobile..."
+              className="w-full pl-10 pr-9 py-3 bg-white/[0.04] border border-white/15 rounded-xl text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-white/50 transition-all font-mono"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Department Filter (spanning 3 cols) */}
+          <div className="md:col-span-3">
+            <select
+              value={selectedDept}
+              onChange={(e) => setSelectedDept(e.target.value)}
+              className="w-full px-3.5 py-3 bg-[#111] border border-white/15 rounded-xl text-xs text-white focus:outline-none focus:border-white/50 transition-all cursor-pointer font-mono font-medium"
             >
-              <X className="w-4 h-4" />
+              <option value="all">All Departments ({registrations.length})</option>
+              {departments.map((dept) => (
+                <option key={dept} value={dept}>
+                  {dept} ({registrations.filter((r) => r.department === dept).length})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Year Filter (spanning 3 cols) */}
+          <div className="md:col-span-3">
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className="w-full px-3.5 py-3 bg-[#111] border border-white/15 rounded-xl text-xs text-white focus:outline-none focus:border-white/50 transition-all cursor-pointer font-mono font-medium"
+            >
+              <option value="all">All Years of Study ({registrations.length})</option>
+              <option value="1">1st Year ({registrations.filter((r) => r.year === 1).length})</option>
+              <option value="2">2nd Year ({registrations.filter((r) => r.year === 2).length})</option>
+              <option value="3">3rd Year ({registrations.filter((r) => r.year === 3).length})</option>
+              <option value="4">4th Year ({registrations.filter((r) => r.year === 4).length})</option>
+              <option value="unknown">Unspecified ({registrations.filter((r) => !r.year || r.year <= 0).length})</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Quick Attendance Filter Tabs */}
+        <div className="flex items-center justify-between gap-3 pt-2 border-t border-white/5 flex-wrap">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+            <button
+              onClick={() => setAttendanceFilter("all")}
+              className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase transition-all whitespace-nowrap ${
+                attendanceFilter === "all"
+                  ? "bg-white text-black font-bold shadow"
+                  : "bg-white/[0.04] border border-white/15 text-white/70 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              All Attendees ({totalCount})
             </button>
-          )}
-        </div>
+            <button
+              onClick={() => setAttendanceFilter("checkedin")}
+              className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                attendanceFilter === "checkedin"
+                  ? "bg-emerald-400 text-black font-bold shadow"
+                  : "bg-emerald-500/[0.08] border border-emerald-500/25 text-emerald-300 hover:bg-emerald-500/15"
+              }`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Present ({checkedInCount})</span>
+            </button>
+            <button
+              onClick={() => setAttendanceFilter("pending")}
+              className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                attendanceFilter === "pending"
+                  ? "bg-amber-400 text-black font-bold shadow"
+                  : "bg-amber-500/[0.08] border border-amber-500/25 text-amber-300 hover:bg-amber-500/15"
+              }`}
+            >
+              <CircleDot className="w-3.5 h-3.5" />
+              <span>Pending ({pendingCount})</span>
+            </button>
+          </div>
 
-        {/* Department Filter */}
-        <div>
-          <select
-            value={selectedDept}
-            onChange={(e) => setSelectedDept(e.target.value)}
-            className="w-full px-3.5 py-3 bg-[#111111] border border-white/20 rounded-xl text-xs text-white focus:outline-none focus:border-white/60 transition-all cursor-pointer font-mono font-medium"
-          >
-            <option value="all">All Departments ({registrations.length})</option>
-            {departments.map((dept) => (
-              <option key={dept} value={dept}>
-                {dept} ({registrations.filter((r) => r.department === dept).length})
-              </option>
-            ))}
-          </select>
+          <div className="text-xs text-white/60 font-mono">
+            Showing <strong className="text-white">{filteredRegistrations.length}</strong> of {totalCount}
+          </div>
         </div>
-
-        {/* Attendance Status Filter */}
-        <div>
-          <select
-            value={attendanceFilter}
-            onChange={(e) => setAttendanceFilter(e.target.value as any)}
-            className="w-full px-3.5 py-3 bg-[#111111] border border-white/20 rounded-xl text-xs text-white focus:outline-none focus:border-white/60 transition-all cursor-pointer font-mono font-medium"
-          >
-            <option value="all">All Statuses ({totalCount})</option>
-            <option value="checkedin">Checked In Only ({checkedInCount})</option>
-            <option value="pending">Pending Arrival ({Math.max(0, totalCount - checkedInCount)})</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Quick Status Filter Tabs & Live Sync Badge */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={() => setAttendanceFilter("all")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-mono uppercase transition-all cursor-pointer ${
-              attendanceFilter === "all"
-                ? "bg-white text-black font-bold shadow-md"
-                : "bg-white/[0.04] border border-white/20 text-white/75 hover:text-white hover:bg-white/10 font-medium"
-            }`}
-          >
-            All ({totalCount})
-          </button>
-          <button
-            onClick={() => setAttendanceFilter("checkedin")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-mono uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
-              attendanceFilter === "checkedin"
-                ? "bg-white text-black font-bold shadow-md"
-                : "bg-white/[0.04] border border-white/20 text-white/75 hover:text-white hover:bg-white/10 font-medium"
-            }`}
-          >
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            Checked In ({checkedInCount})
-          </button>
-          <button
-            onClick={() => setAttendanceFilter("pending")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-mono uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
-              attendanceFilter === "pending"
-                ? "bg-white text-black font-bold shadow-md"
-                : "bg-white/[0.04] border border-white/20 text-white/75 hover:text-white hover:bg-white/10 font-medium"
-            }`}
-          >
-            <span className="w-2 h-2 rounded-full bg-amber-400" />
-            Pending ({Math.max(0, totalCount - checkedInCount)})
-          </button>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 text-[10px] text-white/75 uppercase font-mono tracking-wider font-medium">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            Live Sync
-          </span>
-          <button
-            onClick={() => fetchRegistrations(true)}
-            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/20 transition-colors cursor-pointer"
-            title="Refresh check-ins list"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Participants Counter Status */}
-      <div className="flex items-center justify-between text-xs text-white/70 uppercase tracking-widest px-1 font-mono font-medium">
-        <span>Showing {filteredRegistrations.length} of {registrations.length}</span>
-        <span className="text-white font-bold">{checkedInCount} Present</span>
       </div>
 
       {/* ── Empty State ── */}
       {registrations.length === 0 ? (
-        <div className="py-20 px-4 rounded-3xl border border-dashed border-white/20 bg-white/[0.01] flex flex-col items-center justify-center space-y-4 text-center">
-          <Users className="w-12 h-12 text-white/30" />
-          <p className="font-pixel text-sm text-white/80 uppercase">NO_REGISTRATIONS_YET</p>
-          <p className="text-xs text-white/60 max-w-sm">
-            Add participants manually or upload a CSV export from Google Forms / FOSS United RSVP.
-          </p>
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-pixel text-xs uppercase hover:bg-white/20 transition-all cursor-pointer font-bold"
-          >
-            + ADD_FIRST_PARTICIPANT
-          </button>
+        <div className="py-24 px-4 rounded-3xl border border-dashed border-white/20 bg-white/[0.01] flex flex-col items-center justify-center space-y-4 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+            <Users className="w-8 h-8 text-white/40" />
+          </div>
+          <div className="space-y-1">
+            <p className="font-pixel text-base text-white uppercase font-bold">NO_ATTENDEES_REGISTERED</p>
+            <p className="text-xs text-white/60 max-w-md mx-auto leading-relaxed">
+              Import attendees from your RSVP CSV file or add walk-in participants manually at the front desk.
+            </p>
+          </div>
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="px-5 py-3 rounded-xl bg-white text-black font-pixel text-xs uppercase font-bold hover:bg-white/90 transition-all cursor-pointer"
+            >
+              + ADD_WALK_IN
+            </button>
+            <label className="px-5 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-pixel text-xs uppercase font-bold hover:bg-white/15 transition-all cursor-pointer">
+              UPLOAD_CSV
+              <input type="file" accept=".csv,text/csv" className="hidden" onChange={handleImportCsv} />
+            </label>
+          </div>
         </div>
       ) : filteredRegistrations.length === 0 ? (
-        <div className="py-16 px-4 rounded-3xl border border-dashed border-white/20 bg-white/[0.01] flex flex-col items-center justify-center space-y-2 text-center">
-          <p className="font-pixel text-xs text-white/80 uppercase">NO_MATCHING_PARTICIPANTS</p>
-          <p className="text-[11px] text-white/50">Try clearing your search query or department filter.</p>
+        <div className="py-16 px-4 rounded-3xl border border-dashed border-white/20 bg-white/[0.01] flex flex-col items-center justify-center space-y-3 text-center">
+          <p className="font-pixel text-sm text-white uppercase">NO_MATCHING_RECORDS</p>
+          <p className="text-xs text-white/60">No participants matched your current search and filters.</p>
+          <button
+            onClick={() => {
+              setSearchQuery("");
+              setSelectedDept("all");
+              setSelectedYear("all");
+              setAttendanceFilter("all");
+            }}
+            className="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-xs text-white hover:bg-white/15 transition-all font-mono"
+          >
+            Reset All Filters
+          </button>
         </div>
       ) : (
         <>
-          {/* ── Mobile Touch Cards (md:hidden) ── */}
+          {/* ── Mobile Touch Cards Layout (< md screens) ── */}
           <div className="space-y-3 md:hidden">
-            {filteredRegistrations.map((participant, index) => {
+            {filteredRegistrations.map((participant) => {
               const isChecked = checkedInEmails.has(participant.email.toLowerCase());
               const isToggling = isTogglingEmail === participant.email.toLowerCase();
+              const yearText = getYearDisplay(participant.year);
 
               return (
                 <div
                   key={participant.email}
-                  className="p-4 rounded-2xl border border-white/10 bg-white/[0.02] space-y-3 hover:border-white/20 transition-all"
+                  className={`p-4 rounded-2xl border transition-all space-y-3 ${
+                    isChecked
+                      ? "bg-emerald-500/[0.03] border-emerald-500/25"
+                      : "bg-white/[0.03] border-white/10"
+                  }`}
                 >
-                  {/* Top: Name & Attendance Status */}
+                  {/* Top: Avatar, Name & Attendance Badge */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div
-                        className={`w-9 h-9 rounded-xl font-pixel text-xs flex items-center justify-center shrink-0 border ${
+                        className={`w-10 h-10 rounded-xl font-pixel text-xs flex items-center justify-center shrink-0 border ${
                           isChecked
-                            ? "bg-white text-black font-bold border-white"
-                            : "bg-white/5 border-white/20 text-white/80"
+                            ? "bg-emerald-400 text-black font-bold border-emerald-400 shadow-sm"
+                            : "bg-white/10 border-white/20 text-white font-bold"
                         }`}
                       >
                         {isChecked ? "✓" : participant.name.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-bold text-white uppercase text-xs truncate">{participant.name}</p>
+                        <p className="font-bold text-white text-sm uppercase truncate">{participant.name}</p>
                         <a
                           href={`mailto:${participant.email}`}
-                          className="text-[10px] text-white/70 truncate block hover:text-white transition-colors"
+                          className="text-xs text-white/70 truncate block hover:text-white transition-colors"
                         >
                           {participant.email}
                         </a>
@@ -751,75 +873,77 @@ export default function AdminEventRegistrationsPage() {
                     </div>
 
                     {isChecked ? (
-                      <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white/10 border border-white/20 text-white text-[9px] font-bold uppercase tracking-wider">
-                        <CheckCircle2 className="w-3 h-3" /> PRESENT
+                      <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold uppercase tracking-wider">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> PRESENT
                       </span>
                     ) : (
-                      <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/15 text-white/60 text-[9px] uppercase tracking-wider font-medium">
-                        <CircleDot className="w-3 h-3 opacity-60" /> PENDING
+                      <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 border border-white/15 text-white/60 text-[10px] uppercase tracking-wider font-semibold">
+                        <CircleDot className="w-3.5 h-3.5 opacity-60" /> PENDING
                       </span>
                     )}
                   </div>
 
-                  {/* Badges: Dept, Year, College */}
-                  <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-white/80 font-medium">
-                    <span className="px-2 py-0.5 rounded bg-white/5 border border-white/15 text-white/90">
+                  {/* Badges: Department & Year */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span className="px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/15 text-white/90 text-[11px] font-semibold">
                       {participant.department || "General"}
                     </span>
-                    {participant.year > 0 && (
-                      <span className="px-2 py-0.5 rounded bg-white/5 border border-white/15 text-white/80">
-                        Year {participant.year}
+                    {yearText && (
+                      <span className={`px-2.5 py-1 rounded-lg border text-[11px] font-bold ${getYearBadgeColor(participant.year)}`}>
+                        {yearText}
                       </span>
                     )}
                     {participant.college && (
-                      <span className="px-2 py-0.5 rounded bg-white/5 border border-white/15 text-white/75 truncate max-w-[200px]">
+                      <span className="px-2.5 py-1 rounded-lg bg-white/[0.03] border border-white/10 text-white/60 text-[10px] truncate max-w-[220px]">
                         {participant.college}
                       </span>
                     )}
                   </div>
 
-                  {/* Bottom: Contact & Touch Action Buttons */}
-                  <div className="flex items-center justify-between gap-3 pt-2.5 border-t border-white/10 text-[11px]">
+                  {/* Actions & Contact */}
+                  <div className="flex items-center justify-between gap-3 pt-3 border-t border-white/10">
                     {participant.mobile ? (
                       <a
                         href={`tel:${participant.mobile}`}
-                        className="flex items-center gap-1.5 text-white/80 hover:text-white transition-colors font-medium"
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white hover:text-emerald-300 transition-colors"
                       >
-                        <Phone className="w-3.5 h-3.5 text-white/60" />
+                        <Phone className="w-3.5 h-3.5 text-white/50" />
                         <span>{participant.mobile}</span>
                       </a>
                     ) : (
-                      <span className="text-white/40 text-[10px]">—</span>
+                      <span className="text-white/40 text-xs">—</span>
                     )}
 
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleToggleCheckin(participant.email)}
                         disabled={isToggling}
-                        className={`h-9 px-3 rounded-xl font-pixel text-[9px] uppercase transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
+                        className={`h-11 px-4 rounded-xl font-pixel text-xs uppercase transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer font-bold ${
                           isChecked
-                            ? "bg-white text-black font-bold border border-white"
-                            : "bg-white/10 text-white border border-white/20 hover:bg-white/20"
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30"
+                            : "bg-white text-black hover:bg-white/90 shadow-lg"
                         }`}
                       >
                         {isToggling ? (
-                          <Loader2 className="w-3 h-3 animate-spin" />
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : isChecked ? (
+                          <CheckCheck className="w-4 h-4 text-emerald-300" />
                         ) : (
-                          <CheckCircle2 className="w-3 h-3" />
+                          <CheckCircle2 className="w-4 h-4 text-black" />
                         )}
-                        {isChecked ? "CHECKED" : "CHECK IN"}
+                        <span>{isChecked ? "CHECKED" : "CHECK IN"}</span>
                       </button>
 
                       <button
                         onClick={() => handleDeleteParticipant(participant.email)}
                         disabled={isDeletingEmail === participant.email}
-                        className="p-2 rounded-xl text-white/60 hover:text-red-400 hover:bg-red-500/10 border border-white/10 transition-all cursor-pointer"
-                        title="Remove attendee"
+                        className="p-2.5 rounded-xl border border-white/10 text-white/50 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                        title="Delete attendee"
                       >
                         {isDeletingEmail === participant.email ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin text-red-400" />
+                          <Loader2 className="w-4 h-4 animate-spin text-red-400" />
                         ) : (
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-4 h-4" />
                         )}
                       </button>
                     </div>
@@ -829,109 +953,134 @@ export default function AdminEventRegistrationsPage() {
             })}
           </div>
 
-          {/* ── Desktop Data Table (hidden md:block) ── */}
-          <div className="hidden md:block border border-white/10 rounded-2xl overflow-hidden bg-white/[0.01]">
-            <div className="overflow-x-auto">
+          {/* ── Desktop Data Table View (hidden md:block) ── */}
+          <div className="hidden md:block rounded-2xl border border-white/15 overflow-hidden bg-black/40 shadow-2xl">
+            <div className="overflow-x-auto min-w-full">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-white/10 bg-white/[0.04] text-[10px] text-white/75 font-semibold uppercase tracking-widest font-mono">
-                    <th className="py-4 px-6">#</th>
-                    <th className="py-4 px-6">Participant</th>
-                    <th className="py-4 px-6">Department</th>
-                    <th className="py-4 px-6">Year</th>
-                    <th className="py-4 px-6">Attendance</th>
-                    <th className="py-4 px-6">Contact</th>
-                    <th className="py-4 px-6 text-right">Actions</th>
+                  <tr className="border-b border-white/15 bg-white/[0.04] text-[10px] text-white/75 font-semibold uppercase tracking-widest font-mono">
+                    <th className="py-4 px-5">#</th>
+                    <th className="py-4 px-5">Participant Name & Email</th>
+                    <th className="py-4 px-5">Department</th>
+                    <th className="py-4 px-5">Year of Study</th>
+                    <th className="py-4 px-5">Attendance</th>
+                    <th className="py-4 px-5">Mobile</th>
+                    <th className="py-4 px-5 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-white/10">
                   {filteredRegistrations.map((participant, index) => {
                     const isChecked = checkedInEmails.has(participant.email.toLowerCase());
                     const isToggling = isTogglingEmail === participant.email.toLowerCase();
+                    const yearText = getYearDisplay(participant.year);
 
                     return (
-                      <tr key={participant.email} className="hover:bg-white/[0.03] transition-colors group">
-                        <td className="py-4 px-6 text-white/60 text-[11px] font-mono">{index + 1}</td>
-                        <td className="py-4 px-6">
+                      <tr
+                        key={participant.email}
+                        className={`transition-colors group ${
+                          isChecked ? "bg-emerald-500/[0.02] hover:bg-emerald-500/[0.05]" : "hover:bg-white/[0.03]"
+                        }`}
+                      >
+                        <td className="py-4 px-5 text-white/50 font-mono text-[11px]">{index + 1}</td>
+                        
+                        {/* Name & Email */}
+                        <td className="py-4 px-5">
                           <div className="flex items-center gap-3">
                             <div
-                              className={`w-8 h-8 rounded-lg font-pixel text-xs flex items-center justify-center shrink-0 border ${
+                              className={`w-9 h-9 rounded-xl font-pixel text-xs flex items-center justify-center shrink-0 border ${
                                 isChecked
-                                  ? "bg-white text-black font-bold border-white"
-                                  : "bg-white/5 border-white/20 text-white/70"
+                                  ? "bg-emerald-400 text-black font-bold border-emerald-400 shadow-sm"
+                                  : "bg-white/10 border-white/20 text-white font-bold"
                               }`}
                             >
                               {isChecked ? "✓" : participant.name.charAt(0).toUpperCase()}
                             </div>
-                            <div className="min-w-0">
-                              <p className="font-bold text-white uppercase truncate">{participant.name}</p>
+                            <div className="min-w-0 max-w-[260px]">
+                              <p className="font-bold text-white uppercase text-sm truncate">{participant.name}</p>
                               <a
                                 href={`mailto:${participant.email}`}
-                                className="text-white/70 hover:text-white transition-colors text-[11px] truncate block"
+                                className="text-white/65 hover:text-white transition-colors text-xs truncate block"
                               >
                                 {participant.email}
                               </a>
                             </div>
                           </div>
                         </td>
-                        <td className="py-4 px-6">
-                          <span className="px-2.5 py-1 rounded-md bg-white/[0.05] border border-white/15 text-white/90 text-[11px] font-medium">
-                            {participant.department || "—"}
+
+                        {/* Department */}
+                        <td className="py-4 px-5">
+                          <span className="inline-block px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/15 text-white/90 text-xs font-semibold">
+                            {formatDeptShort(participant.department)}
                           </span>
                         </td>
-                        <td className="py-4 px-6">
-                          <span className="text-white/80 font-medium">
-                            {participant.year ? `Year ${participant.year}` : "—"}
-                          </span>
-                        </td>
-                        <td className="py-4 px-6">
-                          {isChecked ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/10 border border-white/20 text-white text-[10px] font-bold uppercase tracking-wider">
-                              <CheckCircle2 className="w-3 h-3 text-white" /> PRESENT
+
+                        {/* Year of Study */}
+                        <td className="py-4 px-5">
+                          {yearText ? (
+                            <span className={`inline-block px-2.5 py-1 rounded-lg border text-xs font-bold ${getYearBadgeColor(participant.year)}`}>
+                              {yearText}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/15 text-white/60 text-[10px] uppercase tracking-wider font-medium">
-                              <CircleDot className="w-3 h-3 opacity-60" /> PENDING
+                            <span className="text-white/40 text-xs font-mono">—</span>
+                          )}
+                        </td>
+
+                        {/* Attendance Status */}
+                        <td className="py-4 px-5">
+                          {isChecked ? (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold uppercase tracking-wider">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> PRESENT
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/5 border border-white/15 text-white/60 text-[10px] uppercase tracking-wider font-semibold">
+                              <CircleDot className="w-3.5 h-3.5 opacity-60" /> PENDING
                             </span>
                           )}
                         </td>
-                        <td className="py-4 px-6">
+
+                        {/* Mobile */}
+                        <td className="py-4 px-5">
                           {participant.mobile ? (
                             <a
                               href={`tel:${participant.mobile}`}
-                              className="flex items-center gap-1.5 text-white/80 hover:text-white transition-colors font-medium"
+                              className="inline-flex items-center gap-1.5 text-white/80 hover:text-emerald-300 transition-colors font-mono text-xs"
                             >
-                              <Phone className="w-3 h-3 text-white/60" />
+                              <Phone className="w-3 h-3 text-white/50" />
                               <span>{participant.mobile}</span>
                             </a>
                           ) : (
-                            <span className="text-white/40">—</span>
+                            <span className="text-white/40 font-mono">—</span>
                           )}
                         </td>
-                        <td className="py-4 px-6 text-right">
+
+                        {/* Actions */}
+                        <td className="py-4 px-5 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => handleToggleCheckin(participant.email)}
                               disabled={isToggling}
-                              className={`p-2 rounded-lg transition-all cursor-pointer ${
+                              className={`h-9 px-3.5 rounded-xl font-pixel text-[10px] uppercase transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 font-bold ${
                                 isChecked
-                                  ? "bg-white text-black hover:bg-white/90 border border-white font-bold"
-                                  : "bg-white/[0.05] text-white/70 hover:text-white hover:bg-white/[0.1] border border-white/15"
+                                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30"
+                                  : "bg-white text-black hover:bg-white/90 shadow-md"
                               }`}
-                              title={isChecked ? "Mark as un-checked in" : "Mark as checked in"}
+                              title={isChecked ? "Click to undo check-in" : "Click to mark present"}
                             >
                               {isToggling ? (
-                                <Loader2 className="w-4 h-4 animate-spin text-white" />
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : isChecked ? (
+                                <CheckCheck className="w-3.5 h-3.5" />
                               ) : (
-                                <CheckCircle2 className="w-4 h-4" />
+                                <CheckCircle2 className="w-3.5 h-3.5" />
                               )}
+                              <span>{isChecked ? "CHECKED" : "CHECK IN"}</span>
                             </button>
 
                             <button
                               onClick={() => handleDeleteParticipant(participant.email)}
                               disabled={isDeletingEmail === participant.email}
-                              className="p-2 rounded-lg text-white/50 hover:text-red-400 hover:bg-red-500/10 border border-white/10 transition-all disabled:opacity-50 cursor-pointer"
-                              title="Remove attendee"
+                              className="p-2 rounded-xl text-white/50 hover:text-red-400 hover:bg-red-500/10 border border-white/10 transition-colors cursor-pointer"
+                              title="Delete attendee"
                             >
                               {isDeletingEmail === participant.email ? (
                                 <Loader2 className="w-4 h-4 animate-spin text-red-400" />
@@ -951,7 +1100,7 @@ export default function AdminEventRegistrationsPage() {
         </>
       )}
 
-      {/* Modal: Manually Add Participant */}
+      {/* ── Modal: Add Walk-in Participant ── */}
       <AnimatePresence>
         {isAddModalOpen && (
           <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
@@ -966,72 +1115,72 @@ export default function AdminEventRegistrationsPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 30 }}
-              className="relative w-full sm:max-w-lg bg-[#0b0b0b] border border-white/15 rounded-t-[28px] sm:rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 max-h-[90dvh] overflow-y-auto"
+              className="relative w-full sm:max-w-lg bg-[#0b0b0b] border border-white/20 rounded-t-[28px] sm:rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 max-h-[90dvh] overflow-y-auto"
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div className="space-y-1 min-w-0 pr-2">
-                  <h3 className="font-pixel text-sm sm:text-base text-white uppercase truncate">ADD_WALK_IN</h3>
+                  <h3 className="font-pixel text-base text-white uppercase truncate">ADD_WALK_IN_ATTENDEE</h3>
                   <p className="text-[10px] text-white/70 uppercase tracking-widest truncate font-medium">
                     {event.title}
                   </p>
                 </div>
                 <button
                   onClick={() => setIsAddModalOpen(false)}
-                  className="p-2 rounded-xl text-white/50 hover:text-white shrink-0 cursor-pointer"
+                  className="p-2 rounded-xl text-white/60 hover:text-white"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {formError && (
-                <div className="p-3 rounded-xl bg-white/5 border border-white/20 text-white text-xs">
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs">
                   {formError}
                 </div>
               )}
 
-              <form onSubmit={handleSaveParticipant} className="space-y-3.5 text-xs">
-                <div className="space-y-1">
-                  <label className="text-[10px] text-white/85 uppercase tracking-wider pl-1 block font-semibold">Full Name *</label>
+              <form onSubmit={handleSaveParticipant} className="space-y-4 text-xs font-mono">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-white/80 uppercase tracking-wider font-semibold pl-1 block">Full Name *</label>
                   <input
                     type="text"
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. Bharath Kumar P"
-                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl text-white placeholder:text-white/45 text-sm sm:text-xs focus:outline-none focus:border-white/60"
+                    className="w-full px-4 py-3 bg-white/[0.05] border border-white/20 rounded-xl text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-white/60"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] text-white/85 uppercase tracking-wider pl-1 block font-semibold">Email Address *</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-white/80 uppercase tracking-wider font-semibold pl-1 block">Email Address *</label>
                   <input
                     type="email"
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="e.g. bharath@gmail.com"
-                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl text-white placeholder:text-white/45 text-sm sm:text-xs focus:outline-none focus:border-white/60"
+                    placeholder="e.g. student@gmail.com"
+                    className="w-full px-4 py-3 bg-white/[0.05] border border-white/20 rounded-xl text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-white/60"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-[10px] text-white/85 uppercase tracking-wider pl-1 block font-semibold">Department</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-white/80 uppercase tracking-wider font-semibold pl-1 block">Department</label>
                     <input
                       type="text"
                       value={formData.department}
                       onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                      placeholder="CSE, IT, ECE..."
-                      className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl text-white placeholder:text-white/45 text-sm sm:text-xs focus:outline-none focus:border-white/60"
+                      placeholder="e.g. IT, CSE, ECE..."
+                      className="w-full px-4 py-3 bg-white/[0.05] border border-white/20 rounded-xl text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-white/60"
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-[10px] text-white/85 uppercase tracking-wider pl-1 block font-semibold">Year</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-white/80 uppercase tracking-wider font-semibold pl-1 block">Year of Study</label>
                     <select
                       value={formData.year}
                       onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#111111] border border-white/20 rounded-xl text-white font-medium text-sm sm:text-xs focus:outline-none focus:border-white/60 cursor-pointer"
+                      className="w-full px-4 py-3 bg-[#111] border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:border-white/60 cursor-pointer font-medium"
                     >
                       <option value="1">1st Year</option>
                       <option value="2">2nd Year</option>
@@ -1041,43 +1190,43 @@ export default function AdminEventRegistrationsPage() {
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] text-white/85 uppercase tracking-wider pl-1 block font-semibold">College / Institution</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-white/80 uppercase tracking-wider font-semibold pl-1 block">College / Institution</label>
                   <input
                     type="text"
                     value={formData.college}
                     onChange={(e) => setFormData({ ...formData, college: e.target.value })}
                     placeholder="Government College of Engineering, Erode"
-                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl text-white placeholder:text-white/45 text-sm sm:text-xs focus:outline-none focus:border-white/60"
+                    className="w-full px-4 py-3 bg-white/[0.05] border border-white/20 rounded-xl text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-white/60"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] text-white/85 uppercase tracking-wider pl-1 block font-semibold">Phone Number</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-white/80 uppercase tracking-wider font-semibold pl-1 block">Phone / WhatsApp Number</label>
                   <input
                     type="text"
                     value={formData.mobile}
                     onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
                     placeholder="e.g. 9876543210"
-                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl text-white placeholder:text-white/45 text-sm sm:text-xs focus:outline-none focus:border-white/60"
+                    className="w-full px-4 py-3 bg-white/[0.05] border border-white/20 rounded-xl text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-white/60"
                   />
                 </div>
 
-                <div className="flex flex-col-reverse sm:flex-row gap-2.5 pt-3">
+                <div className="flex flex-col-reverse sm:flex-row gap-2.5 pt-4 border-t border-white/10">
                   <button
                     type="button"
                     onClick={() => setIsAddModalOpen(false)}
-                    className="w-full sm:flex-1 py-3 bg-white/[0.04] border border-white/10 text-white/70 hover:text-white rounded-xl font-pixel text-[10px] uppercase transition-all cursor-pointer font-medium"
+                    className="w-full sm:w-auto px-6 py-3.5 bg-white/5 border border-white/10 text-white/70 hover:text-white rounded-xl font-pixel text-xs uppercase transition-all"
                   >
                     CANCEL
                   </button>
                   <button
                     type="submit"
                     disabled={isSavingParticipant}
-                    className="w-full sm:flex-[2] py-3.5 bg-white text-black font-bold rounded-xl font-pixel text-[10px] uppercase hover:bg-white/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+                    className="flex-1 py-3.5 bg-white text-black font-bold rounded-xl font-pixel text-xs uppercase hover:bg-white/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg cursor-pointer"
                   >
                     {isSavingParticipant ? <Loader2 className="w-4 h-4 animate-spin text-black" /> : <CheckCircle2 className="w-4 h-4 text-black" />}
-                    {isSavingParticipant ? "SAVING..." : "CONFIRM_ADD"}
+                    <span>{isSavingParticipant ? "SAVING..." : "REGISTER_PARTICIPANT"}</span>
                   </button>
                 </div>
               </form>
@@ -1086,7 +1235,7 @@ export default function AdminEventRegistrationsPage() {
         )}
       </AnimatePresence>
 
-      {/* Modal: Broadcast Email */}
+      {/* ── Modal: Broadcast Email ── */}
       <AnimatePresence>
         {isEmailModalOpen && (
           <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
@@ -1101,87 +1250,87 @@ export default function AdminEventRegistrationsPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 30 }}
-              className="relative w-full sm:max-w-2xl bg-[#0b0b0b] border border-white/15 rounded-t-[28px] sm:rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 max-h-[90dvh] overflow-y-auto"
+              className="relative w-full sm:max-w-2xl bg-[#0b0b0b] border border-white/20 rounded-t-[28px] sm:rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 max-h-[90dvh] overflow-y-auto"
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div className="space-y-1 min-w-0 pr-2">
-                  <h3 className="font-pixel text-sm sm:text-base text-white uppercase truncate">BROADCAST_EMAIL</h3>
+                  <h3 className="font-pixel text-base text-white uppercase truncate">BROADCAST_EMAIL</h3>
                   <p className="text-[10px] text-white/70 uppercase tracking-widest truncate font-medium">
-                    Notify {registrations.length} attendees of {event.title}
+                    Send announcement to all {registrations.length} attendees
                   </p>
                 </div>
                 <button
                   onClick={() => setIsEmailModalOpen(false)}
-                  className="p-2 rounded-xl text-white/50 hover:text-white shrink-0 cursor-pointer"
+                  className="p-2 rounded-xl text-white/60 hover:text-white"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {emailStatus && (
-                <div className="p-3 rounded-xl bg-white/[0.04] border border-white/20 text-white text-xs">
+                <div className="p-3.5 rounded-xl bg-white/5 border border-white/20 text-white text-xs font-mono">
                   {emailStatus}
                 </div>
               )}
 
-              <div className="space-y-3.5 text-xs">
-                <div className="space-y-1">
-                  <label className="text-[10px] text-white/85 uppercase tracking-wider pl-1 block font-semibold">Email Subject</label>
+              <div className="space-y-4 text-xs font-mono">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-white/80 uppercase tracking-wider font-semibold pl-1 block">Subject *</label>
                   <input
                     type="text"
                     value={emailSubject}
                     onChange={(e) => setEmailSubject(e.target.value)}
                     placeholder="e.g. Schedule & Venue update for tomorrow"
-                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl text-white placeholder:text-white/45 text-sm sm:text-xs focus:outline-none focus:border-white/60"
+                    className="w-full px-4 py-3 bg-white/[0.05] border border-white/20 rounded-xl text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-white/60"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] text-white/85 uppercase tracking-wider pl-1 block font-semibold">Message Content</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-white/80 uppercase tracking-wider font-semibold pl-1 block">Message Content *</label>
                   <textarea
                     rows={5}
                     value={emailMessage}
                     onChange={(e) => setEmailMessage(e.target.value)}
-                    placeholder="Write announcement, instructions, or meeting links..."
-                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/20 rounded-xl text-white placeholder:text-white/45 text-sm sm:text-xs focus:outline-none focus:border-white/60 resize-y"
+                    placeholder="Write instructions, venue directions, or reminders..."
+                    className="w-full px-4 py-3 bg-white/[0.05] border border-white/20 rounded-xl text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-white/60 resize-y"
                   />
                 </div>
 
-                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-2.5">
-                  <p className="text-[10px] text-white/70 uppercase tracking-wider font-semibold">Test Before Sending</p>
+                <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2.5">
+                  <p className="text-[10px] text-white/70 uppercase tracking-wider font-semibold">Send Test Email First</p>
                   <div className="flex flex-col sm:flex-row gap-2">
                     <input
                       type="email"
                       value={testEmail}
                       onChange={(e) => setTestEmail(e.target.value)}
                       placeholder="your.email@example.com"
-                      className="flex-1 px-4 py-2.5 bg-black/40 border border-white/20 rounded-xl text-white placeholder:text-white/45 text-sm sm:text-xs focus:outline-none focus:border-white/60 font-mono"
+                      className="flex-1 px-4 py-2.5 bg-black/40 border border-white/20 rounded-xl text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-white/50 font-mono"
                     />
                     <button
                       onClick={handleSendTestEmail}
                       disabled={isTestEmailing || !testEmail.trim()}
-                      className="h-10 px-4 bg-white/10 border border-white/20 text-white rounded-xl font-pixel text-[9px] uppercase hover:bg-white/20 disabled:opacity-40 cursor-pointer font-bold"
+                      className="h-10 px-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl font-pixel text-[10px] uppercase disabled:opacity-40 cursor-pointer font-bold"
                     >
                       {isTestEmailing ? "SENDING..." : "TEST.SYS"}
                     </button>
                   </div>
                 </div>
 
-                <div className="flex flex-col-reverse sm:flex-row gap-2.5 pt-2">
+                <div className="flex flex-col-reverse sm:flex-row gap-2.5 pt-3 border-t border-white/10">
                   <button
                     type="button"
                     onClick={() => setIsEmailModalOpen(false)}
-                    className="w-full sm:flex-1 py-3 bg-white/[0.04] border border-white/10 text-white/70 hover:text-white rounded-xl font-pixel text-[10px] uppercase cursor-pointer font-medium"
+                    className="w-full sm:w-auto px-6 py-3.5 bg-white/5 border border-white/10 text-white/70 hover:text-white rounded-xl font-pixel text-xs uppercase"
                   >
                     CLOSE
                   </button>
                   <button
                     onClick={handleSendEmail}
                     disabled={isEmailing || registrations.length === 0}
-                    className="w-full sm:flex-[2] py-3.5 bg-white text-black font-bold rounded-xl font-pixel text-[10px] uppercase hover:bg-white/90 transition-all flex items-center justify-center gap-2 disabled:opacity-40 shadow-[0_0_20px_rgba(255,255,255,0.15)] cursor-pointer"
+                    className="flex-1 py-3.5 bg-white text-black font-bold rounded-xl font-pixel text-xs uppercase hover:bg-white/90 transition-all flex items-center justify-center gap-2 disabled:opacity-40 shadow-lg cursor-pointer"
                   >
                     {isEmailing ? <Loader2 className="w-4 h-4 animate-spin text-black" /> : <Mail className="w-4 h-4 text-black" />}
-                    {isEmailing ? "DISPATCHING..." : `SEND_TO_${registrations.length}_ATTENDEES`}
+                    <span>{isEmailing ? "DISPATCHING..." : `SEND_TO_${registrations.length}_ATTENDEES`}</span>
                   </button>
                 </div>
               </div>

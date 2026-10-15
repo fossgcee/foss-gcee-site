@@ -74,19 +74,219 @@ const parseCsv = (content: string): CsvRow[] => {
   });
 };
 
-const readColumn = (row: CsvRow, names: string[]) => {
-  for (const name of names) {
-    const value = row[name.toLowerCase()];
-    if (value) return value.trim();
+// Clean a string down to lowercase alphanumeric characters only
+const cleanStr = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+// Robust fuzzy column detector that handles typos (e.g. "Brach", "Which Year", "Year of Study ?")
+const getColumnValue = (
+  row: CsvRow,
+  fieldType: "name" | "email" | "year" | "department" | "college" | "mobile" | "roll_no"
+): string => {
+  const keys = Object.keys(row);
+
+  // First pass: look for high-confidence header matches
+  for (const key of keys) {
+    const val = (row[key] || "").trim();
+    if (!val) continue;
+
+    const raw = key.toLowerCase().trim();
+    const clean = cleanStr(key);
+
+    switch (fieldType) {
+      case "email": {
+        if (
+          clean.includes("email") ||
+          clean.includes("mailid") ||
+          clean.includes("e_mail") ||
+          raw === "mail" ||
+          raw.startsWith("email") ||
+          clean.includes("emailaddress")
+        ) {
+          return val;
+        }
+        break;
+      }
+
+      case "name": {
+        // Negative checks: exclude headers referencing college, department, event, file
+        if (
+          clean.includes("college") ||
+          clean.includes("department") ||
+          clean.includes("dept") ||
+          clean.includes("event") ||
+          clean.includes("file") ||
+          clean.includes("institution") ||
+          clean.includes("organization") ||
+          clean.includes("company")
+        ) {
+          continue;
+        }
+
+        if (
+          clean === "name" ||
+          /^name\d*$/.test(clean) || // Name, Name1, Name2
+          clean.includes("fullname") ||
+          clean.includes("studentname") ||
+          clean.includes("participantname") ||
+          clean.includes("attendeename") ||
+          clean.includes("candidatename") ||
+          clean.includes("personname") ||
+          clean.startsWith("name") ||
+          clean.endsWith("name")
+        ) {
+          return val;
+        }
+        break;
+      }
+
+      case "year": {
+        // Exclude event-level date headers
+        if (clean.includes("eventyear") || clean.includes("startyear")) {
+          continue;
+        }
+
+        if (
+          clean.includes("yearofstudy") ||
+          clean.includes("whichyear") ||
+          clean.includes("studyyear") ||
+          clean.includes("currentyear") ||
+          clean.includes("classyear") ||
+          clean.includes("collegeyear") ||
+          clean.includes("pursuingyear") ||
+          clean.includes("academicyear") ||
+          clean.includes("graduatingyear") ||
+          clean.includes("batchyear") ||
+          clean.includes("yrofstudy") ||
+          clean.includes("whichyr") ||
+          clean.includes("studyyrs") ||
+          clean === "year" ||
+          clean === "yr" ||
+          clean === "class" ||
+          clean === "standard" ||
+          clean.includes("year") ||
+          clean.includes("yaer") || // common typo: "yaer"
+          clean.includes("yeaer") ||
+          clean.includes("yeer")
+        ) {
+          return val;
+        }
+        break;
+      }
+
+      case "department": {
+        if (
+          clean.includes("dept") ||
+          clean.includes("department") ||
+          clean.includes("depart") ||
+          clean.includes("branch") ||
+          clean.includes("brach") || // common typo: "brach"
+          clean.includes("stream") ||
+          clean.includes("course") ||
+          clean.includes("major") ||
+          clean.includes("specialization") ||
+          clean.includes("programme") ||
+          clean.includes("discipline") ||
+          clean.includes("fieldofstudy")
+        ) {
+          return val;
+        }
+        break;
+      }
+
+      case "college": {
+        if (
+          clean.includes("college") ||
+          clean.includes("institution") ||
+          clean.includes("institute") ||
+          clean.includes("university") ||
+          clean.includes("campus") ||
+          clean.includes("organisation") ||
+          clean.includes("organization") ||
+          clean.includes("school") ||
+          clean.includes("company")
+        ) {
+          return val;
+        }
+        break;
+      }
+
+      case "mobile": {
+        if (
+          clean.includes("mobile") ||
+          clean.includes("phone") ||
+          clean.includes("whatsapp") ||
+          clean.includes("contact") ||
+          clean.includes("cell") ||
+          clean.includes("phno") ||
+          clean.includes("telephone") ||
+          clean.includes("mob")
+        ) {
+          return val;
+        }
+        break;
+      }
+
+      case "roll_no": {
+        if (
+          clean.includes("roll") ||
+          clean.includes("regno") ||
+          clean.includes("registerno") ||
+          clean.includes("regnumber") ||
+          clean.includes("rollnumber") ||
+          clean.includes("registrationnumber") ||
+          clean.includes("usn")
+        ) {
+          return val;
+        }
+        break;
+      }
+    }
   }
+
+  // Fallback for email: check if any cell value is a valid email
+  if (fieldType === "email") {
+    for (const key of keys) {
+      const val = (row[key] || "").trim();
+      if (val && emailRegex.test(val.toLowerCase())) {
+        return val;
+      }
+    }
+  }
+
   return "";
 };
 
-const normalizeYear = (value: string) => {
-  const match = value.match(/\d+/);
-  if (!match) return 0;
-  const year = Number.parseInt(match[0], 10);
-  return Number.isFinite(year) ? year : 0;
+const normalizeYear = (value: string): number => {
+  if (!value) return 0;
+  const raw = value.trim().toLowerCase();
+
+  // 1. Words and roman numerals
+  if (/\b(4th|fourth|final|iv)\b/i.test(raw)) return 4;
+  if (/\b(3rd|third|pre-?final|iii)\b/i.test(raw)) return 3;
+  if (/\b(2nd|second|sophomore|ii)\b/i.test(raw)) return 2;
+  if (/\b(1st|first|freshman|i)\b/i.test(raw)) return 1;
+
+  // 2. Number + suffix (e.g., "4th Year", "2 nd", "Year 3")
+  const match = raw.match(/\b([1-5])(?:\s*(?:st|nd|rd|th))?(?:\s*year)?\b/);
+  if (match) {
+    const num = Number.parseInt(match[1], 10);
+    if (num >= 1 && num <= 5) return num;
+  }
+
+  // 3. Any isolated digit
+  const anyDigit = raw.match(/\d+/);
+  if (anyDigit) {
+    const num = Number.parseInt(anyDigit[0], 10);
+    if (num >= 1 && num <= 5) return num;
+    // 4-digit graduation year
+    if (num >= 2024 && num <= 2030) {
+      const currentYear = new Date().getFullYear();
+      const calcYear = 4 - (num - currentYear);
+      if (calcYear >= 1 && calcYear <= 4) return calcYear;
+    }
+  }
+
+  return 0;
 };
 
 const normalizeImportRows = (rows: CsvRow[], eventId: string) => {
@@ -95,8 +295,9 @@ const normalizeImportRows = (rows: CsvRow[], eventId: string) => {
   const participants: ParticipantImportRow[] = [];
 
   rows.forEach((row, index) => {
-    const name = readColumn(row, ["name", "name1", "full name", "fullname", "participant name", "attendee name"]);
-    const email = readColumn(row, ["email", "email address", "e-mail", "mail"]).toLowerCase();
+    const name = getColumnValue(row, "name");
+    const rawEmail = getColumnValue(row, "email");
+    const email = rawEmail.toLowerCase().trim();
 
     if (!name || !emailRegex.test(email)) {
       skipped.push(`Row ${index + 2}`);
@@ -106,14 +307,20 @@ const normalizeImportRows = (rows: CsvRow[], eventId: string) => {
     if (seen.has(email)) return;
     seen.add(email);
 
+    const yearVal = getColumnValue(row, "year");
+    const parsedYear = normalizeYear(yearVal);
+    const department = getColumnValue(row, "department") || "External RSVP";
+    const college = getColumnValue(row, "college") || "Government College of Engineering, Erode";
+    const mobile = getColumnValue(row, "mobile");
+
     participants.push({
       event_id: eventId,
       name,
       email,
-      mobile: readColumn(row, ["mobile", "phone", "phone number", "contact", "contact number", "whatsapp", "whatsapp number"]),
-      department: readColumn(row, ["department", "dept", "branch", "course"]) || "External RSVP",
-      college: readColumn(row, ["college", "institution", "organization", "organisation", "company"]) || "FOSS United RSVP",
-      year: normalizeYear(readColumn(row, ["year", "year of study", "study year", "current year", "graduation year"])),
+      mobile,
+      department,
+      college,
+      year: parsedYear,
     });
   });
 

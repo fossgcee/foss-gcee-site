@@ -14,7 +14,8 @@ import {
   Trash,
   ExternalLink,
   FolderPlus,
-  FileText
+  FileText,
+  Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
@@ -54,6 +55,7 @@ export default function AdminBlogsManager() {
   // States
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isAddingTestBlog, setIsAddingTestBlog] = useState(false);
   const [coverUploadError, setCoverUploadError] = useState<string | null>(null);
 
   // Category Editor State
@@ -115,6 +117,39 @@ export default function AdminBlogsManager() {
       status: "draft"
     });
     setIsPostModalOpen(true);
+  };
+
+  const handleAddTestBlog = async () => {
+    setIsAddingTestBlog(true);
+    try {
+      const stamp = Date.now().toString().slice(-4);
+      const catId = categories[0]?._id || (categories[0] as any)?.id || "General";
+      const testPost = {
+        title: `Welcome to Open Source at FOSS GCEE #${stamp}`,
+        slug: `welcome-to-open-source-foss-gcee-${stamp}`,
+        content: `### Welcome to FOSS GCEE\n\nOpen Source software powers the digital backbone of modern technology. In this introductory guide, we explore how engineering students at Government College of Engineering, Erode (GCEE) can get involved.\n\n#### Why Open Source?\n1. **Real-world Engineering**: Inspect, debug, and contribute to production-grade repositories.\n2. **Collaborative Development**: Master Git workflows, pull requests, issue triaging, and code reviews.\n3. **Community & Mentorship**: Connect with peers, alumni, and maintainers worldwide.\n\n#### Getting Started in 3 Steps\n- **Step 1**: Clone a community repository from [github.com/fossgcee](https://github.com/fossgcee).\n- **Step 2**: Pick a beginner-friendly issue labeled \`good-first-issue\`.\n- **Step 3**: Submit your pull request and get feedback from campus leads!\n\nHappy hacking! 🚀`,
+        excerpt: "An introductory walkthrough for GCEE students looking to make their first contribution to open-source software and campus development initiatives.",
+        category: catId,
+        author: "FOSS GCEE Core Team",
+        status: "published" as const
+      };
+
+      const res = await fetch("/api/admin/blogs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(testPost)
+      });
+      const d = await res.json();
+      if (d.success) {
+        await fetchData();
+      } else {
+        alert(d.error || "Failed to create test blog");
+      }
+    } catch (err: any) {
+      alert("Error creating test blog: " + err.message);
+    } finally {
+      setIsAddingTestBlog(false);
+    }
   };
 
   const handleEdit = (post: any) => {
@@ -253,17 +288,27 @@ export default function AdminBlogsManager() {
           <h1 className="font-pixel text-white whitespace-nowrap text-[clamp(1.1rem,4vw,1.875rem)]">BLOGS_MANAGER</h1>
           <p className="font-mono text-xs text-white/70">Compose, publish, and categorise blog articles</p>
         </div>
-        <div className="flex items-center gap-2.5 w-full sm:w-auto">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full sm:w-auto">
           <button
             onClick={() => setIsCatModalOpen(true)}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 bg-white/5 border border-white/20 text-white rounded-xl font-pixel text-[10px] hover:bg-white/10 transition-all active:scale-95 cursor-pointer font-bold"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-3 bg-white/5 border border-white/20 text-white rounded-xl font-pixel text-[10px] hover:bg-white/10 transition-all active:scale-95 cursor-pointer font-bold"
           >
             <FolderPlus className="w-4 h-4 text-white/70" />
             CATEGORIES
           </button>
           <button
+            type="button"
+            onClick={handleAddTestBlog}
+            disabled={isAddingTestBlog}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl font-pixel text-[10px] hover:bg-emerald-500/20 transition-all active:scale-95 disabled:opacity-50 cursor-pointer font-bold"
+            title="Generate a sample test blog post"
+          >
+            {isAddingTestBlog ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+            TEST_BLOG
+          </button>
+          <button
             onClick={handleCreateNew}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 bg-white text-black rounded-xl font-pixel text-[10px] hover:bg-white/90 transition-all active:scale-95 shadow-[0_4px_20px_rgba(255,255,255,0.15)] cursor-pointer font-bold"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-3 bg-white text-black rounded-xl font-pixel text-[10px] hover:bg-white/90 transition-all active:scale-95 shadow-[0_4px_20px_rgba(255,255,255,0.15)] cursor-pointer font-bold"
           >
             <Plus className="w-4 h-4" />
             NEW_POST
@@ -314,9 +359,30 @@ export default function AdminBlogsManager() {
             <p className="font-mono text-xs text-white/60 tracking-widest uppercase">Fetching logs...</p>
           </div>
         ) : filteredPosts.length === 0 ? (
-          <div className="py-16 text-center border border-dashed border-white/15 rounded-3xl p-6 bg-white/[0.01] space-y-2">
-            <p className="font-pixel text-xs text-white/70 uppercase">NO_ARTICLES_FOUND</p>
-            <p className="font-mono text-[11px] text-white/40">Try adjusting your search query or filters.</p>
+          <div className="py-16 text-center border border-dashed border-white/15 rounded-3xl p-6 bg-white/[0.01] space-y-4">
+            <div className="space-y-1">
+              <p className="font-pixel text-xs text-white/70 uppercase">NO_ARTICLES_FOUND</p>
+              <p className="font-mono text-[11px] text-white/40">Try adjusting your search query, or create a new blog post.</p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleAddTestBlog}
+                disabled={isAddingTestBlog}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-pixel text-[10px] hover:bg-emerald-500/20 transition-all cursor-pointer font-bold"
+              >
+                {isAddingTestBlog ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                CREATE_SAMPLE_POST
+              </button>
+              <button
+                type="button"
+                onClick={handleCreateNew}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-black font-pixel text-[10px] hover:bg-white/90 transition-all cursor-pointer font-bold"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                NEW_POST
+              </button>
+            </div>
           </div>
         ) : filteredPosts.map((post) => (
           <div key={post._id} className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-white/15 bg-white/[0.02] hover:border-white/30 transition-all space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between gap-4">
