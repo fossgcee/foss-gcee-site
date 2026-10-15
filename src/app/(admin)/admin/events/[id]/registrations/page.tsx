@@ -27,7 +27,8 @@ import {
   Sparkles,
   Copy,
   Check,
-  CheckCheck
+  CheckCheck,
+  RotateCcw
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -186,6 +187,13 @@ export default function AdminEventRegistrationsPage() {
     return Array.from(set).sort();
   }, [registrations]);
 
+  // Only show separate mobile column if more than 20% of participants have a mobile number
+  const hasMobileColumn = useMemo(() => {
+    if (registrations.length === 0) return false;
+    const withMobile = registrations.filter((r) => r.mobile && r.mobile.trim().length > 0).length;
+    return withMobile / registrations.length >= 0.2;
+  }, [registrations]);
+
   // Filtered registrations
   const filteredRegistrations = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -295,6 +303,28 @@ export default function AdminEventRegistrationsPage() {
       alert("Failed to update check-in status");
     } finally {
       setIsTogglingEmail(null);
+    }
+  };
+
+  // Reset / Clear all attendance check-ins
+  const handleClearCheckins = async () => {
+    if (!event) return;
+    if (!confirm("Are you sure you want to reset all attendance check-ins for this event? This will mark all attendees as pending.")) return;
+    try {
+      const res = await fetch("/api/admin/events/checkin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId: event.id,
+          action: "clear",
+        }),
+      });
+      const d = await res.json();
+      if (d.success) {
+        setCheckedInEmails(new Set());
+      }
+    } catch {
+      alert("Failed to reset check-ins");
     }
   };
 
@@ -492,7 +522,10 @@ export default function AdminEventRegistrationsPage() {
     );
   }
 
-  const checkedInCount = checkedInEmails.size;
+  const checkedInCount = useMemo(() => {
+    return registrations.filter((r) => checkedInEmails.has(r.email.toLowerCase())).length;
+  }, [registrations, checkedInEmails]);
+
   const totalCount = registrations.length;
   const checkinPercent = totalCount > 0 ? Math.round((checkedInCount / totalCount) * 100) : 0;
   const pendingCount = Math.max(0, totalCount - checkedInCount);
@@ -678,6 +711,17 @@ export default function AdminEventRegistrationsPage() {
             <Mail className="w-3.5 h-3.5" />
             <span>BROADCAST_EMAIL</span>
           </button>
+
+          {checkedInCount > 0 && (
+            <button
+              onClick={handleClearCheckins}
+              className="flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 text-red-400 font-pixel text-[10px] uppercase transition-all cursor-pointer"
+              title="Reset all attendance check-ins back to pending"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>RESET_ATTENDANCE</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -901,17 +945,15 @@ export default function AdminEventRegistrationsPage() {
                   </div>
 
                   {/* Actions & Contact */}
-                  <div className="flex items-center justify-between gap-3 pt-3 border-t border-white/10">
-                    {participant.mobile ? (
+                  <div className={`flex items-center gap-3 pt-3 border-t border-white/10 ${participant.mobile ? "justify-between" : "justify-end"}`}>
+                    {participant.mobile && (
                       <a
                         href={`tel:${participant.mobile}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white hover:text-emerald-300 transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white hover:text-emerald-300 transition-colors font-mono"
                       >
                         <Phone className="w-3.5 h-3.5 text-white/50" />
                         <span>{participant.mobile}</span>
                       </a>
-                    ) : (
-                      <span className="text-white/40 text-xs">—</span>
                     )}
 
                     <div className="flex items-center gap-2">
@@ -959,13 +1001,13 @@ export default function AdminEventRegistrationsPage() {
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="border-b border-white/15 bg-white/[0.04] text-[10px] text-white/75 font-semibold uppercase tracking-widest font-mono">
-                    <th className="py-4 px-5">#</th>
+                    <th className="py-4 px-5 w-12 text-center">#</th>
                     <th className="py-4 px-5">Participant Name & Email</th>
                     <th className="py-4 px-5">Department</th>
                     <th className="py-4 px-5">Year of Study</th>
-                    <th className="py-4 px-5">Attendance</th>
-                    <th className="py-4 px-5">Mobile</th>
-                    <th className="py-4 px-5 text-right">Actions</th>
+                    <th className="py-4 px-5 whitespace-nowrap min-w-[120px]">Attendance</th>
+                    {hasMobileColumn && <th className="py-4 px-5">Mobile</th>}
+                    <th className="py-4 px-5 text-right whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/10">
@@ -981,9 +1023,9 @@ export default function AdminEventRegistrationsPage() {
                           isChecked ? "bg-emerald-500/[0.02] hover:bg-emerald-500/[0.05]" : "hover:bg-white/[0.03]"
                         }`}
                       >
-                        <td className="py-4 px-5 text-white/50 font-mono text-[11px]">{index + 1}</td>
+                        <td className="py-4 px-5 text-white/50 font-mono text-[11px] text-center">{index + 1}</td>
                         
-                        {/* Name & Email */}
+                        {/* Name & Email (and Phone if no dedicated column) */}
                         <td className="py-4 px-5">
                           <div className="flex items-center gap-3">
                             <div
@@ -995,21 +1037,33 @@ export default function AdminEventRegistrationsPage() {
                             >
                               {isChecked ? "✓" : participant.name.charAt(0).toUpperCase()}
                             </div>
-                            <div className="min-w-0 max-w-[260px]">
+                            <div className="min-w-0 max-w-[280px]">
                               <p className="font-bold text-white uppercase text-sm truncate">{participant.name}</p>
-                              <a
-                                href={`mailto:${participant.email}`}
-                                className="text-white/65 hover:text-white transition-colors text-xs truncate block"
-                              >
-                                {participant.email}
-                              </a>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <a
+                                  href={`mailto:${participant.email}`}
+                                  className="text-white/65 hover:text-white transition-colors text-xs truncate"
+                                >
+                                  {participant.email}
+                                </a>
+                                {!hasMobileColumn && participant.mobile && (
+                                  <a
+                                    href={`tel:${participant.mobile}`}
+                                    className="inline-flex items-center gap-1 text-[11px] text-emerald-400 hover:text-emerald-300 font-mono transition-colors shrink-0"
+                                    title="Call participant"
+                                  >
+                                    <Phone className="w-3 h-3" />
+                                    {participant.mobile}
+                                  </a>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </td>
 
                         {/* Department */}
                         <td className="py-4 px-5">
-                          <span className="inline-block px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/15 text-white/90 text-xs font-semibold">
+                          <span className="inline-block px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/15 text-white/90 text-xs font-semibold whitespace-nowrap">
                             {formatDeptShort(participant.department)}
                           </span>
                         </td>
@@ -1017,7 +1071,7 @@ export default function AdminEventRegistrationsPage() {
                         {/* Year of Study */}
                         <td className="py-4 px-5">
                           {yearText ? (
-                            <span className={`inline-block px-2.5 py-1 rounded-lg border text-xs font-bold ${getYearBadgeColor(participant.year)}`}>
+                            <span className={`inline-block px-2.5 py-1 rounded-lg border text-xs font-bold whitespace-nowrap ${getYearBadgeColor(participant.year)}`}>
                               {yearText}
                             </span>
                           ) : (
@@ -1026,40 +1080,42 @@ export default function AdminEventRegistrationsPage() {
                         </td>
 
                         {/* Attendance Status */}
-                        <td className="py-4 px-5">
+                        <td className="py-4 px-5 whitespace-nowrap">
                           {isChecked ? (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold uppercase tracking-wider">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> PRESENT
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap shrink-0">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> PRESENT
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/5 border border-white/15 text-white/60 text-[10px] uppercase tracking-wider font-semibold">
-                              <CircleDot className="w-3.5 h-3.5 opacity-60" /> PENDING
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/5 border border-white/15 text-white/60 text-[10px] uppercase tracking-wider font-semibold whitespace-nowrap shrink-0">
+                              <CircleDot className="w-3.5 h-3.5 opacity-60 shrink-0" /> PENDING
                             </span>
                           )}
                         </td>
 
-                        {/* Mobile */}
-                        <td className="py-4 px-5">
-                          {participant.mobile ? (
-                            <a
-                              href={`tel:${participant.mobile}`}
-                              className="inline-flex items-center gap-1.5 text-white/80 hover:text-emerald-300 transition-colors font-mono text-xs"
-                            >
-                              <Phone className="w-3 h-3 text-white/50" />
-                              <span>{participant.mobile}</span>
-                            </a>
-                          ) : (
-                            <span className="text-white/40 font-mono">—</span>
-                          )}
-                        </td>
+                        {/* Mobile (conditional) */}
+                        {hasMobileColumn && (
+                          <td className="py-4 px-5 whitespace-nowrap">
+                            {participant.mobile ? (
+                              <a
+                                href={`tel:${participant.mobile}`}
+                                className="inline-flex items-center gap-1.5 text-white/80 hover:text-emerald-300 transition-colors font-mono text-xs"
+                              >
+                                <Phone className="w-3 h-3 text-white/50" />
+                                <span>{participant.mobile}</span>
+                              </a>
+                            ) : (
+                              <span className="text-white/40 font-mono">—</span>
+                            )}
+                          </td>
+                        )}
 
                         {/* Actions */}
-                        <td className="py-4 px-5 text-right">
+                        <td className="py-4 px-5 text-right whitespace-nowrap">
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => handleToggleCheckin(participant.email)}
                               disabled={isToggling}
-                              className={`h-9 px-3.5 rounded-xl font-pixel text-[10px] uppercase transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 font-bold ${
+                              className={`h-9 px-3.5 rounded-xl font-pixel text-[10px] uppercase transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 font-bold whitespace-nowrap shrink-0 ${
                                 isChecked
                                   ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30"
                                   : "bg-white text-black hover:bg-white/90 shadow-md"
