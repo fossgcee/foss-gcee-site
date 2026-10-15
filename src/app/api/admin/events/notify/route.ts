@@ -50,25 +50,28 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const eventSlug = String(body?.eventSlug || "").trim().toLowerCase();
+    const cleanSlugOrId = String(body?.eventSlug || body?.eventId || body?.id || "").trim();
     const subject = String(body?.subject || "").trim();
     const message = String(body?.message || "").trim();
 
-    if (!eventSlug) {
-      return NextResponse.json({ success: false, error: "Event slug is required." }, { status: 400 });
+    if (!cleanSlugOrId) {
+      return NextResponse.json({ success: false, error: "Event slug or ID is required." }, { status: 400 });
     }
     if (!subject || !message) {
       return NextResponse.json({ success: false, error: "Subject and message are required." }, { status: 400 });
     }
 
-    const { data: event, error: eventErr } = await supabase
-      .from("events")
-      .select("*")
-      .eq("slug", eventSlug)
-      .maybeSingle();
+    let query = supabase.from("events").select("*");
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanSlugOrId)) {
+      query = query.eq("id", cleanSlugOrId);
+    } else {
+      query = query.eq("slug", cleanSlugOrId.toLowerCase());
+    }
+
+    const { data: event, error: eventErr } = await query.maybeSingle();
 
     if (eventErr || !event) {
-      return NextResponse.json({ success: false, error: "Event not found." }, { status: 404 });
+      return NextResponse.json({ success: false, error: `Event not found (${cleanSlugOrId}).` }, { status: 404 });
     }
 
     const testEmail = String(body?.testEmail || "").trim().toLowerCase();

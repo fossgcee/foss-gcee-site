@@ -65,15 +65,17 @@ export async function POST(request: Request) {
         if (error) throw error;
         recipients = Array.from(new Set((data || []).map(r => r.email.trim().toLowerCase()))).filter(e => emailRegex.test(e));
       } else if (target === "event") {
-        // Fetch event registrants
-        const { data: eventData, error: eventError } = await supabase
-          .from("events")
-          .select("id")
-          .eq("slug", eventSlug)
-          .single();
+        const cleanSlugOrId = String(eventSlug || "").trim();
+        let query = supabase.from("events").select("id, title, slug");
+        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanSlugOrId)) {
+          query = query.eq("id", cleanSlugOrId);
+        } else {
+          query = query.eq("slug", cleanSlugOrId.toLowerCase());
+        }
           
+        const { data: eventData, error: eventError } = await query.maybeSingle();
         if (eventError || !eventData) {
-          throw new Error("Event not found");
+          return NextResponse.json({ success: false, error: `Selected event was not found (${cleanSlugOrId}).` }, { status: 404 });
         }
         
         const { data: regsData, error: regsError } = await supabase
@@ -82,7 +84,7 @@ export async function POST(request: Request) {
           .eq("event_id", eventData.id);
           
         if (regsError) throw regsError;
-        recipients = Array.from(new Set((regsData || []).map(r => r.email.trim().toLowerCase()))).filter(e => emailRegex.test(e));
+        recipients = Array.from(new Set((regsData || []).map(r => String(r.email || "").trim().toLowerCase()))).filter(e => emailRegex.test(e));
       } else if (target === "custom") {
         // Custom comma-separated list of emails
         if (typeof customEmails === "string") {
